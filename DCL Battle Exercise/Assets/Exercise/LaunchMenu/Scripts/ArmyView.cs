@@ -2,64 +2,68 @@ using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
 
-public interface IArmyView
+namespace DCLBattle.LaunchMenu
 {
-    void UpdateWithModel(IArmyModel model);
-}
-
-public class ArmyView : MonoBehaviour, IArmyView
-{
-    [SerializeField] private Slider warriorsCount;
-    [SerializeField] private TextMeshProUGUI warriorsLabel;
-    [SerializeField] private Slider archersCount;
-    [SerializeField] private TextMeshProUGUI archersLabel;
-    [SerializeField] private TMP_Dropdown strategyDropdown;
-
-    private EnumDropdownWrapper<ArmyStrategy> enumDropdown;
-    private IArmyPresenter presenter = null;
-
-    private void Awake()
+    public interface IArmyView
     {
-        warriorsCount.onValueChanged.AddListener(OnWarriorsCountChanged);
-        archersCount.onValueChanged.AddListener(OnArchersCountChanged);
-        enumDropdown = new EnumDropdownWrapper<ArmyStrategy>(strategyDropdown);
-        enumDropdown.OnValueChanged += OnStrategyChanged;
+        void UpdateWithModel(IArmyModel model);
     }
 
-    public void BindPresenter(IArmyPresenter presenter)
+    public class ArmyView : MonoBehaviour, IArmyView
     {
-        this.presenter = presenter;
-    }
+        [SerializeField] private Slider warriorsCount;
+        [SerializeField] private TextMeshProUGUI warriorsLabel;
+        [SerializeField] private Slider archersCount;
+        [SerializeField] private TextMeshProUGUI archersLabel;
+        [SerializeField] private TMP_Dropdown strategyDropdown;
 
-    public void UpdateWithModel(IArmyModel model)
-    {
-        warriorsCount.SetValueWithoutNotify(model.warriors);
-        warriorsLabel.text = model.warriors.ToString();
-        archersCount.SetValueWithoutNotify(model.archers);
-        archersLabel.text = model.archers.ToString();
-        enumDropdown.SetValueWithoutNotify(model.strategy);
-    }
+        private EnumDropdownWrapper<ArmyStrategy> enumDropdown;
+        private IArmyPresenter presenter = null;
 
-    private void OnWarriorsCountChanged(float value)
-    {
-        presenter?.UpdateWarriors((int)value);
-        warriorsLabel.text = ((int)value).ToString();
-    }
+        private void Awake()
+        {
+            warriorsCount.onValueChanged.AddListener(OnWarriorsCountChanged);
+            archersCount.onValueChanged.AddListener(OnArchersCountChanged);
+            enumDropdown = new EnumDropdownWrapper<ArmyStrategy>(strategyDropdown);
+            enumDropdown.OnValueChanged += OnStrategyChanged;
+        }
 
-    private void OnArchersCountChanged(float value)
-    {
-        presenter?.UpdateArchers((int)value);
-        archersLabel.text = ((int)value).ToString();
-    }
+        public void BindPresenter(IArmyPresenter presenter)
+        {
+            this.presenter = presenter;
+        }
 
-    private void OnStrategyChanged(ArmyStrategy strategy)
-    {
-        presenter?.UpdateStrategy(strategy);
-    }
+        public void UpdateWithModel(IArmyModel model)
+        {
+            warriorsCount.SetValueWithoutNotify(model.warriors);
+            warriorsLabel.text = model.warriors.ToString();
+            archersCount.SetValueWithoutNotify(model.archers);
+            archersLabel.text = model.archers.ToString();
+            enumDropdown.SetValueWithoutNotify(model.strategy);
+        }
 
-    private void OnDestroy()
-    {
-        enumDropdown.OnValueChanged -= OnStrategyChanged;
-        enumDropdown?.Dispose();
+        private void OnWarriorsCountChanged(float value)
+        {
+            // TODO
+            presenter?.UpdateWarriors((int)value);
+            warriorsLabel.text = ((int)value).ToString();
+        }
+
+        private void OnArchersCountChanged(float value)
+        {
+            presenter?.UpdateArchers((int)value);
+            archersLabel.text = ((int)value).ToString();
+        }
+
+        private void OnStrategyChanged(ArmyStrategy strategy)
+        {
+            presenter?.UpdateStrategy(strategy);
+        }
+
+        private void OnDestroy()
+        {
+            enumDropdown.OnValueChanged -= OnStrategyChanged;
+            enumDropdown?.Dispose();
+        }
     }
 }

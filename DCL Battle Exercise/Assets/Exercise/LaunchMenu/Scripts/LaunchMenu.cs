@@ -2,30 +2,42 @@ using UnityEngine;
 using UnityEngine.SceneManagement;
 using UnityEngine.UI;
 
-public class LaunchMenu : MonoBehaviour
+namespace DCLBattle.LaunchMenu
 {
-    [SerializeField] private Button startButton;
-    [SerializeField] private ArmyModelSO army1Model;
-    [SerializeField] private ArmyModelSO army2Model;
-    [SerializeField]private ArmyView army1View;
-    [SerializeField]private ArmyView army2View;
-
-    private ArmyPresenter army1Presenter;
-    private ArmyPresenter army2Presenter;
-
-    void Start()
+    public sealed class LaunchMenu : MonoBehaviour
     {
-        startButton.onClick.AddListener(OnStart);
+        [System.Serializable]
+        private struct ArmyData
+        {
+            [SerializeField] private ArmyModelSO armyModel;
+            public ArmyModelSO GetModel() => armyModel;
+        
+            [SerializeField] private ArmyView armyView;
+            public ArmyView GetView() => armyView;
+        }
+    
+        [SerializeField] private Button startButton;
+        [SerializeField] private int nextSceneIndex = 1;
+        [SerializeField] private ArmyData[] armyData;
 
-        army1Presenter = new ArmyPresenter(army1Model, army1View);
-        army1View.BindPresenter(army1Presenter);
+        private ArmyPresenter[] armyPresenters;
 
-        army2Presenter = new ArmyPresenter(army2Model, army2View);
-        army2View.BindPresenter(army2Presenter);
-    }
+        void Start()
+        {
+            startButton.onClick.AddListener(OnStart);
 
-    void OnStart()
-    {
-        SceneManager.LoadScene(1);
+            armyPresenters = new ArmyPresenter[armyData.Length];
+            for (int i = 0; i < armyData.Length; i++)
+            {
+                var data = armyData[i];
+                armyPresenters[i] = new ArmyPresenter(data.GetModel(), data.GetView());
+                data.GetView().BindPresenter(armyPresenters[i]);
+            }
+        }
+
+        void OnStart()
+        {
+            SceneManager.LoadScene(nextSceneIndex);
+        }
     }
 }

@@ -1,34 +1,37 @@
-public interface IArmyPresenter
+namespace DCLBattle.LaunchMenu
 {
-    void UpdateWarriors(int warriors);
-    void UpdateArchers(int archers);
-    void UpdateStrategy(ArmyStrategy strategy);
-}
-
-public class ArmyPresenter : IArmyPresenter
-{
-    private readonly IArmyModel model;
-    private readonly IArmyView view;
-
-    public ArmyPresenter(IArmyModel model, IArmyView view)
+    public interface IArmyPresenter
     {
-        this.model = model;
-        this.view = view;
-        this.view.UpdateWithModel(model);
+        void UpdateWarriors(int warriors);
+        void UpdateArchers(int archers);
+        void UpdateStrategy(ArmyStrategy strategy);
     }
 
-    public void UpdateWarriors(int warriors)
+    public sealed class ArmyPresenter : IArmyPresenter
     {
-        model.warriors = warriors;
-    }
+        private readonly IArmyModel model;
+        private readonly IArmyView view;
 
-    public void UpdateArchers(int archers)
-    {
-        model.archers = archers;
-    }
+        public ArmyPresenter(IArmyModel model, IArmyView view)
+        {
+            this.model = model;
+            this.view = view;
+            this.view.UpdateWithModel(model);
+        }
 
-    public void UpdateStrategy(ArmyStrategy strategy)
-    {
-        model.strategy = strategy;
+        public void UpdateWarriors(int warriors)
+        {
+            model.warriors = warriors;
+        }
+
+        public void UpdateArchers(int archers)
+        {
+            model.archers = archers;
+        }
+
+        public void UpdateStrategy(ArmyStrategy strategy)
+        {
+            model.strategy = strategy;
+        }
     }
 }
