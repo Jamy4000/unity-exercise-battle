@@ -76,6 +76,7 @@ public abstract class UnitBase : MonoBehaviour
 
         UpdateBasicRules(allies, enemies);
 
+        // TODO Use an interface for the strategies
         switch ( armyModel.Strategy )
         {
             case ArmyStrategy.Defensive:

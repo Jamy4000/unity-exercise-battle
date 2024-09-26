@@ -9,11 +9,11 @@ namespace DCLBattle.LaunchMenu
         [System.Serializable]
         private struct ArmyData
         {
-            [SerializeField] private ArmyModelSO armyModel;
-            public ArmyModelSO GetModel() => armyModel;
+            [SerializeField, Interface(typeof(IArmyModel))] private Object armyModel;
+            public IArmyModel GetModel() => armyModel as IArmyModel;
         
-            [SerializeField] private ArmyView armyView;
-            public ArmyView GetView() => armyView;
+            [SerializeField, Interface(typeof(IArmyView))] private Object armyView;
+            public IArmyView GetView() => armyView as IArmyView;
         }
     
         [SerializeField] private Button startButton;

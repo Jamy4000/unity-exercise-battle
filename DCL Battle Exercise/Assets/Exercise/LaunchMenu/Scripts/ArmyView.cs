@@ -6,6 +6,7 @@ namespace DCLBattle.LaunchMenu
 {
     public interface IArmyView
     {
+        void BindPresenter(IArmyPresenter presenter);
         void UpdateWithModel(IArmyModel model);
     }
 
