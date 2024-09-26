@@ -53,6 +53,11 @@ public class BattleInstantiator : MonoBehaviour
 
     void Update()
     {
+        foreach (var army in _armies)
+        {
+            army.Update();
+        }
+
         Vector3 mainCenter = Vector3.zero;
         foreach (var army in _armies)
         {
@@ -91,7 +96,7 @@ public class BattleInstantiator : MonoBehaviour
             if (unitToSpawn == null)
                 continue;
 
-            int unitCount = model.UnitsCount[(int)unitType];
+            int unitCount = model.GetUnitsCount(unitType);
             for (int j = 0; j < unitCount; j++)
             {
                 // TODO Pooling

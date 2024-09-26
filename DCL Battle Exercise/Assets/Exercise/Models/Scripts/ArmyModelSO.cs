@@ -1,3 +1,5 @@
+using System.Collections;
+using System.Collections.Generic;
 using UnityEngine;
 
 
@@ -20,20 +22,41 @@ public class ArmyModelSO : ScriptableObject, IArmyModel
 
 
     [ReadOnlyAttribute, SerializeField] private int[] unitsCount = new int[_unitLength];
-    public int[] UnitsCount => unitsCount;
+    public int GetUnitsCount(UnitType unitType)
+    {
+        return unitsCount[(int)unitType];
+    }
+
+    public void SetUnitsCount(UnitType unitType, int unitCount)
+    {
+        unitsCount[(int)unitType] = unitCount;
+    }
 
 
     // This one is the only one that needs to be set in editor
     [SerializeField] private UnitBase[] unitsPrefabs = new UnitBase[_unitLength];
     public UnitBase GetUnitPrefab(UnitType type)
     {
-        // We cannot be sure the prefabs will be ordered correctly in editor, so doing a for loop instead
-        foreach (var prefab in unitsPrefabs)
-        {
-            if (prefab.UnitType == type)
-                return prefab;
-        }
+        return unitsPrefabs[(int)type];
+    }
 
-        return null;
+    // This makes sure our Units Prefabs are always in the right order
+    private void OnValidate()
+    {
+        var unitsPrefabComparer = new UnitPrefabComparer();
+        System.Array.Sort(unitsPrefabs, unitsPrefabComparer);
+    }
+
+    private sealed class UnitPrefabComparer : IComparer<UnitBase>
+    {
+        public int Compare(UnitBase x, UnitBase y)
+        {
+            if (x == null)
+                return 1;
+            else if (y == null)
+                return -1;
+            else
+                return x.UnitType.CompareTo(y.UnitType);
+        }
     }
 }

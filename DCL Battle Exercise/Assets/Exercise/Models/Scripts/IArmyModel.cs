@@ -13,6 +13,9 @@ public enum ArmyStrategy
 public interface IArmyModel
 {
     ArmyStrategy Strategy { get; set; }
-    int[] UnitsCount { get; }
+
+    int GetUnitsCount(UnitType type);
+    void SetUnitsCount(UnitType type, int unitsCount);
+
     UnitBase GetUnitPrefab(UnitType type);
 }

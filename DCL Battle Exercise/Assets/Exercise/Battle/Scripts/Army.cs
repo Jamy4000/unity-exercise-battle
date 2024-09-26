@@ -12,6 +12,14 @@ public class Army
         _units = units;
     }
 
+    public void Update()
+    {
+        foreach (UnitBase unit in _units)
+        {
+            unit.ManualUpdate();
+        }
+    }
+
     public Color GetColor()
     {
         return _color;

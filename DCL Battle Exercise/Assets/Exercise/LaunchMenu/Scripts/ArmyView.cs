@@ -12,6 +12,8 @@ namespace DCLBattle.LaunchMenu
 
     public class ArmyView : MonoBehaviour, IArmyView
     {
+        [SerializeField] private TextMeshProUGUI title;
+
         // TODO This is still hard coded, may do later
         [SerializeField] private Slider warriorsCount;
         [SerializeField] private TextMeshProUGUI warriorsLabel;
@@ -39,11 +41,11 @@ namespace DCLBattle.LaunchMenu
 
         public void UpdateWithModel(IArmyModel model)
         {
-            var warriorUnitCount = model.UnitsCount[(int)UnitType.Warrior];
+            var warriorUnitCount = model.GetUnitsCount(UnitType.Warrior);
             warriorsCount.SetValueWithoutNotify(warriorUnitCount);
             warriorsLabel.text = warriorUnitCount.ToString();
 
-            var archerUnitsCount = model.UnitsCount[(int)UnitType.Archer];
+            var archerUnitsCount = model.GetUnitsCount(UnitType.Archer);
             archersCount.SetValueWithoutNotify(archerUnitsCount);
             archersLabel.text = archerUnitsCount.ToString();
 

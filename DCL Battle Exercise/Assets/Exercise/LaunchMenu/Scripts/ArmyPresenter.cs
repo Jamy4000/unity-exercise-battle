@@ -20,7 +20,7 @@ namespace DCLBattle.LaunchMenu
 
         public void UpdateUnit(UnitType type, int newCount)
         {
-            model.UnitsCount[(int)type] = newCount;
+            model.SetUnitsCount(type, newCount);
         }
 
         public void UpdateStrategy(ArmyStrategy strategy)
