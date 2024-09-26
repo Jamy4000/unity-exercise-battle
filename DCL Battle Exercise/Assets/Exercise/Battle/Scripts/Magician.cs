@@ -39,7 +39,7 @@ public class Magician : UnitBase
         attackCooldown = maxAttackCooldown;
         // TODO IProjectile
         ArcherArrow arrow = Object.Instantiate(arrowPrefab.gameObject).GetComponent<ArcherArrow>();
-        arrow.target = enemy.transform.position;
+        arrow._target = enemy.transform.position;
         arrow.attack = attack;
         arrow.transform.position = transform.position;
 

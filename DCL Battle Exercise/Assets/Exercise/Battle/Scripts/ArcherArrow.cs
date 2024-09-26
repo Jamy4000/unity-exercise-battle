@@ -1,43 +1,48 @@
-using System;
 using UnityEngine;
 
-public class ArcherArrow : MonoBehaviour
+public class ArcherArrow : MonoBehaviour, IProjectile
 {
-    public float speed;
+    [SerializeField]
+    private float _speed;
+    private float _speedSq;
 
-    [NonSerialized] public Vector3 target;
-    [NonSerialized] public float attack;
+    [SerializeField]
+    private float _attackDamage;
 
+    private IAttackReceiver _target;
+
+    // TODO Remove this
     public Army army;
+
+    private void Awake()
+    {
+        _speedSq = _speed * _speed;
+    }
+
+    public void Launch(Vector3 startPosition, IAttackReceiver target)
+    {
+        this._target = target;
+        transform.position = startPosition;
+    }
 
     // TODO have a system go other every arrow instead of each arrow having an update
     public void Update()
     {
         Vector3 position = transform.position;
-        Vector3 direction = Vector3.Normalize(target - position);
-        position += direction * speed;
+        Vector3 direction = Vector3.Normalize(_target.Position - position);
+        position += direction * _speed;
         
         transform.position = position;
         transform.forward = direction;
 
-        // TODO Octree or KDTree
-        foreach ( var a in army.GetEnemyArmy().GetUnits() )
-        {
-            float dist = Vector3.Distance(a.transform.position, transform.position);
+        float sqDist = Vector3.SqrMagnitude(_target.Position - transform.position);
 
-            if (dist < speed)
-            {
-                UnitBase unit = a.GetComponent<UnitBase>();
-                unit.Hit(gameObject);
-                // TODO pooling
-                Destroy(gameObject);
-                return;
-            }
-        }
-
-        if ( Vector3.Distance(transform.position, target) < speed)
+        if (sqDist < _speedSq)
         {
+            _target.Hit(position, _attackDamage);
+            // TODO pooling
             Destroy(gameObject);
+            return;
         }
     }
 }

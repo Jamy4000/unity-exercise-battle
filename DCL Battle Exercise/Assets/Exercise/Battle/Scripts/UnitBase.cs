@@ -25,7 +25,7 @@ public abstract class UnitBase : MonoBehaviour
     // TODO seperate this with a View component
     protected Animator Animator { get; private set; }
 
-    public abstract void Attack(UnitBase enemy);
+    public abstract void Attack(IAttackReceiver target);
 
     protected abstract void UpdateDefensive(List<UnitBase> allies, List<UnitBase> enemies);
     protected abstract void UpdateBasic(List<UnitBase> allies, List<UnitBase> enemies);
