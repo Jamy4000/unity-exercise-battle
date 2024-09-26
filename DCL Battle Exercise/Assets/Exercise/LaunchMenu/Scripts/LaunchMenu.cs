@@ -6,38 +6,41 @@ namespace DCLBattle.LaunchMenu
 {
     public sealed class LaunchMenu : MonoBehaviour
     {
-        [System.Serializable]
-        private struct ArmyData
-        {
-            [SerializeField, Interface(typeof(IArmyModel))] private Object armyModel;
-            public IArmyModel GetModel() => armyModel as IArmyModel;
-        
-            [SerializeField, Interface(typeof(IArmyView))] private Object armyView;
-            public IArmyView GetView() => armyView as IArmyView;
-        }
-    
         [SerializeField] private Button startButton;
-        [SerializeField] private int nextSceneIndex = 1;
-        [SerializeField] private ArmyData[] armyData;
+        [SerializeField] private string nextSceneName = "Battle";
 
-        private ArmyPresenter[] armyPresenters;
+        [SerializeField] private Transform armiesScrollViewContent;
+
+        [SerializeField]
+        private GameObject armiesInfoPrefab;
+
+        [SerializeField, Interface(typeof(IArmyModel))] 
+        private Object[] armyModels;
+
+        private IArmyPresenter[] armyPresenters;
 
         void Start()
         {
             startButton.onClick.AddListener(OnStart);
 
-            armyPresenters = new ArmyPresenter[armyData.Length];
-            for (int i = 0; i < armyData.Length; i++)
+            // TODO create army presenter without access to implementation
+            armyPresenters = new ArmyPresenter[armyModels.Length];
+
+            for (int i = 0; i < armyModels.Length; i++)
             {
-                var data = armyData[i];
-                armyPresenters[i] = new ArmyPresenter(data.GetModel(), data.GetView());
-                data.GetView().BindPresenter(armyPresenters[i]);
+                IArmyModel model = armyModels[i] as IArmyModel;
+                
+                IArmyView view = Instantiate(armiesInfoPrefab, armiesScrollViewContent).GetComponent<IArmyView>();
+
+                armyPresenters[i] = new ArmyPresenter(model, view);
+
+                view.BindPresenter(armyPresenters[i]);
             }
         }
 
         void OnStart()
         {
-            SceneManager.LoadScene(nextSceneIndex);
+            SceneManager.LoadScene(nextSceneName);
         }
     }
 }

@@ -20,9 +20,9 @@ public abstract class UnitBase : MonoBehaviour
     protected float attackCooldown;
     private Vector3 lastPosition;
 
-    // TODO not a fan of having a reference to this
     private Army _army;
 
+    // TODO seperate this with a View component
     protected Animator Animator { get; private set; }
 
     public abstract void Attack(UnitBase enemy);

@@ -2,6 +2,8 @@ public enum UnitType
 {
     Warrior = 0,
     Archer = 1,
+    Cavalry = 2,
+    Magician = 3,
 }
 
 public enum ArmyStrategy
@@ -12,6 +14,8 @@ public enum ArmyStrategy
 
 public interface IArmyModel
 {
+    string ArmyName { get; set; }
+    UnityEngine.Color ArmyColor { get; set; }
     ArmyStrategy Strategy { get; set; }
 
     int GetUnitsCount(UnitType type);

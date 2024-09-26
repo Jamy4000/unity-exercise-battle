@@ -3,6 +3,7 @@ namespace DCLBattle.LaunchMenu
     public interface IArmyPresenter
     {
         void UpdateUnit(UnitType type, int newCount);
+
         void UpdateStrategy(ArmyStrategy strategy);
     }
 

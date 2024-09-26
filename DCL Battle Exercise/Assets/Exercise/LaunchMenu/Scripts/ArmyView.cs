@@ -1,3 +1,4 @@
+using System.Linq;
 using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
@@ -14,22 +15,16 @@ namespace DCLBattle.LaunchMenu
     {
         [SerializeField] private TextMeshProUGUI title;
 
-        // TODO This is still hard coded, may do later
-        [SerializeField] private Slider warriorsCount;
-        [SerializeField] private TextMeshProUGUI warriorsLabel;
-
-        [SerializeField] private Slider archersCount;
-        [SerializeField] private TextMeshProUGUI archersLabel;
-
         [SerializeField] private TMP_Dropdown strategyDropdown;
+
+        [SerializeField] private Slider unitSliderPrefab;
+        [SerializeField] private Transform unitsSliderContent;
 
         private EnumDropdownWrapper<ArmyStrategy> enumDropdown;
         private IArmyPresenter presenter = null;
 
         private void Awake()
         {
-            warriorsCount.onValueChanged.AddListener(OnWarriorsCountChanged);
-            archersCount.onValueChanged.AddListener(OnArchersCountChanged);
             enumDropdown = new EnumDropdownWrapper<ArmyStrategy>(strategyDropdown);
             enumDropdown.OnValueChanged += OnStrategyChanged;
         }
@@ -39,36 +34,39 @@ namespace DCLBattle.LaunchMenu
             this.presenter = presenter;
         }
 
-        public void UpdateWithModel(IArmyModel model)
+        public void UpdateWithModel(IArmyModel armyModel)
         {
-            var warriorUnitCount = model.GetUnitsCount(UnitType.Warrior);
-            warriorsCount.SetValueWithoutNotify(warriorUnitCount);
-            warriorsLabel.text = warriorUnitCount.ToString();
+            title.text = armyModel.ArmyName;
 
-            var archerUnitsCount = model.GetUnitsCount(UnitType.Archer);
-            archersCount.SetValueWithoutNotify(archerUnitsCount);
-            archersLabel.text = archerUnitsCount.ToString();
+            var unitTypes = System.Enum.GetValues(typeof(UnitType)).Cast<UnitType>();
+            foreach (UnitType unitType in unitTypes)
+            {
+                if (armyModel.GetUnitPrefab(unitType) == null)
+                    continue;
 
-            enumDropdown.SetValueWithoutNotify(model.Strategy);
+                int unitCount = armyModel.GetUnitsCount(unitType);
+                // TODO Remove hard implementation, use SO instead
+                IUnitModel unitModel = new UnitModel(unitCount, unitType.ToString(), unitType);
+
+                IUnitView unitView = Instantiate(unitSliderPrefab.gameObject, unitsSliderContent).GetComponent<IUnitView>();
+                unitView.InjectModel(unitModel);
+
+                // TODO Remove hard impl
+                IUnitPresenter presenter = new UnitPresenter(unitModel, unitView);
+                unitView.BindPresenter(presenter);
+
+                unitModel.OnUnitsCountChanged += OnUnitsCountChanged;
+            }
         }
 
-        // TODO shouldn't be warrior only
-        private void OnWarriorsCountChanged(float value)
+        private void OnUnitsCountChanged(IUnitModel model)
         {
-            presenter.UpdateUnit(UnitType.Warrior, (int)value);
-            warriorsLabel.text = ((int)value).ToString();
-        }
-
-        // TODO shouldn't be archer only
-        private void OnArchersCountChanged(float value)
-        {
-            presenter.UpdateUnit(UnitType.Archer, (int)value);
-            archersLabel.text = ((int)value).ToString();
+            presenter.UpdateUnit(model.GetUnitsType(), model.GetUnitsCount());
         }
 
         private void OnStrategyChanged(ArmyStrategy strategy)
         {
-            presenter?.UpdateStrategy(strategy);
+            presenter.UpdateStrategy(strategy);
         }
 
         private void OnDestroy()

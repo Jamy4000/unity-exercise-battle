@@ -1,7 +1,7 @@
 ﻿using System.Collections.Generic;
 using UnityEngine;
 
-public class Army
+public sealed class Army
 {
     private Color _color;
     private readonly List<UnitBase> _units = new();

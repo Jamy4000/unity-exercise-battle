@@ -9,17 +9,13 @@ public class BattleInstantiator : MonoBehaviour
     [System.Serializable]
     private struct ArmySpawnParameters
     {
-        [SerializeField]
-        private ArmyModelSO armyModel;
-        public readonly IArmyModel GetModel() => armyModel;
+        [SerializeField, Interface(typeof(IArmyModel))]
+        private UnityEngine.Object armyModel;
+        public readonly IArmyModel GetModel() => armyModel as IArmyModel;
         
         [SerializeField]
         private BoxCollider armySpawnBounds;
         public readonly Bounds GetSpawnBounds() => armySpawnBounds.bounds;
-        
-        [SerializeField]
-        private Color armyColor;
-        public readonly Color GetArmyColor() => armyColor;
     }
     
     // todo ewwww
@@ -86,7 +82,6 @@ public class BattleInstantiator : MonoBehaviour
     {
         List<UnitBase> armyUnits = new();
         IArmyModel model = parameters.GetModel();
-        Color color = parameters.GetArmyColor();
         Bounds bounds = parameters.GetSpawnBounds();
         var values = Enum.GetValues(typeof(UnitType)).Cast<UnitType>();
 
@@ -104,12 +99,12 @@ public class BattleInstantiator : MonoBehaviour
                 unit.armyModel = model;
                 unit.transform.position = Utils.GetRandomPosInBounds(bounds);
 
-                unit.GetComponentInChildren<Renderer>().material.color = color;
+                unit.GetComponentInChildren<Renderer>().material.color = model.ArmyColor;
 
                 armyUnits.Add(unit);
             }
         }
 
-        return new Army(color, armyUnits);
+        return new Army(model.ArmyColor, armyUnits);
     }
 }
