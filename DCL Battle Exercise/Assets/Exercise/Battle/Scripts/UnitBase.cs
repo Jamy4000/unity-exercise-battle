@@ -12,6 +12,7 @@ public abstract class UnitBase : MonoBehaviour
     public float maxAttackCooldown { get; protected set; }
     public float postAttackDelay { get; protected set; }
     public float speed { get; protected set; } = 0.1f;
+    public abstract UnitType UnitType { get; }
 
     [NonSerialized]
     public IArmyModel armyModel;

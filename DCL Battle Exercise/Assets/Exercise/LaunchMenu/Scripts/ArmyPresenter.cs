@@ -2,8 +2,7 @@ namespace DCLBattle.LaunchMenu
 {
     public interface IArmyPresenter
     {
-        void UpdateWarriors(int warriors);
-        void UpdateArchers(int archers);
+        void UpdateUnit(UnitType type, int newCount);
         void UpdateStrategy(ArmyStrategy strategy);
     }
 
@@ -19,14 +18,9 @@ namespace DCLBattle.LaunchMenu
             this.view.UpdateWithModel(model);
         }
 
-        public void UpdateWarriors(int warriors)
+        public void UpdateUnit(UnitType type, int newCount)
         {
-            model.Warriors = warriors;
-        }
-
-        public void UpdateArchers(int archers)
-        {
-            model.Archers = archers;
+            model.UnitsCount[(int)type] = newCount;
         }
 
         public void UpdateStrategy(ArmyStrategy strategy)

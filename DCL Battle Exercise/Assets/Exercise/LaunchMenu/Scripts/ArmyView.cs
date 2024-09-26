@@ -11,10 +11,13 @@ namespace DCLBattle.LaunchMenu
 
     public class ArmyView : MonoBehaviour, IArmyView
     {
+        // TODO This is still hard coded, may do later
         [SerializeField] private Slider warriorsCount;
         [SerializeField] private TextMeshProUGUI warriorsLabel;
+
         [SerializeField] private Slider archersCount;
         [SerializeField] private TextMeshProUGUI archersLabel;
+
         [SerializeField] private TMP_Dropdown strategyDropdown;
 
         private EnumDropdownWrapper<ArmyStrategy> enumDropdown;
@@ -35,23 +38,28 @@ namespace DCLBattle.LaunchMenu
 
         public void UpdateWithModel(IArmyModel model)
         {
-            warriorsCount.SetValueWithoutNotify(model.Warriors);
-            warriorsLabel.text = model.Warriors.ToString();
-            archersCount.SetValueWithoutNotify(model.Archers);
-            archersLabel.text = model.Archers.ToString();
+            var warriorUnitCount = model.UnitsCount[(int)UnitType.Warrior];
+            warriorsCount.SetValueWithoutNotify(warriorUnitCount);
+            warriorsLabel.text = warriorUnitCount.ToString();
+
+            var archerUnitsCount = model.UnitsCount[(int)UnitType.Archer];
+            archersCount.SetValueWithoutNotify(archerUnitsCount);
+            archersLabel.text = archerUnitsCount.ToString();
+
             enumDropdown.SetValueWithoutNotify(model.Strategy);
         }
 
+        // TODO shouldn't be warrior only
         private void OnWarriorsCountChanged(float value)
         {
-            // TODO
-            presenter?.UpdateWarriors((int)value);
+            presenter.UpdateUnit(UnitType.Warrior, (int)value);
             warriorsLabel.text = ((int)value).ToString();
         }
 
+        // TODO shouldn't be archer only
         private void OnArchersCountChanged(float value)
         {
-            presenter?.UpdateArchers((int)value);
+            presenter.UpdateUnit(UnitType.Archer, (int)value);
             archersLabel.text = ((int)value).ToString();
         }
 

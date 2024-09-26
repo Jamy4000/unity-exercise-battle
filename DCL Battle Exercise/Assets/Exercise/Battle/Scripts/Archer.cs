@@ -9,6 +9,8 @@ public class Archer : UnitBase
 
     private Color _color;
 
+    public override UnitType UnitType => UnitType.Archer;
+
     protected override void Awake()
     {
         base.Awake();
@@ -22,7 +24,7 @@ public class Archer : UnitBase
     private void Start()
     {
         // TODO not a fan of that one
-        _color = GetComponent<Renderer>().material.color;
+        _color = GetComponentInChildren<Renderer>().material.color;
     }
 
     public override void Attack(UnitBase enemy)

@@ -7,6 +7,8 @@ public class Warrior : UnitBase
     [NonSerialized]
     public float attackRange = 2.5f;
 
+    public override UnitType UnitType => UnitType.Warrior;
+
     protected override void Awake()
     {
         base.Awake();

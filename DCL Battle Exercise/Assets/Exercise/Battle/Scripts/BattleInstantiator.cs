@@ -1,4 +1,6 @@
+using System;
 using System.Collections.Generic;
+using System.Linq;
 using UnityEngine;
 
 
@@ -9,15 +11,15 @@ public class BattleInstantiator : MonoBehaviour
     {
         [SerializeField]
         private ArmyModelSO armyModel;
-        public IArmyModel GetModel() => armyModel;
+        public readonly IArmyModel GetModel() => armyModel;
         
         [SerializeField]
         private BoxCollider armySpawnBounds;
-        public Bounds GetSpawnBounds() => armySpawnBounds.bounds;
+        public readonly Bounds GetSpawnBounds() => armySpawnBounds.bounds;
         
         [SerializeField]
         private Color armyColor;
-        public Color GetArmyColor() => armyColor;
+        public readonly Color GetArmyColor() => armyColor;
     }
     
     // todo ewwww
@@ -25,12 +27,6 @@ public class BattleInstantiator : MonoBehaviour
 
     [SerializeField]
     private ArmySpawnParameters[] armiesToSpawn;
-
-    [SerializeField]
-    private Warrior warriorPrefab;
-
-    [SerializeField]
-    private Archer archerPrefab;
 
     [SerializeField]
     private GameOverMenu gameOverMenu;
@@ -87,29 +83,26 @@ public class BattleInstantiator : MonoBehaviour
         IArmyModel model = parameters.GetModel();
         Color color = parameters.GetArmyColor();
         Bounds bounds = parameters.GetSpawnBounds();
+        var values = Enum.GetValues(typeof(UnitType)).Cast<UnitType>();
 
-        // TODO Should be only one for loop
-        for (int i = 0; i < model.Warriors; i++)
+        foreach (UnitType unitType in values)
         {
-            // TODO Pooling
-            GameObject go = Instantiate(warriorPrefab.gameObject);
-            go.transform.position = Utils.GetRandomPosInBounds(bounds);
+            var unitToSpawn = model.GetUnitPrefab(unitType);
+            if (unitToSpawn == null)
+                continue;
 
-            go.GetComponentInChildren<UnitBase>().armyModel = model;
-            go.GetComponentInChildren<Renderer>().material.color = color;
+            int unitCount = model.UnitsCount[(int)unitType];
+            for (int j = 0; j < unitCount; j++)
+            {
+                // TODO Pooling
+                UnitBase unit = Instantiate(unitToSpawn);
+                unit.armyModel = model;
+                unit.transform.position = Utils.GetRandomPosInBounds(bounds);
 
-            armyUnits.Add(go.GetComponent<UnitBase>());
-        }
+                unit.GetComponentInChildren<Renderer>().material.color = color;
 
-        for (int i = 0; i < parameters.GetModel().Archers; i++)
-        {
-            GameObject go = Object.Instantiate(archerPrefab.gameObject);
-            go.transform.position = Utils.GetRandomPosInBounds(bounds);
-
-            go.GetComponentInChildren<UnitBase>().armyModel = model;
-            go.GetComponentInChildren<Renderer>().material.color = color;
-
-            armyUnits.Add(go.GetComponent<UnitBase>());
+                armyUnits.Add(unit);
+            }
         }
 
         return new Army(color, armyUnits);

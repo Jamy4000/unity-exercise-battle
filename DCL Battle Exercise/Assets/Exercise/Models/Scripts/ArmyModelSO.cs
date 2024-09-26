@@ -9,24 +9,31 @@ using UnityEngine;
 [CreateAssetMenu(menuName = "Create ArmyModel", fileName = "ArmyModel", order = 0)]
 public class ArmyModelSO : ScriptableObject, IArmyModel
 {
-    [ReadOnlyAttribute, SerializeField] private int warriorsValue = 100;
-    public int Warriors
-    {
-        get => warriorsValue;
-        set => warriorsValue = value;
-    }
-
-    [ReadOnlyAttribute, SerializeField] private int archersValue = 100;
-    public int Archers
-    {
-        get => archersValue;
-        set => archersValue = value;
-    }
+    private static readonly int _unitLength = System.Enum.GetValues(typeof(UnitType)).Length;
 
     [ReadOnlyAttribute, SerializeField] private ArmyStrategy strategyValue = ArmyStrategy.Basic;
     public ArmyStrategy Strategy
     {
         get => strategyValue;
         set => strategyValue = value;
+    }
+
+
+    [ReadOnlyAttribute, SerializeField] private int[] unitsCount = new int[_unitLength];
+    public int[] UnitsCount => unitsCount;
+
+
+    // This one is the only one that needs to be set in editor
+    [SerializeField] private UnitBase[] unitsPrefabs = new UnitBase[_unitLength];
+    public UnitBase GetUnitPrefab(UnitType type)
+    {
+        // We cannot be sure the prefabs will be ordered correctly in editor, so doing a for loop instead
+        foreach (var prefab in unitsPrefabs)
+        {
+            if (prefab.UnitType == type)
+                return prefab;
+        }
+
+        return null;
     }
 }

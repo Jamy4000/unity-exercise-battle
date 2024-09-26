@@ -4,7 +4,7 @@ using UnityEngine;
 public class Army
 {
     private Color _color;
-    private readonly List<UnitBase> _units = new List<UnitBase>();
+    private readonly List<UnitBase> _units = new();
 
     public Army(Color color, List<UnitBase> units)
     {
