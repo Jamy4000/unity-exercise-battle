@@ -5,6 +5,7 @@ using UnityEngine;
 
 public abstract class UnitBase : MonoBehaviour
 {
+    // todo turn those as abstract getters
     public float health { get; protected set; }
     public float defense { get; protected set; }
     public float attack { get; protected set; }
@@ -20,11 +21,18 @@ public abstract class UnitBase : MonoBehaviour
     protected float attackCooldown;
     private Vector3 lastPosition;
 
+    private Animator _animator;
+
     public abstract void Attack(GameObject enemy);
 
 
     protected abstract void UpdateDefensive(List<GameObject> allies, List<GameObject> enemies);
     protected abstract void UpdateBasic(List<GameObject> allies, List<GameObject> enemies);
+
+    protected virtual void Awake()
+    {
+        _animator = GetComponentInChildren<Animator>();
+    }
 
     public virtual void Move( Vector3 delta )
     {
@@ -60,13 +68,11 @@ public abstract class UnitBase : MonoBehaviour
             else if ( this is Archer )
                 army.archers.Remove(this as Archer);
 
-            var animator = GetComponentInChildren<Animator>();
-            animator?.SetTrigger("Death");
+            _animator?.SetTrigger("Death");
         }
         else
         {
-            var animator = GetComponentInChildren<Animator>();
-            animator?.SetTrigger("Hit");
+            _animator?.SetTrigger("Hit");
         }
     }
 
@@ -76,7 +82,7 @@ public abstract class UnitBase : MonoBehaviour
             return;
 
         List<GameObject> allies = army.GetUnits();
-        List<GameObject> enemies = army.enemyArmy.GetUnits();
+        List<GameObject> enemies = army.GetEnemyArmy().GetUnits();
 
         UpdateBasicRules(allies, enemies);
 
@@ -90,8 +96,7 @@ public abstract class UnitBase : MonoBehaviour
                 break;
         }
 
-        var animator = GetComponentInChildren<Animator>();
-        animator.SetFloat("MovementSpeed", (transform.position - lastPosition).magnitude / speed);
+        _animator.SetFloat("MovementSpeed", (transform.position - lastPosition).magnitude / speed);
         lastPosition = transform.position;
     }
 
@@ -103,7 +108,7 @@ public abstract class UnitBase : MonoBehaviour
 
     void EvadeAllies(List<GameObject> allies)
     {
-        var allUnits = army.GetUnits().Union(army.enemyArmy.GetUnits()).ToList();
+        var allUnits = army.GetUnits().Union(army.GetEnemyArmy().GetUnits()).ToList();
 
         Vector3 center = Utils.GetCenter(allUnits);
 

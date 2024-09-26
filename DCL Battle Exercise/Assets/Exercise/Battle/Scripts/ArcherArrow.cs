@@ -12,13 +12,18 @@ public class ArcherArrow : MonoBehaviour
 
     public Army army;
 
+    // TODO have a system go other every arrow instead of each arrow having an update
     public void Update()
     {
-        Vector3 direction = (target - transform.position).normalized;
-        transform.position += direction * speed;
+        Vector3 position = transform.position;
+        Vector3 direction = Vector3.Normalize(target - position);
+        position += direction * speed;
+        
+        transform.position = position;
         transform.forward = direction;
 
-        foreach ( var a in army.enemyArmy.GetUnits() )
+        // TODO Octree or KDTree
+        foreach ( var a in army.GetEnemyArmy().GetUnits() )
         {
             float dist = Vector3.Distance(a.transform.position, transform.position);
 
@@ -26,6 +31,7 @@ public class ArcherArrow : MonoBehaviour
             {
                 UnitBase unit = a.GetComponent<UnitBase>();
                 unit.Hit(gameObject);
+                // TODO pooling
                 Destroy(gameObject);
                 return;
             }

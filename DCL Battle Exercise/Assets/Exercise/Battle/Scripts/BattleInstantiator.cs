@@ -1,17 +1,29 @@
-using System.Collections;
-using UnityEditor;
 using UnityEngine;
 
 
 public class BattleInstantiator : MonoBehaviour
 {
+    [System.Serializable]
+    private struct ArmySpawnParameters
+    {
+        [SerializeField]
+        private ArmyModelSO armyModel;
+        public ArmyModelSO GetModel() => armyModel;
+        
+        [SerializeField]
+        private BoxCollider armySpawnBounds;
+        public BoxCollider GetSpawnBounds() => armySpawnBounds;
+        
+        [SerializeField]
+        private Color armyColor;
+        public Color GetArmyColor() => armyColor;
+    }
+    
+    // todo ewwww
     public static BattleInstantiator instance { get; private set; }
 
     [SerializeField]
-    private ArmyModelSO army1Model;
-
-    [SerializeField]
-    private ArmyModelSO army2Model;
+    private ArmySpawnParameters[] armiesToSpawn;
 
     [SerializeField]
     private Warrior warriorPrefab;
@@ -20,18 +32,13 @@ public class BattleInstantiator : MonoBehaviour
     private Archer archerPrefab;
 
     [SerializeField]
-    private BoxCollider leftArmySpawnBounds;
+    private GameOverMenu gameOverMenu;
+    
+    private Army[] _armies;
+    private Vector3 forwardTarget;
 
-    [SerializeField]
-    private BoxCollider rightArmySpawnBounds;
-
-    public readonly Army army1 = new Army();
-    public readonly Army army2 = new Army();
-
-    public Color army1Color;
-    public Color army2Color;
-
-    public GameOverMenu gameOverMenu;
+    public Army GetArmy(int index) => _armies[index];
+    public int GetArmiesCount() => _armies.Length;
 
     void InstanceArmy(IArmyModel model, Army army, Bounds instanceBounds)
     {
@@ -62,33 +69,46 @@ public class BattleInstantiator : MonoBehaviour
 
     void Awake()
     {
+        if (instance != null)
+            throw new System.Exception("An instance of BattleInstantiator already exists.");
+        
         instance = this;
+        _armies = new Army[armiesToSpawn.Length];
 
-        army1.color = army1Color;
-        army1.enemyArmy = army2;
-
-        army2.color = army2Color;
-        army2.enemyArmy = army1;
-
-        InstanceArmy(army1Model, army1, leftArmySpawnBounds.bounds);
-        InstanceArmy(army2Model, army2, rightArmySpawnBounds.bounds);
+        for (int i = 0; i < armiesToSpawn.Length; i++)
+        {
+            var army = _armies[i] = new Army();
+            var armyParameters = armiesToSpawn[i];
+            
+            army.color = armyParameters.GetArmyColor();
+            
+            InstanceArmy(armyParameters.GetModel(), army, armyParameters.GetSpawnBounds().bounds);
+        }
     }
 
     void Update()
     {
-        if ( army1.GetUnits().Count == 0 || army2.GetUnits().Count == 0 )
+        Vector3 mainCenter = Vector3.zero;
+        foreach (var army in _armies)
         {
-            gameOverMenu.gameObject.SetActive(true);
-            gameOverMenu.Populate();
+            // TODO This is bad, we should just use an event and check when all armies but one are dead
+            // TODO add army allies ?
+            if ( army.GetUnits().Count == 0 )
+            {
+                gameOverMenu.gameObject.SetActive(true);
+                gameOverMenu.Populate();
+            }
+
+            // Todo that's quite a big calculation for not much
+            mainCenter += Utils.GetCenter(army.GetUnits());
         }
 
-        Vector3 mainCenter = Utils.GetCenter(army1.GetUnits()) + Utils.GetCenter(army2.GetUnits());
-        mainCenter *= 0.5f;
+        // Todo that's quite a big calculation for not much
+        mainCenter /= _armies.Length;
 
-        forwardTarget = (mainCenter - Camera.main.transform.position).normalized;
+        Transform cameraTransform = Camera.main.transform;
+        forwardTarget = Vector3.Normalize(mainCenter - cameraTransform.position);
 
-        Camera.main.transform.forward += (forwardTarget - Camera.main.transform.forward) * 0.1f;
+        cameraTransform.forward += (forwardTarget - cameraTransform.forward) * 0.1f;
     }
-
-    private Vector3 forwardTarget;
 }

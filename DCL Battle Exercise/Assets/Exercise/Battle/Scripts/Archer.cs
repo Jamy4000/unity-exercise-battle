@@ -8,8 +8,9 @@ public class Archer : UnitBase
 
     public ArcherArrow arrowPrefab;
 
-    void Awake()
+    protected override void Awake()
     {
+        base.Awake();
         health = 5;
         defense = 0;
         attack = 10;
@@ -26,19 +27,18 @@ public class Archer : UnitBase
             return;
 
         attackCooldown = maxAttackCooldown;
-        GameObject arrow = Object.Instantiate(arrowPrefab.gameObject);
-        arrow.GetComponent<ArcherArrow>().target = enemy.transform.position;
-        arrow.GetComponent<ArcherArrow>().attack = attack;
-        arrow.GetComponent<ArcherArrow>().army = army;
+        // TODO IProjectile
+        ArcherArrow arrow = Object.Instantiate(arrowPrefab.gameObject).GetComponent<ArcherArrow>();
+        arrow.target = enemy.transform.position;
+        arrow.attack = attack;
+        arrow.army = army;
         arrow.transform.position = transform.position;
 
+        // Todo Cache this
         var animator = GetComponentInChildren<Animator>();
         animator?.SetTrigger("Attack");
 
-        if ( army == BattleInstantiator.instance.army1 )
-            arrow.GetComponent<Renderer>().material.color = BattleInstantiator.instance.army1Color;
-        else
-            arrow.GetComponent<Renderer>().material.color = BattleInstantiator.instance.army2Color;
+        arrow.GetComponent<Renderer>().material.color = army.color;
     }
 
     public void OnDeathAnimFinished()

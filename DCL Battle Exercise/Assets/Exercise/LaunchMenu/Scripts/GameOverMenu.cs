@@ -10,16 +10,17 @@ public class GameOverMenu : MonoBehaviour
     public TextMeshProUGUI armyWins;
     public Button goToMenu;
 
+    // TODO use event instead
     public void Populate()
     {
-        if ( BattleInstantiator.instance.army1.GetUnits().Count == 0 )
+        int armyCount = BattleInstantiator.instance.GetArmiesCount();
+        for (int i = 0; i < armyCount; i++)
         {
-            armyWins.text = "Army 1 wins!";
-        }
-
-        if ( BattleInstantiator.instance.army2.GetUnits().Count == 0 )
-        {
-            armyWins.text = "Army 2 wins!";
+            if ( BattleInstantiator.instance.GetArmy(i).GetUnits().Count > 0 )
+            {
+                armyWins.text = $"Army {i} wins!";
+                return;
+            }
         }
     }
 
