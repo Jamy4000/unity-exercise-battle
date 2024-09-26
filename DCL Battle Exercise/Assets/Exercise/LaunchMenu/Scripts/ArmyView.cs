@@ -43,12 +43,11 @@ namespace DCLBattle.LaunchMenu
             var unitTypes = System.Enum.GetValues(typeof(UnitType)).Cast<UnitType>();
             foreach (UnitType unitType in unitTypes)
             {
-                if (armyModel.GetUnitPrefab(unitType) == null)
+                if (armyModel.GetUnitModel(unitType) == null)
                     continue;
 
-                int unitCount = armyModel.GetUnitsCount(unitType);
-                // TODO Remove hard implementation, use SO instead
-                IUnitModel unitModel = new UnitModel(unitCount, unitType.ToString(), unitType);
+                IUnitModel unitModel = armyModel.GetUnitModel(unitType);
+                unitModel.SetUnitsCount(armyModel.GetUnitsCount(unitType));
 
                 IUnitView unitView = Instantiate(unitSliderPrefab.gameObject, unitsSliderContent).GetComponent<IUnitView>();
                 unitView.InjectModel(unitModel);
@@ -57,13 +56,13 @@ namespace DCLBattle.LaunchMenu
                 IUnitPresenter presenter = new UnitPresenter(unitModel, unitView);
                 unitView.BindPresenter(presenter);
 
-                unitModel.OnUnitsCountChanged += OnUnitsCountChanged;
+                unitModel.OnUnitsChanged += OnUnitsChanged;
             }
         }
 
-        private void OnUnitsCountChanged(IUnitModel model)
+        private void OnUnitsChanged(IUnitModel unitModel)
         {
-            presenter.UpdateUnit(model.GetUnitsType(), model.GetUnitsCount());
+            presenter.UpdateUnit(unitModel);
         }
 
         private void OnStrategyChanged(ArmyStrategy strategy)

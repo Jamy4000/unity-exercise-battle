@@ -1,0 +1,23 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 0
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 02f23b66324495249b6ec4eafa794b7a, type: 3}
+  m_Name: Rivendell
+  m_EditorClassIdentifier: Assembly-CSharp::ArmyModelSO
+  armyName: Rivendell
+  armyColor: {r: 0.14524738, g: 0.754717, b: 0.14818117, a: 0.69411767}
+  strategyValue: 1
+  unitsCount: 550000001b0000000000000000000000
+  unitsModels:
+  - {fileID: 11400000, guid: 78ce89d1c7df59f4faa247d06072a8f6, type: 2}
+  - {fileID: 11400000, guid: 099a6477133f9284d83560b10634a78e, type: 2}
+  - {fileID: 0}
+  - {fileID: 11400000, guid: e8d5e2d043ca6784f9f5123e427a6dbb, type: 2}

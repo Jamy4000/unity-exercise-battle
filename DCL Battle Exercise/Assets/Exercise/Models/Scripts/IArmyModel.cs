@@ -15,11 +15,13 @@ public enum ArmyStrategy
 public interface IArmyModel
 {
     string ArmyName { get; set; }
+
     UnityEngine.Color ArmyColor { get; set; }
+
     ArmyStrategy Strategy { get; set; }
 
     int GetUnitsCount(UnitType type);
     void SetUnitsCount(UnitType type, int unitsCount);
 
-    UnitBase GetUnitPrefab(UnitType type);
+    IUnitModel GetUnitModel(UnitType type);
 }

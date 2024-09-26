@@ -28,7 +28,7 @@ public class ArmyModelSO : ScriptableObject, IArmyModel
         set => armyColor = value; 
     }
 
-    [ReadOnlyAttribute, SerializeField] private ArmyStrategy strategyValue = ArmyStrategy.Basic;
+    [ReadOnly, SerializeField] private ArmyStrategy strategyValue = ArmyStrategy.Basic;
     public ArmyStrategy Strategy
     {
         get => strategyValue;
@@ -49,11 +49,11 @@ public class ArmyModelSO : ScriptableObject, IArmyModel
 
 
     // This one is the only one that needs to be set in editor
-    [SerializeField, DrawEnumBasedArray(typeof(UnitType))] 
-    private UnitBase[] unitsPrefabs = new UnitBase[_unitLength];
-    public UnitBase GetUnitPrefab(UnitType type)
+    [SerializeField, DrawEnumBasedArray(typeof(UnitType))]
+    private Object[] unitsModels = new Object[_unitLength];
+    public IUnitModel GetUnitModel(UnitType type)
     {
-        return unitsPrefabs[(int)type];
+        return unitsModels[(int)type] as IUnitModel;
     }
 
     // This makes sure our Units Prefabs are always in the right order
@@ -67,15 +67,14 @@ public class ArmyModelSO : ScriptableObject, IArmyModel
             unitsCount = unitCountCopy;
         }
 
-        if (unitsPrefabs.Length != _unitLength)
+        if (unitsModels.Length != _unitLength)
         {
-            var unitPrefabsCopy = new UnitBase[_unitLength];
-            unitsPrefabs.CopyTo(unitPrefabsCopy, 0);
-            unitsPrefabs = unitPrefabsCopy;
+            var unitPrefabsCopy = new Object[_unitLength];
+            unitsModels.CopyTo(unitPrefabsCopy, 0);
+            unitsModels = unitPrefabsCopy;
         }
 
         // We could technically add a check to see if the assigned prefab is of the right unit type compared to the array index
         // But for this exercise, may be overkill
     }
-
 }

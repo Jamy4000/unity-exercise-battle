@@ -10,14 +10,14 @@ MonoBehaviour:
   m_Enabled: 0
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 02f23b66324495249b6ec4eafa794b7a, type: 3}
-  m_Name: TheShire
+  m_Name: Gondor
   m_EditorClassIdentifier: Assembly-CSharp::ArmyModelSO
-  armyName: The Shire
-  armyColor: {r: 0.9245283, g: 0.6003607, b: 0.25642577, a: 0.69411767}
-  strategyValue: 1
-  unitsCount: 3a0000005d0000000000000000000000
-  unitsPrefabs:
-  - {fileID: 4074248562238301595, guid: d84cac85cdce1be419a5e701d52e9cee, type: 3}
-  - {fileID: 8284140959867094785, guid: d5b353320e661744aa811b1a632ee53e, type: 3}
-  - {fileID: 0}
+  armyName: Gondor
+  armyColor: {r: 0, g: 0.40661025, b: 1, a: 0.59607846}
+  strategyValue: 0
+  unitsCount: 4f000000240000000000000000000000
+  unitsModels:
+  - {fileID: 11400000, guid: 78ce89d1c7df59f4faa247d06072a8f6, type: 2}
+  - {fileID: 11400000, guid: 099a6477133f9284d83560b10634a78e, type: 2}
+  - {fileID: 11400000, guid: 31ac0833455744d47bbef46f65b64adf, type: 2}
   - {fileID: 0}

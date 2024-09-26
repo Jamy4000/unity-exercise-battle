@@ -81,30 +81,30 @@ public class BattleInstantiator : MonoBehaviour
     private Army InstanceArmy(ArmySpawnParameters parameters)
     {
         List<UnitBase> armyUnits = new();
-        IArmyModel model = parameters.GetModel();
+        IArmyModel armyModel = parameters.GetModel();
         Bounds bounds = parameters.GetSpawnBounds();
         var values = Enum.GetValues(typeof(UnitType)).Cast<UnitType>();
 
         foreach (UnitType unitType in values)
         {
-            var unitToSpawn = model.GetUnitPrefab(unitType);
-            if (unitToSpawn == null)
+            IUnitModel unitModel = armyModel.GetUnitModel(unitType);
+            if (unitModel == null)
                 continue;
 
-            int unitCount = model.GetUnitsCount(unitType);
+            int unitCount = armyModel.GetUnitsCount(unitType);
             for (int j = 0; j < unitCount; j++)
             {
                 // TODO Pooling
-                UnitBase unit = Instantiate(unitToSpawn);
-                unit.armyModel = model;
+                UnitBase unit = Instantiate(unitModel.GetUnitsPrefab());
+                unit.armyModel = armyModel;
                 unit.transform.position = Utils.GetRandomPosInBounds(bounds);
 
-                unit.GetComponentInChildren<Renderer>().material.color = model.ArmyColor;
+                unit.GetComponentInChildren<Renderer>().material.color = armyModel.ArmyColor;
 
                 armyUnits.Add(unit);
             }
         }
 
-        return new Army(model.ArmyColor, armyUnits);
+        return new Army(armyModel.ArmyColor, armyUnits);
     }
 }

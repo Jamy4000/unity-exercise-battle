@@ -2,7 +2,7 @@ namespace DCLBattle.LaunchMenu
 {
     public interface IArmyPresenter
     {
-        void UpdateUnit(UnitType type, int newCount);
+        void UpdateUnit(IUnitModel unitModel);
 
         void UpdateStrategy(ArmyStrategy strategy);
     }
@@ -19,9 +19,9 @@ namespace DCLBattle.LaunchMenu
             this.view.UpdateWithModel(model);
         }
 
-        public void UpdateUnit(UnitType type, int newCount)
+        public void UpdateUnit(IUnitModel unitModel)
         {
-            model.SetUnitsCount(type, newCount);
+            model.SetUnitsCount(unitModel.GetUnitsType(), unitModel.GetUnitsCount());
         }
 
         public void UpdateStrategy(ArmyStrategy strategy)

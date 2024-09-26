@@ -16,8 +16,8 @@ MonoBehaviour:
   armyColor: {r: 1, g: 0, b: 0, a: 0.61960787}
   strategyValue: 1
   unitsCount: 64000000620000000000000000000000
-  unitsPrefabs:
-  - {fileID: 4074248562238301595, guid: d84cac85cdce1be419a5e701d52e9cee, type: 3}
-  - {fileID: 8284140959867094785, guid: d5b353320e661744aa811b1a632ee53e, type: 3}
-  - {fileID: 0}
-  - {fileID: -2339639447242417457, guid: 092688a92b2e5b74794afd6783e355b6, type: 3}
+  unitsModels:
+  - {fileID: 11400000, guid: 78ce89d1c7df59f4faa247d06072a8f6, type: 2}
+  - {fileID: 11400000, guid: 099a6477133f9284d83560b10634a78e, type: 2}
+  - {fileID: 11400000, guid: 31ac0833455744d47bbef46f65b64adf, type: 2}
+  - {fileID: 11400000, guid: e8d5e2d043ca6784f9f5123e427a6dbb, type: 2}
