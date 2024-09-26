@@ -17,7 +17,7 @@ public class Warrior : UnitBase
         postAttackDelay = 0;
     }
 
-    public override void Attack( GameObject target )
+    public override void Attack(UnitBase target )
     {
         if ( attackCooldown > 0 )
             return;
@@ -32,19 +32,19 @@ public class Warrior : UnitBase
 
         attackCooldown = maxAttackCooldown;
 
-        var animator = GetComponentInChildren<Animator>();
-        animator.SetTrigger("Attack");
+        Animator.SetTrigger("Attack");
 
         targetUnit.Hit( gameObject );
     }
 
     public void OnDeathAnimFinished()
     {
+        // TODO Pooling
         Destroy(gameObject);
     }
 
 
-    protected override void UpdateDefensive(List<GameObject> allies, List<GameObject> enemies)
+    protected override void UpdateDefensive(List<UnitBase> allies, List<UnitBase> enemies)
     {
         Vector3 enemyCenter = Utils.GetCenter(enemies);
 
@@ -57,7 +57,7 @@ public class Warrior : UnitBase
                 Move( Vector3.right );
         }
 
-        Utils.GetNearestObject(gameObject, enemies, out GameObject nearestObject );
+        Utils.GetNearestObject(this, enemies, out UnitBase nearestObject);
 
         if ( nearestObject == null )
             return;
@@ -72,9 +72,9 @@ public class Warrior : UnitBase
         Attack(nearestObject);
     }
 
-    protected override void UpdateBasic(List<GameObject> allies, List<GameObject> enemies)
+    protected override void UpdateBasic(List<UnitBase> allies, List<UnitBase> enemies)
     {
-        Utils.GetNearestObject(gameObject, enemies, out GameObject nearestEnemy );
+        Utils.GetNearestObject(this, enemies, out UnitBase nearestEnemy );
 
         if ( nearestEnemy == null )
             return;

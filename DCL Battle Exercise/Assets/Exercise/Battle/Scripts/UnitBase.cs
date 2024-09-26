@@ -13,25 +13,25 @@ public abstract class UnitBase : MonoBehaviour
     public float postAttackDelay { get; protected set; }
     public float speed { get; protected set; } = 0.1f;
 
-    public Army army;
-
     [NonSerialized]
     public IArmyModel armyModel;
 
     protected float attackCooldown;
     private Vector3 lastPosition;
 
-    private Animator _animator;
+    // TODO not a fan of having a reference to this
+    private Army _army;
 
-    public abstract void Attack(GameObject enemy);
+    protected Animator Animator { get; private set; }
 
+    public abstract void Attack(UnitBase enemy);
 
-    protected abstract void UpdateDefensive(List<GameObject> allies, List<GameObject> enemies);
-    protected abstract void UpdateBasic(List<GameObject> allies, List<GameObject> enemies);
+    protected abstract void UpdateDefensive(List<UnitBase> allies, List<UnitBase> enemies);
+    protected abstract void UpdateBasic(List<UnitBase> allies, List<UnitBase> enemies);
 
     protected virtual void Awake()
     {
-        _animator = GetComponentInChildren<Animator>();
+        Animator = GetComponentInChildren<Animator>();
     }
 
     public virtual void Move( Vector3 delta )
@@ -42,20 +42,13 @@ public abstract class UnitBase : MonoBehaviour
         transform.position += delta * speed;
     }
 
-    public virtual void Hit( GameObject sourceGo )
+    // TODO Change GameObject as ITarget
+    public virtual void Hit(GameObject sourceGo )
     {
-        UnitBase source = sourceGo.GetComponent<UnitBase>();
-        float sourceAttack = 0;
-
-        if ( source != null )
-        {
-            sourceAttack = source.attack;
-        }
-        else
-        {
-            ArcherArrow arrow = sourceGo.GetComponent<ArcherArrow>();
-            sourceAttack = arrow.attack;
-        }
+        // TODO IProjectile
+        float sourceAttack = sourceGo.TryGetComponent(out UnitBase source) ?
+            source.attack :
+            sourceGo.GetComponent<ArcherArrow>().attack;
 
         health -= Mathf.Max(sourceAttack - defense, 0);
 
@@ -63,30 +56,26 @@ public abstract class UnitBase : MonoBehaviour
         {
             transform.forward = sourceGo.transform.position - transform.position;
 
-            if ( this is Warrior )
-                army.warriors.Remove(this as Warrior);
-            else if ( this is Archer )
-                army.archers.Remove(this as Archer);
+            // TODO event for this
+            //army.RemoveUnit(this);
 
-            _animator?.SetTrigger("Death");
+            Animator.SetTrigger("Death");
+            this.enabled = false;
         }
         else
         {
-            _animator?.SetTrigger("Hit");
+            Animator.SetTrigger("Hit");
         }
     }
 
-    private void Update()
+    public virtual void ManualUpdate()
     {
-        if ( health < 0 )
-            return;
-
-        List<GameObject> allies = army.GetUnits();
-        List<GameObject> enemies = army.GetEnemyArmy().GetUnits();
+        var allies = _army.GetUnits();
+        var enemies = _army.GetEnemyArmy().GetUnits();
 
         UpdateBasicRules(allies, enemies);
 
-        switch ( armyModel.strategy )
+        switch ( armyModel.Strategy )
         {
             case ArmyStrategy.Defensive:
                 UpdateDefensive(allies, enemies);
@@ -96,39 +85,43 @@ public abstract class UnitBase : MonoBehaviour
                 break;
         }
 
-        _animator.SetFloat("MovementSpeed", (transform.position - lastPosition).magnitude / speed);
+        Animator.SetFloat("MovementSpeed", (transform.position - lastPosition).magnitude / speed);
         lastPosition = transform.position;
     }
 
-    void UpdateBasicRules(List<GameObject> allies, List<GameObject> enemies)
+    void UpdateBasicRules(List<UnitBase> allies, List<UnitBase> enemies)
     {
         attackCooldown -= Time.deltaTime;
-        EvadeAllies(allies);
+        EvadeAllies(allies, enemies);
     }
 
-    void EvadeAllies(List<GameObject> allies)
+    void EvadeAllies(List<UnitBase> allies, List<UnitBase> enemies)
     {
-        var allUnits = army.GetUnits().Union(army.GetEnemyArmy().GetUnits()).ToList();
+        var allUnits = allies.Union(enemies).ToList();
 
+        // TODO that would be nice to cache
         Vector3 center = Utils.GetCenter(allUnits);
 
-        float centerDist = Vector3.Distance(gameObject.transform.position, center);
+        float centerSqDist = Vector3.SqrMagnitude(gameObject.transform.position - center);
 
-        if ( centerDist > 80.0f )
+        // TODO Hard coded value
+        if ( centerSqDist > (80.0f * 80.0f))
         {
-            Vector3 toNearest = (center - transform.position).normalized;
-            transform.position -= toNearest * (80.0f - centerDist);
+            Vector3 toNearest = Vector3.Normalize(center - transform.position);
+            transform.position -= toNearest * (80.0f - Mathf.Sqrt(centerSqDist));
             return;
         }
 
         foreach ( var obj in allUnits )
         {
-            float dist = Vector3.Distance(gameObject.transform.position, obj.transform.position);
+            float sqDist = Vector3.SqrMagnitude(gameObject.transform.position - obj.transform.position);
 
-            if ( dist < 2f )
+            // TODO Hard coded value
+            if ( sqDist < 4f )
             {
-                Vector3 toNearest = (obj.transform.position - transform.position).normalized;
-                transform.position -= toNearest * (2.0f - dist);
+                Vector3 toNearest = Vector3.Normalize(obj.transform.position - transform.position);
+                // TODO Hard Coded value
+                transform.position -= toNearest * (2f - Mathf.Sqrt(sqDist));
             }
         }
     }

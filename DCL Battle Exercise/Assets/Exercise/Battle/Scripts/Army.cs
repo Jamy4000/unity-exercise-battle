@@ -3,30 +3,32 @@ using UnityEngine;
 
 public class Army
 {
-    // TODO no public variable allowed
-    public Color color;
-    public List<Warrior> warriors = new List<Warrior>();
-    public List<Archer> archers = new List<Archer>();
-    
+    private Color _color;
+    private readonly List<UnitBase> _units = new List<UnitBase>();
+
+    public Army(Color color, List<UnitBase> units)
+    {
+        _color = color;
+        _units = units;
+    }
+
+    public Color GetColor()
+    {
+        return _color;
+    }
+
     public Army GetEnemyArmy()
     {
         return null;
     }
     
-    public List<GameObject> GetUnits()
+    public List<UnitBase> GetUnits()
     {
-        List<GameObject> result = new List<GameObject>();
+        return _units;
+    }
 
-        foreach ( var warrior in warriors )
-        {
-            result.Add( warrior.gameObject );
-        }
-
-        foreach ( var archer in archers )
-        {
-            result.Add( archer.gameObject );
-        }
-
-        return result;
+    public void RemoveUnit(UnitBase unit)
+    {
+        _units.Remove(unit);
     }
 }

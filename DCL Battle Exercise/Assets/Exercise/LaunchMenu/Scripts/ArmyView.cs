@@ -35,11 +35,11 @@ namespace DCLBattle.LaunchMenu
 
         public void UpdateWithModel(IArmyModel model)
         {
-            warriorsCount.SetValueWithoutNotify(model.warriors);
-            warriorsLabel.text = model.warriors.ToString();
-            archersCount.SetValueWithoutNotify(model.archers);
-            archersLabel.text = model.archers.ToString();
-            enumDropdown.SetValueWithoutNotify(model.strategy);
+            warriorsCount.SetValueWithoutNotify(model.Warriors);
+            warriorsLabel.text = model.Warriors.ToString();
+            archersCount.SetValueWithoutNotify(model.Archers);
+            archersLabel.text = model.Archers.ToString();
+            enumDropdown.SetValueWithoutNotify(model.Strategy);
         }
 
         private void OnWarriorsCountChanged(float value)

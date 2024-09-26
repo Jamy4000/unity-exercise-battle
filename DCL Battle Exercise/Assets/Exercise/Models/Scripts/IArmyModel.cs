@@ -1,8 +1,9 @@
 public interface IArmyModel
 {
-    int warriors { get; set; }
-    int archers { get; set; }
-    ArmyStrategy strategy { get; set; }
+    // TODO this shouldn't be one int per army type
+    int Warriors { get; set; }
+    int Archers { get; set; }
+    ArmyStrategy Strategy { get; set; }
 }
 
 public enum ArmyStrategy

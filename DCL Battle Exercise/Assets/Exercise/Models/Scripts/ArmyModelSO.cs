@@ -10,21 +10,21 @@ using UnityEngine;
 public class ArmyModelSO : ScriptableObject, IArmyModel
 {
     [ReadOnlyAttribute, SerializeField] private int warriorsValue = 100;
-    public int warriors
+    public int Warriors
     {
         get => warriorsValue;
         set => warriorsValue = value;
     }
 
     [ReadOnlyAttribute, SerializeField] private int archersValue = 100;
-    public int archers
+    public int Archers
     {
         get => archersValue;
         set => archersValue = value;
     }
 
     [ReadOnlyAttribute, SerializeField] private ArmyStrategy strategyValue = ArmyStrategy.Basic;
-    public ArmyStrategy strategy
+    public ArmyStrategy Strategy
     {
         get => strategyValue;
         set => strategyValue = value;

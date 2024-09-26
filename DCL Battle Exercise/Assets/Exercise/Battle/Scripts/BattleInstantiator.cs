@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using UnityEngine;
 
 
@@ -8,11 +9,11 @@ public class BattleInstantiator : MonoBehaviour
     {
         [SerializeField]
         private ArmyModelSO armyModel;
-        public ArmyModelSO GetModel() => armyModel;
+        public IArmyModel GetModel() => armyModel;
         
         [SerializeField]
         private BoxCollider armySpawnBounds;
-        public BoxCollider GetSpawnBounds() => armySpawnBounds;
+        public Bounds GetSpawnBounds() => armySpawnBounds.bounds;
         
         [SerializeField]
         private Color armyColor;
@@ -40,33 +41,6 @@ public class BattleInstantiator : MonoBehaviour
     public Army GetArmy(int index) => _armies[index];
     public int GetArmiesCount() => _armies.Length;
 
-    void InstanceArmy(IArmyModel model, Army army, Bounds instanceBounds)
-    {
-        for ( int i = 0; i < model.warriors; i++ )
-        {
-            GameObject go = Instantiate(warriorPrefab.gameObject);
-            go.transform.position = Utils.GetRandomPosInBounds(instanceBounds);
-
-            go.GetComponentInChildren<Warrior>().army = army;
-            go.GetComponentInChildren<Warrior>().armyModel = model;
-            go.GetComponentInChildren<Renderer>().material.color = army.color;
-
-            army.warriors.Add(go.GetComponent<Warrior>());
-        }
-
-        for ( int i = 0; i < model.archers; i++ )
-        {
-            GameObject go = Object.Instantiate(archerPrefab.gameObject);
-            go.transform.position = Utils.GetRandomPosInBounds(instanceBounds);
-
-            go.GetComponentInChildren<Archer>().army = army;
-            go.GetComponentInChildren<Archer>().armyModel = model;
-            go.GetComponentInChildren<Renderer>().material.color = army.color;
-
-            army.archers.Add(go.GetComponent<Archer>());
-        }
-    }
-
     void Awake()
     {
         if (instance != null)
@@ -77,12 +51,7 @@ public class BattleInstantiator : MonoBehaviour
 
         for (int i = 0; i < armiesToSpawn.Length; i++)
         {
-            var army = _armies[i] = new Army();
-            var armyParameters = armiesToSpawn[i];
-            
-            army.color = armyParameters.GetArmyColor();
-            
-            InstanceArmy(armyParameters.GetModel(), army, armyParameters.GetSpawnBounds().bounds);
+            _armies[i] = InstanceArmy(armiesToSpawn[i]);
         }
     }
 
@@ -110,5 +79,39 @@ public class BattleInstantiator : MonoBehaviour
         forwardTarget = Vector3.Normalize(mainCenter - cameraTransform.position);
 
         cameraTransform.forward += (forwardTarget - cameraTransform.forward) * 0.1f;
+    }
+
+    private Army InstanceArmy(ArmySpawnParameters parameters)
+    {
+        List<UnitBase> armyUnits = new();
+        IArmyModel model = parameters.GetModel();
+        Color color = parameters.GetArmyColor();
+        Bounds bounds = parameters.GetSpawnBounds();
+
+        // TODO Should be only one for loop
+        for (int i = 0; i < model.Warriors; i++)
+        {
+            // TODO Pooling
+            GameObject go = Instantiate(warriorPrefab.gameObject);
+            go.transform.position = Utils.GetRandomPosInBounds(bounds);
+
+            go.GetComponentInChildren<UnitBase>().armyModel = model;
+            go.GetComponentInChildren<Renderer>().material.color = color;
+
+            armyUnits.Add(go.GetComponent<UnitBase>());
+        }
+
+        for (int i = 0; i < parameters.GetModel().Archers; i++)
+        {
+            GameObject go = Object.Instantiate(archerPrefab.gameObject);
+            go.transform.position = Utils.GetRandomPosInBounds(bounds);
+
+            go.GetComponentInChildren<UnitBase>().armyModel = model;
+            go.GetComponentInChildren<Renderer>().material.color = color;
+
+            armyUnits.Add(go.GetComponent<UnitBase>());
+        }
+
+        return new Army(color, armyUnits);
     }
 }

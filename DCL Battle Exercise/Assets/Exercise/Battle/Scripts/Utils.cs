@@ -47,20 +47,40 @@ public static class Utils
 
     public static float GetNearestObject( GameObject source, List<GameObject> objects, out GameObject nearestObject )
     {
-        float minDist = float.MaxValue;
+        float minDistSq = float.MaxValue;
         nearestObject = null;
 
         foreach ( var obj in objects )
         {
-            float dist = Vector3.Distance(source.transform.position, obj.transform.position);
+            float sqDist = Vector3.SqrMagnitude(source.transform.position - obj.transform.position);
 
-            if ( dist < minDist )
+            if ( sqDist < minDistSq )
             {
-                minDist = dist;
+                minDistSq = sqDist;
                 nearestObject = obj;
             }
         }
 
-        return minDist;
+        return Mathf.Sqrt(minDistSq);
+    }
+
+    public static float GetNearestObject<T>(T source, List<T> objects, out T nearestObject)
+        where T : Component
+    {
+        float minDistSq = float.MaxValue;
+        nearestObject = null;
+
+        foreach (var obj in objects)
+        {
+            float sqDist = Vector3.SqrMagnitude(source.transform.position - obj.transform.position);
+
+            if (sqDist < minDistSq)
+            {
+                minDistSq = sqDist;
+                nearestObject = obj;
+            }
+        }
+
+        return Mathf.Sqrt(minDistSq);
     }
 }

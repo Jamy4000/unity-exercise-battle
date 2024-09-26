@@ -1,12 +1,13 @@
 ﻿using System.Collections.Generic;
 using UnityEngine;
-using UnityEngine.Serialization;
 
 public class Archer : UnitBase
 {
     public float attackRange = 20f;
 
     public ArcherArrow arrowPrefab;
+
+    private Color _color;
 
     protected override void Awake()
     {
@@ -18,7 +19,13 @@ public class Archer : UnitBase
         postAttackDelay = 1f;
     }
 
-    public override void Attack(GameObject enemy)
+    private void Start()
+    {
+        // TODO not a fan of that one
+        _color = GetComponent<Renderer>().material.color;
+    }
+
+    public override void Attack(UnitBase enemy)
     {
         if ( attackCooldown > 0 )
             return;
@@ -31,14 +38,11 @@ public class Archer : UnitBase
         ArcherArrow arrow = Object.Instantiate(arrowPrefab.gameObject).GetComponent<ArcherArrow>();
         arrow.target = enemy.transform.position;
         arrow.attack = attack;
-        arrow.army = army;
         arrow.transform.position = transform.position;
 
-        // Todo Cache this
-        var animator = GetComponentInChildren<Animator>();
-        animator?.SetTrigger("Attack");
+        Animator.SetTrigger("Attack");
 
-        arrow.GetComponent<Renderer>().material.color = army.color;
+        arrow.GetComponent<Renderer>().material.color = _color;
     }
 
     public void OnDeathAnimFinished()
@@ -46,7 +50,7 @@ public class Archer : UnitBase
         Destroy(gameObject);
     }
 
-    protected override void UpdateDefensive(List<GameObject> allies, List<GameObject> enemies)
+    protected override void UpdateDefensive(List<UnitBase> allies, List<UnitBase> enemies)
     {
         Vector3 enemyCenter = Utils.GetCenter(enemies);
         float distToEnemyX = Mathf.Abs( enemyCenter.x - transform.position.x );
@@ -60,7 +64,7 @@ public class Archer : UnitBase
                 Move( Vector3.right );
         }
 
-        float distToNearest = Utils.GetNearestObject(gameObject, enemies, out GameObject nearestEnemy );
+        float distToNearest = Utils.GetNearestObject(this, enemies, out UnitBase nearestEnemy );
 
         if ( nearestEnemy == null )
             return;
@@ -83,9 +87,9 @@ public class Archer : UnitBase
         Attack(nearestEnemy);
     }
 
-    protected override void UpdateBasic(List<GameObject> allies, List<GameObject> enemies)
+    protected override void UpdateBasic(List<UnitBase> allies, List<UnitBase> enemies)
     {
-        Utils.GetNearestObject(gameObject, enemies, out GameObject nearestEnemy );
+        Utils.GetNearestObject(this, enemies, out UnitBase nearestEnemy );
 
         if ( nearestEnemy == null )
             return;
