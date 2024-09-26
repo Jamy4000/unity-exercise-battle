@@ -13,6 +13,7 @@ MonoBehaviour:
   m_Name: Rivendell
   m_EditorClassIdentifier: Assembly-CSharp::ArmyModelSO
   armyName: Rivendell
+  armyColor: {r: 0.14524738, g: 0.754717, b: 0.14818117, a: 0.69411767}
   strategyValue: 1
   unitsCount: 550000001b0000000000000000000000
   unitsPrefabs:

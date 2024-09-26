@@ -13,6 +13,7 @@ MonoBehaviour:
   m_Name: Gondor
   m_EditorClassIdentifier: Assembly-CSharp::ArmyModelSO
   armyName: Gondor
+  armyColor: {r: 0, g: 0.40661025, b: 1, a: 0.59607846}
   strategyValue: 0
   unitsCount: 4f000000240000000000000000000000
   unitsPrefabs:

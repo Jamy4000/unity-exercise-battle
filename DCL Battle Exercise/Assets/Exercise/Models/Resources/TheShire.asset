@@ -13,6 +13,7 @@ MonoBehaviour:
   m_Name: TheShire
   m_EditorClassIdentifier: Assembly-CSharp::ArmyModelSO
   armyName: The Shire
+  armyColor: {r: 0.9245283, g: 0.6003607, b: 0.25642577, a: 0.69411767}
   strategyValue: 1
   unitsCount: 3a0000005d0000000000000000000000
   unitsPrefabs:

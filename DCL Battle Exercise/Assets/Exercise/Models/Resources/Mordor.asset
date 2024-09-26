@@ -13,6 +13,7 @@ MonoBehaviour:
   m_Name: Mordor
   m_EditorClassIdentifier: Assembly-CSharp::ArmyModelSO
   armyName: Mordor
+  armyColor: {r: 1, g: 0, b: 0, a: 0.61960787}
   strategyValue: 1
   unitsCount: 64000000620000000000000000000000
   unitsPrefabs:

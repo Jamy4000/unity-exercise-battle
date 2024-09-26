@@ -14,6 +14,7 @@ namespace DCLBattle.LaunchMenu
     public class ArmyView : MonoBehaviour, IArmyView
     {
         [SerializeField] private TextMeshProUGUI title;
+        [SerializeField] private Image background;
 
         [SerializeField] private TMP_Dropdown strategyDropdown;
 
@@ -37,6 +38,7 @@ namespace DCLBattle.LaunchMenu
         public void UpdateWithModel(IArmyModel armyModel)
         {
             title.text = armyModel.ArmyName;
+            background.color = armyModel.ArmyColor;
 
             var unitTypes = System.Enum.GetValues(typeof(UnitType)).Cast<UnitType>();
             foreach (UnitType unitType in unitTypes)

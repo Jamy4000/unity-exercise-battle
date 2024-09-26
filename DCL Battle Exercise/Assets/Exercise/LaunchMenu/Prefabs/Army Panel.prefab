@@ -1581,6 +1581,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   title: {fileID: 2251046515072827207}
+  background: {fileID: 6938353578388200419}
   strategyDropdown: {fileID: 6767348901913324028}
   unitSliderPrefab: {fileID: 229677581490655888, guid: 0d27b543615e3594d890b9df1caace5b, type: 3}
   unitsSliderContent: {fileID: 4911857910116752456}
