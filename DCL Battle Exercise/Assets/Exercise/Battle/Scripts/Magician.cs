@@ -1,20 +1,29 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-// copy of archer, just for the sake of argument
-public class Magician : UnitBase
+// THis is really a copy of Archer class so far
+public class Magician : UnitBase, IAttacker
 {
-    public float attackRange = 20f;
+    [SerializeField]
+    private float _attackRange = 20f;
+    private float _attackRangeSq;
 
-    public ArcherArrow arrowPrefab;
+    [SerializeField, Interface(typeof(IProjectile))]
+    private Object _arrowPrefab;
 
     private Color _color;
+    public Color ArmyColor => _color;
 
-    public override UnitType UnitType => UnitType.Magician;
+    public int ArmyID => throw new System.NotImplementedException();
+
+    public override UnitType UnitType => UnitType.Archer;
 
     protected override void Awake()
     {
         base.Awake();
+        _attackRangeSq = _attackRange * _attackRange;
+
+        // TODO Move this to a SO
         health = 5;
         defense = 0;
         attack = 10;
@@ -28,24 +37,21 @@ public class Magician : UnitBase
         _color = GetComponentInChildren<Renderer>().material.color;
     }
 
-    public override void Attack(UnitBase enemy)
+    public void Attack(IAttackReceiver target)
     {
         if (attackCooldown > 0)
             return;
 
-        if (Vector3.Distance(transform.position, enemy.transform.position) > attackRange)
+        if (Vector3.SqrMagnitude(transform.position - target.Position) > _attackRangeSq)
             return;
 
-        attackCooldown = maxAttackCooldown;
-        // TODO IProjectile
-        ArcherArrow arrow = Object.Instantiate(arrowPrefab.gameObject).GetComponent<ArcherArrow>();
-        arrow._target = enemy.transform.position;
-        arrow.attack = attack;
-        arrow.transform.position = transform.position;
-
+        // TODO Pooling
+        IProjectile projectile = Instantiate(_arrowPrefab) as IProjectile;
+        projectile.Setup(this);
+        projectile.Launch(transform.position, target);
+        
         Animator.SetTrigger("Attack");
-
-        arrow.GetComponent<Renderer>().material.color = _color;
+        attackCooldown = maxAttackCooldown;
     }
 
     public void OnDeathAnimFinished()
@@ -58,7 +64,7 @@ public class Magician : UnitBase
         Vector3 enemyCenter = Utils.GetCenter(enemies);
         float distToEnemyX = Mathf.Abs(enemyCenter.x - transform.position.x);
 
-        if (distToEnemyX > attackRange)
+        if (distToEnemyX > _attackRange)
         {
             if (enemyCenter.x < transform.position.x)
                 Move(Vector3.left);
@@ -72,7 +78,7 @@ public class Magician : UnitBase
         if (nearestEnemy == null)
             return;
 
-        if (distToNearest < attackRange)
+        if (distToNearest < _attackRange)
         {
             Vector3 toNearest = (nearestEnemy.transform.position - transform.position).normalized;
             toNearest.Scale(new Vector3(1, 0, 1));

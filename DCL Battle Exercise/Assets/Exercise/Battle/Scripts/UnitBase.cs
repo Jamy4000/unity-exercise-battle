@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
 
-public abstract class UnitBase : MonoBehaviour
+public abstract class UnitBase : MonoBehaviour, IAttackReceiver
 {
     // todo turn those as abstract getters
     public float health { get; protected set; }
@@ -25,7 +25,7 @@ public abstract class UnitBase : MonoBehaviour
     // TODO seperate this with a View component
     protected Animator Animator { get; private set; }
 
-    public abstract void Attack(IAttackReceiver target);
+    public Vector3 Position => transform.position;
 
     protected abstract void UpdateDefensive(List<UnitBase> allies, List<UnitBase> enemies);
     protected abstract void UpdateBasic(List<UnitBase> allies, List<UnitBase> enemies);
@@ -43,19 +43,13 @@ public abstract class UnitBase : MonoBehaviour
         transform.position += delta * speed;
     }
 
-    // TODO Change GameObject as ITarget
-    public virtual void Hit(GameObject sourceGo )
+    public virtual void Hit(IAttacker attacker, Vector3 hitPosition, float damage)
     {
-        // TODO IProjectile
-        float sourceAttack = sourceGo.TryGetComponent(out UnitBase source) ?
-            source.attack :
-            sourceGo.GetComponent<ArcherArrow>().attack;
-
-        health -= Mathf.Max(sourceAttack - defense, 0);
+        health -= Mathf.Max(damage - defense, 0);
 
         if ( health < 0 )
         {
-            transform.forward = sourceGo.transform.position - transform.position;
+            transform.forward = attacker.Position - transform.position;
 
             // TODO event for this
             //army.RemoveUnit(this);

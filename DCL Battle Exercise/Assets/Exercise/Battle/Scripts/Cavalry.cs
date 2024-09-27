@@ -3,16 +3,23 @@ using System.Collections.Generic;
 using UnityEngine;
 
 // copy of warrior, just for the sake of argument
-public class Cavalry : UnitBase
+public class Cavalry : UnitBase, IAttacker
 {
-    [NonSerialized]
-    public float attackRange = 2.5f;
+    private float _attackRange = 2.5f;
 
+    private float _attackRangeSq;
+
+    public int ArmyID  => throw new System.NotImplementedException();
+    public Color ArmyColor  => throw new System.NotImplementedException();
+    
     public override UnitType UnitType => UnitType.Cavalry;
 
     protected override void Awake()
     {
         base.Awake();
+        _attackRangeSq = _attackRange * _attackRange;
+        
+        // TODO Move this in SO
         health = 50;
         defense = 5;
         attack = 20;
@@ -20,24 +27,19 @@ public class Cavalry : UnitBase
         postAttackDelay = 0;
     }
 
-    public override void Attack(UnitBase target )
+    public void Attack(IAttackReceiver target )
     {
         if ( attackCooldown > 0 )
             return;
 
-        if ( Vector3.Distance(transform.position, target.transform.position) > attackRange )
-            return;
-
-        UnitBase targetUnit = target.GetComponentInChildren<UnitBase>();
-
-        if ( targetUnit == null )
+        if ( Vector3.SqrMagnitude(transform.position - target.Position) > _attackRangeSq )
             return;
 
         attackCooldown = maxAttackCooldown;
 
         Animator.SetTrigger("Attack");
 
-        targetUnit.Hit( gameObject );
+        target.Hit(this, target.Position, attack );
     }
 
     public void OnDeathAnimFinished()
@@ -51,7 +53,8 @@ public class Cavalry : UnitBase
     {
         Vector3 enemyCenter = Utils.GetCenter(enemies);
 
-        if ( Mathf.Abs( enemyCenter.x - transform.position.x ) > 20 )
+        // TODO Hard coded value
+        if ( Mathf.Abs( enemyCenter.x - transform.position.x ) > 20f )
         {
             if ( enemyCenter.x < transform.position.x )
                 Move( Vector3.left );
@@ -65,8 +68,10 @@ public class Cavalry : UnitBase
         if ( nearestObject == null )
             return;
 
-        if ( attackCooldown <= 0 )
+        if (attackCooldown <= 0)
+        {
             Move( (nearestObject.transform.position - transform.position).normalized );
+        }
         else
         {
             Move( (nearestObject.transform.position - transform.position).normalized * -1 );

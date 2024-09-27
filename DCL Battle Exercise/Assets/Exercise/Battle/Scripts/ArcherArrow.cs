@@ -10,6 +10,7 @@ public class ArcherArrow : MonoBehaviour, IProjectile
     private float _attackDamage;
 
     private IAttackReceiver _target;
+    private IAttacker _source;
 
     // TODO Remove this
     public Army army;
@@ -17,6 +18,12 @@ public class ArcherArrow : MonoBehaviour, IProjectile
     private void Awake()
     {
         _speedSq = _speed * _speed;
+    }
+
+    public void Setup(IAttacker attacker)
+    {
+        _source = attacker;
+        GetComponent<Renderer>().material.color = attacker.ArmyColor;
     }
 
     public void Launch(Vector3 startPosition, IAttackReceiver target)
@@ -39,7 +46,7 @@ public class ArcherArrow : MonoBehaviour, IProjectile
 
         if (sqDist < _speedSq)
         {
-            _target.Hit(position, _attackDamage);
+            _target.Hit(_source, position, _attackDamage);
             // TODO pooling
             Destroy(gameObject);
             return;

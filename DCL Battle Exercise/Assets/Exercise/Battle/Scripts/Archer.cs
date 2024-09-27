@@ -1,16 +1,19 @@
 ﻿using System.Collections.Generic;
 using UnityEngine;
 
-public class Archer : UnitBase
+public class Archer : UnitBase, IAttacker
 {
     [SerializeField]
     private float _attackRange = 20f;
     private float _attackRangeSq;
 
     [SerializeField, Interface(typeof(IProjectile))]
-    private Object arrowPrefab;
+    private Object _arrowPrefab;
 
     private Color _color;
+    public Color ArmyColor => _color;
+
+    public int ArmyID => throw new System.NotImplementedException();
 
     public override UnitType UnitType => UnitType.Archer;
 
@@ -33,7 +36,7 @@ public class Archer : UnitBase
         _color = GetComponentInChildren<Renderer>().material.color;
     }
 
-    public override void Attack(IAttackReceiver target)
+    public void Attack(IAttackReceiver target)
     {
         if (attackCooldown > 0)
             return;
@@ -41,14 +44,13 @@ public class Archer : UnitBase
         if (Vector3.SqrMagnitude(transform.position - target.Position) > _attackRangeSq)
             return;
 
-        attackCooldown = maxAttackCooldown;
         // TODO Pooling
-        IProjectile projectile = Instantiate(arrowPrefab) as IProjectile;
+        IProjectile projectile = Instantiate(_arrowPrefab) as IProjectile;
+        projectile.Setup(this);
         projectile.Launch(transform.position, target);
-
+        
         Animator.SetTrigger("Attack");
-
-        projectile.GetComponent<Renderer>().material.color = _color;
+        attackCooldown = maxAttackCooldown;
     }
 
     public void OnDeathAnimFinished()
@@ -61,7 +63,7 @@ public class Archer : UnitBase
         Vector3 enemyCenter = Utils.GetCenter(enemies);
         float distToEnemyX = Mathf.Abs(enemyCenter.x - transform.position.x);
 
-        if (distToEnemyX > attackRange)
+        if (distToEnemyX > _attackRange)
         {
             if (enemyCenter.x < transform.position.x)
                 Move(Vector3.left);
@@ -75,7 +77,7 @@ public class Archer : UnitBase
         if (nearestEnemy == null)
             return;
 
-        if (distToNearest < attackRange)
+        if (distToNearest < _attackRange)
         {
             Vector3 toNearest = (nearestEnemy.transform.position - transform.position).normalized;
             toNearest.Scale(new Vector3(1, 0, 1));
