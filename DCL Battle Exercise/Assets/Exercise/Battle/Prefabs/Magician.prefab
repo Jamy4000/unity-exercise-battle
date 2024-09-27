@@ -150,5 +150,5 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 48478619491bd6b4ea6f2dc0229c3192, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  attackRange: 40
-  arrowPrefab: {fileID: 4995913744683215106, guid: 43df16efbb83b484d91bf87170fd46c2, type: 3}
+  _attackRange: 20
+  _arrowPrefab: {fileID: 4995913744683215106, guid: 43df16efbb83b484d91bf87170fd46c2, type: 3}

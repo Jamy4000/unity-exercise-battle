@@ -1,3 +1,5 @@
+using DCLBattle.LaunchMenu;
+
 public enum UnitType
 {
     Warrior = 0,
@@ -14,14 +16,16 @@ public enum ArmyStrategy
 
 public interface IArmyModel
 {
+    public static readonly int UnitLength = System.Enum.GetValues(typeof(UnitType)).Length;
+        
     string ArmyName { get; set; }
 
     UnityEngine.Color ArmyColor { get; set; }
 
     ArmyStrategy Strategy { get; set; }
 
-    int GetUnitsCount(UnitType type);
-    void SetUnitsCount(UnitType type, int unitsCount);
+    int GetUnitCount(UnitType type);
+    void SetUnitCount(UnitType type, int newCount);
 
     IUnitModel GetUnitModel(UnitType type);
 }

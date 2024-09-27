@@ -1,4 +1,4 @@
-using System;
+using DCLBattle.LaunchMenu;
 using UnityEngine;
 
 /// <summary>
@@ -7,39 +7,13 @@ using UnityEngine;
 [CreateAssetMenu(menuName = "Create UnitModel", fileName = "UnitModel", order = 0)]
 public class UnitModelSO : ScriptableObject, IUnitModel
 {
-    private int _unitCount = 80;
-
-    [SerializeField]
+    [SerializeField, ReadOnly]
     private UnitType _unitType;
+    public UnitType UnitType => _unitType;
+    public string UnitName => _unitType.ToString();
 
+    // Only data set in editor
     [SerializeField]
-    private UnitBase _unitPrefab;
-
-    public Action<IUnitModel> OnUnitsChanged { get; set; }
-
-    public int GetUnitsCount()
-    {
-        return _unitCount;
-    }
-
-    public void SetUnitsCount(int newUnitCount)
-    {
-        _unitCount = newUnitCount;
-        OnUnitsChanged?.Invoke(this);
-    }
-
-    public string GetUnitsName()
-    {
-        return _unitType.ToString();
-    }
-
-    public UnitType GetUnitsType()
-    {
-        return _unitType;
-    }
-
-    public UnitBase GetUnitsPrefab()
-    {
-        return _unitPrefab;
-    }
+    private GameObject _unitViewPrefab;
+    public GameObject UnitViewPrefab => _unitViewPrefab;
 }

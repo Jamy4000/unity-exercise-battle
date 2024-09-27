@@ -13,4 +13,4 @@ MonoBehaviour:
   m_Name: Cavalry
   m_EditorClassIdentifier: 
   _unitType: 2
-  _unitPrefab: {fileID: 3994983980625163418, guid: 9dbff414d5bc57844b73d286c238de1a, type: 3}
+  _unitViewPrefab: {fileID: 5761066131136756735, guid: 9dbff414d5bc57844b73d286c238de1a, type: 3}

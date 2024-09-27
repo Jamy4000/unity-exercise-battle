@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using DCLBattle.LaunchMenu;
 using UnityEngine;
 
 
@@ -91,20 +92,20 @@ public class BattleInstantiator : MonoBehaviour
             if (unitModel == null)
                 continue;
 
-            int unitCount = armyModel.GetUnitsCount(unitType);
+            int unitCount = armyModel.GetUnitCount(unitType);
             for (int j = 0; j < unitCount; j++)
             {
                 // TODO Pooling
-                UnitBase unit = Instantiate(unitModel.GetUnitsPrefab());
-                unit.armyModel = armyModel;
-                unit.transform.position = Utils.GetRandomPosInBounds(bounds);
+                UnitBase unitView = Instantiate(unitModel.UnitViewPrefab).GetComponent<UnitBase>();
+                unitView.army = armyModel;
+                unitView.transform.position = Utils.GetRandomPosInBounds(bounds);
 
-                unit.GetComponentInChildren<Renderer>().material.color = armyModel.ArmyColor;
+                unitView.GetComponentInChildren<Renderer>().material.color = armyModel.ArmyColor;
 
-                armyUnits.Add(unit);
+                armyUnits.Add(unitView);
             }
         }
 
-        return new Army(armyModel.ArmyColor, armyUnits);
+        return new Army(armyModel.ArmyColor, armyModel.Strategy, armyUnits);
     }
 }

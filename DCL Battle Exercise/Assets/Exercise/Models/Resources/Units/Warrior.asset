@@ -13,4 +13,4 @@ MonoBehaviour:
   m_Name: Warrior
   m_EditorClassIdentifier: 
   _unitType: 0
-  _unitPrefab: {fileID: 4074248562238301595, guid: d84cac85cdce1be419a5e701d52e9cee, type: 3}
+  _unitViewPrefab: {fileID: 5761066131136756735, guid: d84cac85cdce1be419a5e701d52e9cee, type: 3}

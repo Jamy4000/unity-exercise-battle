@@ -13,4 +13,4 @@ MonoBehaviour:
   m_Name: Magician
   m_EditorClassIdentifier: 
   _unitType: 3
-  _unitPrefab: {fileID: -2339639447242417457, guid: 092688a92b2e5b74794afd6783e355b6, type: 3}
+  _unitViewPrefab: {fileID: 7211230073387977219, guid: 092688a92b2e5b74794afd6783e355b6, type: 3}

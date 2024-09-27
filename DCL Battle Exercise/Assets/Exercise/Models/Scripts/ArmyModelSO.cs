@@ -1,3 +1,4 @@
+using DCLBattle.LaunchMenu;
 using EditorUtils;
 using UnityEngine;
 
@@ -10,68 +11,66 @@ using UnityEngine;
 [CreateAssetMenu(menuName = "Create ArmyModel", fileName = "ArmyModel", order = 0)]
 public class ArmyModelSO : ScriptableObject, IArmyModel
 {
-    private static readonly int _unitLength = System.Enum.GetValues(typeof(UnitType)).Length;
-
     // TODO Could control this from UI too
-    [SerializeField] private string armyName = "Army";
+    [SerializeField] private string _armyName = "Army";
     public string ArmyName
     { 
-        get => armyName; 
-        set => armyName = value; 
+        get => _armyName; 
+        set => _armyName = value; 
     }
 
     // TODO Could control this from UI too
-    [SerializeField] private Color armyColor;
+    [SerializeField] private Color _armyColor;
     public Color ArmyColor 
     { 
-        get => armyColor; 
-        set => armyColor = value; 
+        get => _armyColor; 
+        set => _armyColor = value; 
     }
 
-    [ReadOnly, SerializeField] private ArmyStrategy strategyValue = ArmyStrategy.Basic;
+    [ReadOnly, SerializeField] private ArmyStrategy _strategyValue = ArmyStrategy.Basic;
     public ArmyStrategy Strategy
     {
-        get => strategyValue;
-        set => strategyValue = value;
+        get => _strategyValue;
+        set => _strategyValue = value;
     }
 
     [ReadOnly, SerializeField, DrawEnumBasedArray(typeof(UnitType))] 
-    private int[] unitsCount = new int[_unitLength];
-    public int GetUnitsCount(UnitType unitType)
+    private int[] _unitsCount = new int[IArmyModel.UnitLength];
+    public int GetUnitCount(UnitType unitType)
     {
-        return unitsCount[(int)unitType];
+        return _unitsCount[(int)unitType];
     }
 
-    public void SetUnitsCount(UnitType unitType, int unitCount)
+    public void SetUnitCount(UnitType unitType, int unitCount)
     {
-        unitsCount[(int)unitType] = unitCount;
+        _unitsCount[(int)unitType] = unitCount;
     }
 
 
     // This one is the only one that needs to be set in editor
     [SerializeField, DrawEnumBasedArray(typeof(UnitType))]
-    private Object[] unitsModels = new Object[_unitLength];
+    private Object[] _unitsModels = new Object[IArmyModel.UnitLength];
     public IUnitModel GetUnitModel(UnitType type)
     {
-        return unitsModels[(int)type] as IUnitModel;
+        return _unitsModels[(int)type] as IUnitModel;
     }
 
     // This makes sure our Units Prefabs are always in the right order
     private void OnValidate()
     {
-        if (unitsCount.Length != _unitLength)
+        if (_unitsCount.Length != IArmyModel.UnitLength)
         {
             // kind of lame way fo doing this since this may make us lose data, but since it's set at runtime by the player, doesn't matter much
-            var unitCountCopy = new int[_unitLength];
-            unitsCount.CopyTo(unitCountCopy, 0);
-            unitsCount = unitCountCopy;
+            var unitCountCopy = new int[IArmyModel.UnitLength];
+            _unitsCount.CopyTo(unitCountCopy, 0);
+            _unitsCount = unitCountCopy;
         }
 
-        if (unitsModels.Length != _unitLength)
+        if (_unitsModels.Length != IArmyModel.UnitLength)
         {
-            var unitPrefabsCopy = new Object[_unitLength];
-            unitsModels.CopyTo(unitPrefabsCopy, 0);
-            unitsModels = unitPrefabsCopy;
+            var unitPrefabsCopy = new Object[IArmyModel.UnitLength];
+            _unitsModels.CopyTo(unitPrefabsCopy, 0);
+            _unitsModels = unitPrefabsCopy;
         }
 
         // We could technically add a check to see if the assigned prefab is of the right unit type compared to the array index

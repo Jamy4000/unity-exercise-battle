@@ -331,15 +331,15 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: bbbbdbc4bec91b641aa418079cf257ca, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  startButton: {fileID: 247129742}
-  nextSceneName: Battle
-  armiesScrollViewContent: {fileID: 1847119311}
-  armiesInfoPrefab: {fileID: 6732074835578031328, guid: ea44184cf4f4f164ab4629ca0a01ca6e, type: 3}
-  armyModels:
+  _startButton: {fileID: 247129742}
+  _nextSceneName: Battle
+  _armiesScrollViewContent: {fileID: 1847119311}
+  _armiesInfoPrefab: {fileID: 6732074835578031328, guid: ea44184cf4f4f164ab4629ca0a01ca6e, type: 3}
+  _armyModels:
   - {fileID: 11400000, guid: a6c80dd762eaa2942967f75607f7c7a3, type: 2}
   - {fileID: 11400000, guid: 72f780312aa8e3c40b08fe23dd9b7117, type: 2}
-  - {fileID: 11400000, guid: f3acd28be5a485c43afd74bee773f61d, type: 2}
   - {fileID: 11400000, guid: 1534cd5a897919044ba600c86ae550c3, type: 2}
+  - {fileID: 11400000, guid: f3acd28be5a485c43afd74bee773f61d, type: 2}
 --- !u!1 &124791748
 GameObject:
   m_ObjectHideFlags: 0
@@ -729,7 +729,7 @@ MonoBehaviour:
   m_TargetGraphic: {fileID: 124791750}
   m_HandleRect: {fileID: 124791749}
   m_Direction: 2
-  m_Value: 1
+  m_Value: 0
   m_Size: 1
   m_NumberOfSteps: 0
   m_OnValueChanged:

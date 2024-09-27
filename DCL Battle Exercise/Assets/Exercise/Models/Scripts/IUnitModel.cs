@@ -1,16 +1,9 @@
-
-using System;
-
-public interface IUnitModel
+namespace DCLBattle.LaunchMenu
 {
-    int GetUnitsCount();
-    void SetUnitsCount(int newUnitCount);
-
-    string GetUnitsName();
-
-    UnitType GetUnitsType();
-
-    UnitBase GetUnitsPrefab();
-
-    Action<IUnitModel> OnUnitsChanged { get; set; }
+    public interface IUnitModel
+    {
+        string UnitName { get; }
+        UnitType UnitType { get; }
+        UnityEngine.GameObject UnitViewPrefab { get; }
+    }
 }

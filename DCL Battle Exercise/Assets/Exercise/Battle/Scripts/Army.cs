@@ -3,12 +3,14 @@ using UnityEngine;
 
 public sealed class Army
 {
-    private Color _color;
+    private readonly Color _color;
+    private readonly ArmyStrategy _strategy;
     private readonly List<UnitBase> _units = new();
 
-    public Army(Color color, List<UnitBase> units)
+    public Army(Color color, ArmyStrategy strategy, List<UnitBase> units)
     {
         _color = color;
+        _strategy = strategy;
         _units = units;
     }
 
@@ -23,6 +25,11 @@ public sealed class Army
     public Color GetColor()
     {
         return _color;
+    }
+
+    public ArmyStrategy GetStrategy()
+    {
+        return _strategy;
     }
 
     public Army GetEnemyArmy()

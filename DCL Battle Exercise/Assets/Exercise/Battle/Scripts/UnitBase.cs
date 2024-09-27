@@ -14,8 +14,9 @@ public abstract class UnitBase : MonoBehaviour, IAttackReceiver
     public float speed { get; protected set; } = 0.1f;
     public abstract UnitType UnitType { get; }
 
+    // TODO bad
     [NonSerialized]
-    public IArmyModel armyModel;
+    public IArmyModel army;
 
     protected float attackCooldown;
     private Vector3 lastPosition;
@@ -71,7 +72,7 @@ public abstract class UnitBase : MonoBehaviour, IAttackReceiver
         UpdateBasicRules(allies, enemies);
 
         // TODO Use an interface for the strategies
-        switch ( armyModel.Strategy )
+        switch ( army.Strategy )
         {
             case ArmyStrategy.Defensive:
                 UpdateDefensive(allies, enemies);

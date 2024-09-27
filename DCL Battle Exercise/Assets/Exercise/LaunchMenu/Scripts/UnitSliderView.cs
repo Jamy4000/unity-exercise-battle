@@ -6,36 +6,60 @@ namespace DCLBattle.LaunchMenu
     // The view for a unit setup in the launch menu
     public interface IUnitView
     {
-        void BindPresenter(IUnitPresenter presenter);
-        void InjectModel(IUnitModel model);
+        void InjectModel(IArmyModel armyModel, IUnitModel unitModel);
+        void RegisterArmyDataChangedCallback(System.Action<IArmyData> callback);
     }
 
     public sealed class UnitSliderView : MonoBehaviour, IUnitView
     {
-        [SerializeField] private Slider unitCountSlider;
-        [SerializeField] private TMPro.TextMeshProUGUI unitNameText;
-        [SerializeField] private TMPro.TextMeshProUGUI unitCountText;
+        [SerializeField] private Slider _unitCountSlider;
+        [SerializeField] private TMPro.TextMeshProUGUI _unitNameText;
+        [SerializeField] private TMPro.TextMeshProUGUI _unitCountText;
 
-        private IUnitPresenter presenter;
-
-        public void BindPresenter(IUnitPresenter presenter)
+        private System.Action<IArmyData> _onArmyDataChanged;
+        private UnitType _unitType;
+        
+        public void InjectModel(IArmyModel armyModel, IUnitModel unitModel)
         {
-            this.presenter = presenter;
+            _unitType = unitModel.UnitType;
+            
+            int unitCount = armyModel.GetUnitCount(unitModel.UnitType);
+            _unitCountSlider.SetValueWithoutNotify(unitCount);
+            _unitCountText.text = unitCount.ToString();
+            _unitNameText.text = unitModel.UnitName;
+
+            _unitCountSlider.onValueChanged.AddListener(OnUnitsCountChanged);
         }
 
-        public void InjectModel(IUnitModel model)
+        public void RegisterArmyDataChangedCallback(System.Action<IArmyData> callback)
         {
-            int unitCount = model.GetUnitsCount();
-            unitCountSlider.SetValueWithoutNotify(unitCount);
-            unitCountText.text = unitCount.ToString();
-            unitNameText.text = model.GetUnitsName();
-
-            unitCountSlider.onValueChanged.AddListener(OnUnitsCountChanged);
+            _onArmyDataChanged += callback;
         }
+
         private void OnUnitsCountChanged(float value)
         {
-            presenter.UpdateUnitCount((int)value);
-            unitCountText.text = ((int)value).ToString();
+            int newCount = (int)value;
+            _unitCountText.text = newCount.ToString();
+
+            var unitCountData = new ArmyUnitCountData(_unitType, newCount);
+            _onArmyDataChanged?.Invoke(unitCountData);
+        }
+    }
+
+    public sealed class ArmyUnitCountData : IArmyData
+    {
+        private readonly UnitType _type;
+        private readonly int _newCount;
+
+        public ArmyUnitCountData(UnitType type, int newCount)
+        {
+            _type = type;
+            _newCount = newCount;
+        }
+        
+        public void ApplyToModel(IArmyModel model)
+        {
+            model.SetUnitCount(_type, _newCount);
         }
     }
 }

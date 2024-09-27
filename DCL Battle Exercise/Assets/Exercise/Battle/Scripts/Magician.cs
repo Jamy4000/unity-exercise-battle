@@ -16,7 +16,7 @@ public class Magician : UnitBase, IAttacker
 
     public int ArmyID => throw new System.NotImplementedException();
 
-    public override UnitType UnitType => UnitType.Archer;
+    public override UnitType UnitType => UnitType.Magician;
 
     protected override void Awake()
     {

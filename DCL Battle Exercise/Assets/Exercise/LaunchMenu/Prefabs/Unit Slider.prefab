@@ -162,9 +162,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 193be0db8262924438a07d2c94b23ed0, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  unitCountSlider: {fileID: 229677581490655888}
-  unitNameText: {fileID: 280489783939547149}
-  unitCountText: {fileID: 7883070854001617805}
+  _unitCountSlider: {fileID: 229677581490655888}
+  _unitNameText: {fileID: 280489783939547149}
+  _unitCountText: {fileID: 7883070854001617805}
 --- !u!1 &2643793630744645710
 GameObject:
   m_ObjectHideFlags: 0

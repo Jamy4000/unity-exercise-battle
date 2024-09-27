@@ -7,8 +7,8 @@ namespace DCLBattle.LaunchMenu
 {
     public interface IArmyView
     {
-        void BindPresenter(IArmyPresenter presenter);
-        void UpdateWithModel(IArmyModel model);
+        void InjectModel(IArmyModel model);
+        void RegisterArmyDataChangedCallback(System.Action<IArmyData> callback);
     }
 
     public class ArmyView : MonoBehaviour, IArmyView
@@ -22,7 +22,8 @@ namespace DCLBattle.LaunchMenu
         [SerializeField] private Transform unitsSliderContent;
 
         private EnumDropdownWrapper<ArmyStrategy> enumDropdown;
-        private IArmyPresenter presenter = null;
+
+        private System.Action<IArmyData> _onDataChanged;
 
         private void Awake()
         {
@@ -30,50 +31,60 @@ namespace DCLBattle.LaunchMenu
             enumDropdown.OnValueChanged += OnStrategyChanged;
         }
 
-        public void BindPresenter(IArmyPresenter presenter)
-        {
-            this.presenter = presenter;
-        }
-
-        public void UpdateWithModel(IArmyModel armyModel)
+        public void InjectModel(IArmyModel armyModel)
         {
             title.text = armyModel.ArmyName;
             background.color = armyModel.ArmyColor;
 
-            var unitTypes = System.Enum.GetValues(typeof(UnitType)).Cast<UnitType>();
-            foreach (UnitType unitType in unitTypes)
+            for (int unitTypeIndex = 0; unitTypeIndex < IArmyModel.UnitLength; unitTypeIndex++)
             {
+                UnitType unitType = (UnitType)unitTypeIndex;
                 if (armyModel.GetUnitModel(unitType) == null)
                     continue;
 
                 IUnitModel unitModel = armyModel.GetUnitModel(unitType);
-                unitModel.SetUnitsCount(armyModel.GetUnitsCount(unitType));
-
                 IUnitView unitView = Instantiate(unitSliderPrefab.gameObject, unitsSliderContent).GetComponent<IUnitView>();
-                unitView.InjectModel(unitModel);
-
-                // TODO Remove hard impl
-                IUnitPresenter presenter = new UnitPresenter(unitModel, unitView);
-                unitView.BindPresenter(presenter);
-
-                unitModel.OnUnitsChanged += OnUnitsChanged;
+                unitView.InjectModel(armyModel, unitModel);
+                
+                unitView.RegisterArmyDataChangedCallback(OnUnitCountChanged);
             }
         }
 
-        private void OnUnitsChanged(IUnitModel unitModel)
+        public void RegisterArmyDataChangedCallback(System.Action<IArmyData> callback)
         {
-            presenter.UpdateUnit(unitModel);
+            _onDataChanged += callback;
         }
 
         private void OnStrategyChanged(ArmyStrategy strategy)
         {
-            presenter.UpdateStrategy(strategy);
+            var strategyData = new ArmyStrategyData(strategy);
+            _onDataChanged?.Invoke(strategyData);
+        }
+        
+        private void OnUnitCountChanged(IArmyData newData)
+        {
+            _onDataChanged?.Invoke(newData);
         }
 
         private void OnDestroy()
         {
             enumDropdown.OnValueChanged -= OnStrategyChanged;
             enumDropdown?.Dispose();
+        }
+    }
+
+    public sealed class ArmyStrategyData : IArmyData
+    {
+        private readonly ArmyStrategy _strategy;
+
+        public ArmyStrategyData(ArmyStrategy strategy)
+        {
+            _strategy = strategy;
+        }
+        
+        public void ApplyToModel(IArmyModel model)
+        {
+            model.Strategy = _strategy;
         }
     }
 }

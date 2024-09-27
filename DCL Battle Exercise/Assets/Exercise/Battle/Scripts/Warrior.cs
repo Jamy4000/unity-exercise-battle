@@ -10,7 +10,7 @@ public class Warrior : UnitBase, IAttacker
     public int ArmyID => throw new System.NotImplementedException();
     public Color ArmyColor => throw new System.NotImplementedException();
     
-    public override UnitType UnitType => UnitType.Cavalry;
+    public override UnitType UnitType => UnitType.Warrior;
 
     protected override void Awake()
     {
