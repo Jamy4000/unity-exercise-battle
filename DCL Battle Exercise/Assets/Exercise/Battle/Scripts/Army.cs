@@ -28,7 +28,7 @@ namespace DCLBattle.Battle
 
         public Vector3 CalculateCenterPoint()
         {
-            return Utils.GetCenter(_units);
+            return DCLBattleUtils.GetCenter(_units);
         }
 
         public void RemoveUnit(UnitBase unit)

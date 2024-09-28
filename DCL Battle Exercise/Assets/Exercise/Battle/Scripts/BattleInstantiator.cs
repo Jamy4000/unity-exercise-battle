@@ -89,7 +89,7 @@ namespace DCLBattle.Battle
                     UnitBase unit = Instantiate(unitModel.UnitViewPrefab).GetComponent<UnitBase>();
                     // TODO Inject on Pool
                     unit.Army = newArmy;
-                    unit.transform.position = Utils.GetRandomPosInBounds(bounds);
+                    unit.transform.position = DCLBattleUtils.GetRandomPosInBounds(bounds);
 
                     newArmy.AddUnit(unit);
                 }

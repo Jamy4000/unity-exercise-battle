@@ -2,7 +2,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-public static class Utils
+public static class DCLBattleUtils
 {
     public static Vector3 GetRandomPosInBounds(Bounds bounds)
     {

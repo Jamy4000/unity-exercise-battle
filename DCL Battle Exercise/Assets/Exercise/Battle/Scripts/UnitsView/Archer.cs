@@ -53,7 +53,7 @@ namespace DCLBattle.Battle
 
         protected override void UpdateDefensive(List<UnitBase> allies, List<UnitBase> enemies)
         {
-            Vector3 enemyCenter = Utils.GetCenter(enemies);
+            Vector3 enemyCenter = DCLBattleUtils.GetCenter(enemies);
             float distToEnemyX = Mathf.Abs(enemyCenter.x - transform.position.x);
 
             if (distToEnemyX > _attackRange)
@@ -65,7 +65,7 @@ namespace DCLBattle.Battle
                     Move(Vector3.right);
             }
 
-            float distToNearest = Utils.GetNearestObject(this, enemies, out UnitBase nearestEnemy);
+            float distToNearest = DCLBattleUtils.GetNearestObject(this, enemies, out UnitBase nearestEnemy);
 
             if (nearestEnemy == null)
                 return;
@@ -90,7 +90,7 @@ namespace DCLBattle.Battle
 
         protected override void UpdateBasic(List<UnitBase> allies, List<UnitBase> enemies)
         {
-            Utils.GetNearestObject(this, enemies, out UnitBase nearestEnemy);
+            DCLBattleUtils.GetNearestObject(this, enemies, out UnitBase nearestEnemy);
 
             if (nearestEnemy == null)
                 return;

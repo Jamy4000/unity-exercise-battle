@@ -105,7 +105,7 @@ namespace DCLBattle.Battle
             var allUnits = allies.Union(enemies).ToList();
 
             // TODO that would be nice to cache
-            Vector3 center = Utils.GetCenter(allUnits);
+            Vector3 center = DCLBattleUtils.GetCenter(allUnits);
 
             float centerSqDist = Vector3.SqrMagnitude(gameObject.transform.position - center);
 
