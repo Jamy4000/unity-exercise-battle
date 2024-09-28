@@ -9,7 +9,7 @@ MonoBehaviour:
   m_GameObject: {fileID: 0}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: eaec820b191d9fa4cb15e9067eb0b87c, type: 3}
+  m_Script: {fileID: 11500000, guid: 80c627940f9fc494abcd7b6f9c62ad3d, type: 3}
   m_Name: WarriorFactory
   m_EditorClassIdentifier: 
   _unitPrefab: {fileID: 5761066131136756735, guid: d84cac85cdce1be419a5e701d52e9cee, type: 3}

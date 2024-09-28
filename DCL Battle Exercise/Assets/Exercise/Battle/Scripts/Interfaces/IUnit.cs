@@ -5,6 +5,6 @@ namespace DCLBattle.Battle
         UnityEngine.Vector3 Position { get; }
         IArmy Army { get; }
 
-        void Initialize(IArmy parentArmy, UnitCreationParameters parameters);
+        void Initialize(UnitCreationParameters parameters);
     }
 }

@@ -9,7 +9,7 @@ MonoBehaviour:
   m_GameObject: {fileID: 0}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: d2e5235ee59eb89439b1a66c619c273d, type: 3}
+  m_Script: {fileID: 11500000, guid: 80c627940f9fc494abcd7b6f9c62ad3d, type: 3}
   m_Name: ArcherFactory
   m_EditorClassIdentifier: 
   _unitPrefab: {fileID: 7211230073387977219, guid: d5b353320e661744aa811b1a632ee53e, type: 3}

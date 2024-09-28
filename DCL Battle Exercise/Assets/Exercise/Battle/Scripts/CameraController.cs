@@ -17,7 +17,7 @@ namespace DCLBattle.Battle
         void Update()
         {
             Vector3 mainCenter = Vector3.zero;
-            int armyCount = _battleInstantiator.GetArmiesCount();
+            int armyCount = _battleInstantiator.ArmiesCount;
             for (int armyIndex = 0; armyIndex < armyCount; armyIndex++)
             {
                 mainCenter += _battleInstantiator.GetArmy(armyIndex).CalculateCenterPoint();

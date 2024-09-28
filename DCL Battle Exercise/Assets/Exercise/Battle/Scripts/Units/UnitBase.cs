@@ -34,10 +34,10 @@ namespace DCLBattle.Battle
             Animator = GetComponentInChildren<Animator>();
         }
 
-        public virtual void Initialize(IArmy parentArmy, UnitCreationParameters parameters)
+        public virtual void Initialize(UnitCreationParameters parameters)
         {
-            Army = parentArmy;
-            GetComponentInChildren<Renderer>().material.color = parentArmy.Model.ArmyColor;
+            Army = parameters.ParentArmy;
+            GetComponentInChildren<Renderer>().material.color = Army.Model.ArmyColor;
             transform.SetPositionAndRotation(parameters.Position, parameters.Rotation);
         }
 
