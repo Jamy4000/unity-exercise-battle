@@ -5,19 +5,17 @@ namespace DCLBattle.Battle
 {
     public sealed class Army : IArmy
     {
-        private readonly Color _color;
-        private readonly ArmyStrategy _strategy;
+        private readonly IArmyModel _model;
         private readonly List<UnitBase> _units = new();
 
-        public Color ArmyColor => _color;
-        public ArmyStrategy Strategy => _strategy;
+        public Color ArmyColor => _model.ArmyColor;
+        public ArmyStrategy Strategy => _model.Strategy;
         public int RemainingUnitsCount => _units.Count;
 
 
-        public Army(Color color, ArmyStrategy strategy)
+        public Army(IArmyModel model)
         {
-            _color = color;
-            _strategy = strategy;
+            _model = model;
         }
 
         public void Update()

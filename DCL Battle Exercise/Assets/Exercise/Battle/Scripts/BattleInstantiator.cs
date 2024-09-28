@@ -73,7 +73,7 @@ namespace DCLBattle.Battle
             Bounds bounds = parameters.GetSpawnBounds();
 
             // TODO Hide implementation
-            IArmy newArmy = new Army(armyModel.ArmyColor, armyModel.Strategy);
+            IArmy newArmy = new Army(armyModel);
 
             for (int unitIndex = 0; unitIndex < IArmyModel.UnitLength; unitIndex++)
             {
