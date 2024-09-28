@@ -1,96 +1,99 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using UnityEngine;
 
-// copy of warrior, just for the sake of argument
-public class Cavalry : UnitBase, IAttacker
+namespace DCLBattle.Battle
 {
-    private float _attackRange = 2.5f;
-
-    private float _attackRangeSq;
-
-    public int ArmyID  => throw new System.NotImplementedException();
-    public Color ArmyColor  => throw new System.NotImplementedException();
-    
-    public override UnitType UnitType => UnitType.Cavalry;
-
-    protected override void Awake()
+    // copy of warrior, just for the sake of argument
+    public sealed class Cavalry : UnitBase, IAttacker
     {
-        base.Awake();
-        _attackRangeSq = _attackRange * _attackRange;
-        
-        // TODO Move this in SO
-        health = 50;
-        defense = 5;
-        attack = 20;
-        maxAttackCooldown = 1f;
-        postAttackDelay = 0;
-    }
+        // TODO add in SO
+        private float _attackRange = 2.5f;
 
-    public void Attack(IAttackReceiver target )
-    {
-        if ( attackCooldown > 0 )
-            return;
+        private float _attackRangeSq;
 
-        if ( Vector3.SqrMagnitude(transform.position - target.Position) > _attackRangeSq )
-            return;
+        public int ArmyID => throw new System.NotImplementedException();
+        public Color ArmyColor => throw new System.NotImplementedException();
 
-        attackCooldown = maxAttackCooldown;
+        public override UnitType UnitType => UnitType.Cavalry;
 
-        Animator.SetTrigger("Attack");
-
-        target.Hit(this, target.Position, attack );
-    }
-
-    public void OnDeathAnimFinished()
-    {
-        // TODO Pooling
-        Destroy(gameObject);
-    }
-
-
-    protected override void UpdateDefensive(List<UnitBase> allies, List<UnitBase> enemies)
-    {
-        Vector3 enemyCenter = Utils.GetCenter(enemies);
-
-        // TODO Hard coded value
-        if ( Mathf.Abs( enemyCenter.x - transform.position.x ) > 20f )
+        protected override void Awake()
         {
-            if ( enemyCenter.x < transform.position.x )
-                Move( Vector3.left );
+            base.Awake();
+            _attackRangeSq = _attackRange * _attackRange;
 
-            if ( enemyCenter.x > transform.position.x )
-                Move( Vector3.right );
+            // TODO Move this in SO
+            health = 50;
+            defense = 5;
+            attack = 20;
+            maxAttackCooldown = 1f;
+            postAttackDelay = 0;
         }
 
-        Utils.GetNearestObject(this, enemies, out UnitBase nearestObject);
-
-        if ( nearestObject == null )
-            return;
-
-        if (attackCooldown <= 0)
+        public void Attack(IAttackReceiver target)
         {
-            Move( (nearestObject.transform.position - transform.position).normalized );
+            if (attackCooldown > 0)
+                return;
+
+            if (Vector3.SqrMagnitude(transform.position - target.Position) > _attackRangeSq)
+                return;
+
+            attackCooldown = maxAttackCooldown;
+
+            Animator.SetTrigger("Attack");
+
+            target.Hit(this, target.Position, attack);
         }
-        else
+
+        public void OnDeathAnimFinished()
         {
-            Move( (nearestObject.transform.position - transform.position).normalized * -1 );
+            // TODO Pooling
+            Destroy(gameObject);
         }
 
-        Attack(nearestObject);
-    }
 
-    protected override void UpdateBasic(List<UnitBase> allies, List<UnitBase> enemies)
-    {
-        Utils.GetNearestObject(this, enemies, out UnitBase nearestEnemy );
+        protected override void UpdateDefensive(List<UnitBase> allies, List<UnitBase> enemies)
+        {
+            Vector3 enemyCenter = Utils.GetCenter(enemies);
 
-        if ( nearestEnemy == null )
-            return;
+            // TODO Hard coded value
+            if (Mathf.Abs(enemyCenter.x - transform.position.x) > 20f)
+            {
+                if (enemyCenter.x < transform.position.x)
+                    Move(Vector3.left);
 
-        Vector3 toNearest = (nearestEnemy.transform.position - transform.position).normalized;
-        toNearest.Scale( new Vector3(1, 0, 1));
-        Move( toNearest.normalized );
+                if (enemyCenter.x > transform.position.x)
+                    Move(Vector3.right);
+            }
 
-        Attack(nearestEnemy);
+            Utils.GetNearestObject(this, enemies, out UnitBase nearestObject);
+
+            if (nearestObject == null)
+                return;
+
+            if (attackCooldown <= 0)
+            {
+                Move((nearestObject.transform.position - transform.position).normalized);
+            }
+            else
+            {
+                Move((nearestObject.transform.position - transform.position).normalized * -1);
+            }
+
+            Attack(nearestObject);
+        }
+
+        protected override void UpdateBasic(List<UnitBase> allies, List<UnitBase> enemies)
+        {
+            Utils.GetNearestObject(this, enemies, out UnitBase nearestEnemy);
+
+            if (nearestEnemy == null)
+                return;
+
+            Vector3 toNearest = (nearestEnemy.transform.position - transform.position).normalized;
+            toNearest.Scale(new Vector3(1, 0, 1));
+            Move(toNearest.normalized);
+
+            Attack(nearestEnemy);
+        }
     }
 }

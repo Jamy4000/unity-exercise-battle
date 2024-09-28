@@ -1,49 +1,52 @@
 ﻿using System.Collections.Generic;
 using UnityEngine;
 
-public sealed class Army
+namespace DCLBattle.Battle
 {
-    private readonly Color _color;
-    private readonly ArmyStrategy _strategy;
-    private readonly List<UnitBase> _units = new();
-
-    public Army(Color color, ArmyStrategy strategy, List<UnitBase> units)
+    public sealed class Army
     {
-        _color = color;
-        _strategy = strategy;
-        _units = units;
-    }
+        private readonly Color _color;
+        private readonly ArmyStrategy _strategy;
+        private readonly List<UnitBase> _units = new();
 
-    public void Update()
-    {
-        foreach (UnitBase unit in _units)
+        public Army(Color color, ArmyStrategy strategy, List<UnitBase> units)
         {
-            unit.ManualUpdate();
+            _color = color;
+            _strategy = strategy;
+            _units = units;
         }
-    }
 
-    public Color GetColor()
-    {
-        return _color;
-    }
+        public void Update()
+        {
+            foreach (UnitBase unit in _units)
+            {
+                unit.ManualUpdate();
+            }
+        }
 
-    public ArmyStrategy GetStrategy()
-    {
-        return _strategy;
-    }
+        public Color GetColor()
+        {
+            return _color;
+        }
 
-    public Army GetEnemyArmy()
-    {
-        return null;
-    }
-    
-    public List<UnitBase> GetUnits()
-    {
-        return _units;
-    }
+        public ArmyStrategy GetStrategy()
+        {
+            return _strategy;
+        }
 
-    public void RemoveUnit(UnitBase unit)
-    {
-        _units.Remove(unit);
+        public Army GetEnemyArmy()
+        {
+            return null;
+        }
+
+        public List<UnitBase> GetUnits()
+        {
+            return _units;
+        }
+
+        public void RemoveUnit(UnitBase unit)
+        {
+            _units.Remove(unit);
+        }
     }
 }
