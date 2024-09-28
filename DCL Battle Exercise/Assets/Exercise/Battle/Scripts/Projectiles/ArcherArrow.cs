@@ -5,18 +5,15 @@ namespace DCLBattle.Battle
     public sealed class ArcherArrow : MonoBehaviour, IProjectile
     {
         [SerializeField]
-        private float _speed;
+        private float _speed = 20f;
 
         private float _speedSq;
 
         [SerializeField]
-        private float _attackDamage;
+        private float _attackDamage = 5f;
 
         private IAttackReceiver _target;
         private IAttacker _source;
-
-        // TODO Remove this
-        public Army Army;
 
         private void Awake()
         {

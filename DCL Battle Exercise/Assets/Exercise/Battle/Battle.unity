@@ -387,6 +387,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 354391276}
+  - component: {fileID: 354391277}
   - component: {fileID: 354391275}
   - component: {fileID: 354391274}
   m_Layer: 0
@@ -470,6 +471,18 @@ Transform:
   m_Children: []
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 46.7, y: 0, z: 0}
+--- !u!114 &354391277
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 354391273}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 96c0062d469220144abfda24ed9760ae, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!1 &443984562
 GameObject:
   m_ObjectHideFlags: 0
@@ -1072,16 +1085,16 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: e4aeece4e56b0314a96a4315134bd6ca, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  armiesToSpawn:
-  - armyModel: {fileID: 11400000, guid: a6c80dd762eaa2942967f75607f7c7a3, type: 2}
-    armySpawnBounds: {fileID: 764418157}
-  - armyModel: {fileID: 11400000, guid: 72f780312aa8e3c40b08fe23dd9b7117, type: 2}
-    armySpawnBounds: {fileID: 443984563}
-  - armyModel: {fileID: 11400000, guid: f3acd28be5a485c43afd74bee773f61d, type: 2}
-    armySpawnBounds: {fileID: 539593045}
-  - armyModel: {fileID: 11400000, guid: 1534cd5a897919044ba600c86ae550c3, type: 2}
-    armySpawnBounds: {fileID: 2052915548}
-  gameOverMenu: {fileID: 1714358169}
+  _armiesToSpawn:
+  - _armyModel: {fileID: 11400000, guid: a6c80dd762eaa2942967f75607f7c7a3, type: 2}
+    _armySpawnBounds: {fileID: 764418157}
+  - _armyModel: {fileID: 11400000, guid: 72f780312aa8e3c40b08fe23dd9b7117, type: 2}
+    _armySpawnBounds: {fileID: 539593045}
+  - _armyModel: {fileID: 11400000, guid: f3acd28be5a485c43afd74bee773f61d, type: 2}
+    _armySpawnBounds: {fileID: 2052915548}
+  - _armyModel: {fileID: 11400000, guid: 1534cd5a897919044ba600c86ae550c3, type: 2}
+    _armySpawnBounds: {fileID: 443984563}
+  _gameOverMenu: {fileID: 1714358169}
 --- !u!4 &1951697636
 Transform:
   m_ObjectHideFlags: 0

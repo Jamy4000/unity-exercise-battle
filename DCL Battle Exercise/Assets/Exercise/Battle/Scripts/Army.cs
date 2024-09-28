@@ -3,17 +3,21 @@ using UnityEngine;
 
 namespace DCLBattle.Battle
 {
-    public sealed class Army
+    public sealed class Army : IArmy
     {
         private readonly Color _color;
         private readonly ArmyStrategy _strategy;
         private readonly List<UnitBase> _units = new();
 
-        public Army(Color color, ArmyStrategy strategy, List<UnitBase> units)
+        public Color ArmyColor => _color;
+        public ArmyStrategy Strategy => _strategy;
+        public int RemainingUnitsCount => _units.Count;
+
+
+        public Army(Color color, ArmyStrategy strategy)
         {
             _color = color;
             _strategy = strategy;
-            _units = units;
         }
 
         public void Update()
@@ -24,29 +28,19 @@ namespace DCLBattle.Battle
             }
         }
 
-        public Color GetColor()
+        public Vector3 CalculateCenterPoint()
         {
-            return _color;
-        }
-
-        public ArmyStrategy GetStrategy()
-        {
-            return _strategy;
-        }
-
-        public Army GetEnemyArmy()
-        {
-            return null;
-        }
-
-        public List<UnitBase> GetUnits()
-        {
-            return _units;
+            return Utils.GetCenter(_units);
         }
 
         public void RemoveUnit(UnitBase unit)
         {
             _units.Remove(unit);
+        }
+
+        public void AddUnit(UnitBase unit)
+        {
+            _units.Add(unit);
         }
     }
 }

@@ -1,4 +1,3 @@
-using System.Collections.Generic;
 using System.Linq;
 using DCLBattle.LaunchMenu;
 using UnityEngine;
@@ -12,7 +11,7 @@ namespace DCLBattle.Battle
         private struct ArmySpawnParameters
         {
             [SerializeField, Interface(typeof(IArmyModel))]
-            private UnityEngine.Object _armyModel;
+            private Object _armyModel;
             public readonly IArmyModel GetModel() => _armyModel as IArmyModel;
 
             [SerializeField]
@@ -30,10 +29,9 @@ namespace DCLBattle.Battle
         [SerializeField]
         private GameOverMenu _gameOverMenu;
 
-        private Army[] _armies;
-        private Vector3 _forwardTarget;
+        private IArmy[] _armies;
 
-        public Army GetArmy(int index) => _armies[index];
+        public IArmy GetArmy(int index) => _armies[index];
         public int GetArmiesCount() => _armies.Length;
 
         void Awake()
@@ -42,7 +40,7 @@ namespace DCLBattle.Battle
                 throw new System.Exception("An instance of BattleInstantiator already exists.");
 
             Instance = this;
-            _armies = new Army[_armiesToSpawn.Length];
+            _armies = new IArmy[_armiesToSpawn.Length];
 
             for (int i = 0; i < _armiesToSpawn.Length; i++)
             {
@@ -57,35 +55,25 @@ namespace DCLBattle.Battle
                 army.Update();
             }
 
-            Vector3 mainCenter = Vector3.zero;
             foreach (var army in _armies)
             {
                 // TODO This is bad, we should just use an event and check when all armies but one are dead
                 // TODO add army allies ?
-                if (army.GetUnits().Count == 0)
+                if (army.RemainingUnitsCount == 0)
                 {
                     _gameOverMenu.gameObject.SetActive(true);
                     _gameOverMenu.Populate();
                 }
-
-                // Todo that's quite a big calculation for not much
-                mainCenter += Utils.GetCenter(army.GetUnits());
             }
-
-            // Todo that's quite a big calculation for not much
-            mainCenter /= _armies.Length;
-
-            Transform cameraTransform = Camera.main.transform;
-            _forwardTarget = Vector3.Normalize(mainCenter - cameraTransform.position);
-
-            cameraTransform.forward += (_forwardTarget - cameraTransform.forward) * 0.1f;
         }
 
-        private Army InstanceArmy(ArmySpawnParameters parameters)
+        private IArmy InstanceArmy(ArmySpawnParameters parameters)
         {
-            List<UnitBase> armyUnits = new();
             IArmyModel armyModel = parameters.GetModel();
             Bounds bounds = parameters.GetSpawnBounds();
+
+            // TODO Hide implementation
+            IArmy newArmy = new Army(armyModel.ArmyColor, armyModel.Strategy);
 
             for (int unitIndex = 0; unitIndex < IArmyModel.UnitLength; unitIndex++)
             {
@@ -98,17 +86,16 @@ namespace DCLBattle.Battle
                 for (int j = 0; j < unitCount; j++)
                 {
                     // TODO Pooling
-                    UnitBase unitView = Instantiate(unitModel.UnitViewPrefab).GetComponent<UnitBase>();
-                    unitView.army = armyModel;
-                    unitView.transform.position = Utils.GetRandomPosInBounds(bounds);
+                    UnitBase unit = Instantiate(unitModel.UnitViewPrefab).GetComponent<UnitBase>();
+                    // TODO Inject on Pool
+                    unit.Army = newArmy;
+                    unit.transform.position = Utils.GetRandomPosInBounds(bounds);
 
-                    unitView.GetComponentInChildren<Renderer>().material.color = armyModel.ArmyColor;
-
-                    armyUnits.Add(unitView);
+                    newArmy.AddUnit(unit);
                 }
             }
 
-            return new Army(armyModel.ArmyColor, armyModel.Strategy, armyUnits);
+            return newArmy;
         }
     }
 }

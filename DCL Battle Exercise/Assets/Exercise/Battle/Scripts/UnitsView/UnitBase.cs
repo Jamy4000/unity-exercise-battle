@@ -14,17 +14,14 @@ namespace DCLBattle.Battle
         public float maxAttackCooldown { get; protected set; }
         public float postAttackDelay { get; protected set; }
         public float speed { get; protected set; } = 0.1f;
+        
         public abstract UnitType UnitType { get; }
 
-        // TODO bad
-        [NonSerialized]
-        public IArmyModel army;
+        // TODO Inject this on Spawn
+        public IArmy Army { get; set; }
 
-        protected float attackCooldown;
-        private Vector3 lastPosition;
-
-        // TODO remove
-        private Army _army;
+        protected float _attackCooldown;
+        private Vector3 _lastPosition;
 
         // TODO seperate this with a View component
         protected Animator Animator { get; private set; }
@@ -39,9 +36,15 @@ namespace DCLBattle.Battle
             Animator = GetComponentInChildren<Animator>();
         }
 
+        protected virtual void Start()
+        {
+            // TODO do this when pooling creates the unit
+            GetComponentInChildren<Renderer>().material.color = Army.ArmyColor;
+        }
+
         public virtual void Move(Vector3 delta)
         {
-            if (attackCooldown > maxAttackCooldown - postAttackDelay)
+            if (_attackCooldown > maxAttackCooldown - postAttackDelay)
                 return;
 
             transform.position += delta * speed;
@@ -69,13 +72,14 @@ namespace DCLBattle.Battle
 
         public virtual void ManualUpdate()
         {
-            var allies = _army.GetUnits();
-            var enemies = _army.GetEnemyArmy().GetUnits();
+            /*
+            var allies = Army.GetUnits();
+            var enemies = Army.GetEnemyArmy().GetUnits();
 
             UpdateBasicRules(allies, enemies);
 
             // TODO Use an interface for the strategies
-            switch (army.Strategy)
+            switch (Army.Strategy)
             {
                 case ArmyStrategy.Defensive:
                     UpdateDefensive(allies, enemies);
@@ -85,13 +89,14 @@ namespace DCLBattle.Battle
                     break;
             }
 
-            Animator.SetFloat("MovementSpeed", (transform.position - lastPosition).magnitude / speed);
-            lastPosition = transform.position;
+            Animator.SetFloat("MovementSpeed", (transform.position - _lastPosition).magnitude / speed);
+            _lastPosition = transform.position;
+            */
         }
 
         void UpdateBasicRules(List<UnitBase> allies, List<UnitBase> enemies)
         {
-            attackCooldown -= Time.deltaTime;
+            _attackCooldown -= Time.deltaTime;
             EvadeAllies(allies, enemies);
         }
 

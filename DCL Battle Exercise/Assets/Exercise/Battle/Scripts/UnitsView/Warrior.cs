@@ -10,8 +10,6 @@ namespace DCLBattle.Battle
 
         private float _attackRangeSq;
 
-        public IArmy Army => throw new System.NotImplementedException();
-
         public override UnitType UnitType => UnitType.Warrior;
 
         protected override void Awake()
@@ -29,13 +27,13 @@ namespace DCLBattle.Battle
 
         public void Attack(IAttackReceiver target)
         {
-            if (attackCooldown > 0)
+            if (_attackCooldown > 0)
                 return;
 
             if (Vector3.SqrMagnitude(transform.position - target.Position) > _attackRangeSq)
                 return;
 
-            attackCooldown = maxAttackCooldown;
+            _attackCooldown = maxAttackCooldown;
 
             Animator.SetTrigger("Attack");
 
@@ -68,7 +66,7 @@ namespace DCLBattle.Battle
             if (nearestObject == null)
                 return;
 
-            if (attackCooldown <= 0)
+            if (_attackCooldown <= 0)
             {
                 Move((nearestObject.transform.position - transform.position).normalized);
             }

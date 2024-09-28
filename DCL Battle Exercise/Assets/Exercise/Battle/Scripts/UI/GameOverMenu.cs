@@ -16,11 +16,11 @@ namespace DCLBattle.Battle
         public void Populate()
         {
             int armyCount = BattleInstantiator.Instance.GetArmiesCount();
-            for (int i = 0; i < armyCount; i++)
+            for (int armyIndex = 0; armyIndex < armyCount; armyIndex++)
             {
-                if (BattleInstantiator.Instance.GetArmy(i).GetUnits().Count > 0)
+                if (BattleInstantiator.Instance.GetArmy(armyIndex).RemainingUnitsCount > 0)
                 {
-                    armyWins.text = $"Army {i} wins!";
+                    armyWins.text = $"Army {armyIndex} wins!";
                     return;
                 }
             }

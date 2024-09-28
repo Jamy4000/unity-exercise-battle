@@ -14,7 +14,6 @@ namespace DCLBattle.Battle
         
 
         private static readonly Vector3 _flatScale = new Vector3(1f, 0f, 1f);
-        public IArmy Army => throw new System.NotImplementedException();
 
         public override UnitType UnitType => UnitType.Archer;
 
@@ -33,7 +32,7 @@ namespace DCLBattle.Battle
 
         public void Attack(IAttackReceiver target)
         {
-            if (attackCooldown > 0)
+            if (_attackCooldown > 0)
                 return;
 
             if (Vector3.SqrMagnitude(transform.position - target.Position) > _attackRangeSq)
@@ -44,7 +43,7 @@ namespace DCLBattle.Battle
             projectile.Launch(this, target);
 
             Animator.SetTrigger("Attack");
-            attackCooldown = maxAttackCooldown;
+            _attackCooldown = maxAttackCooldown;
         }
 
         public void OnDeathAnimFinished()
