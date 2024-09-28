@@ -14,10 +14,7 @@ namespace DCLBattle.Battle
         [SerializeField, Interface(typeof(IProjectile))]
         private Object _arrowPrefab;
 
-        private Color _color;
-        public Color ArmyColor => _color;
-
-        public int ArmyID => throw new System.NotImplementedException();
+        public IArmy Army => throw new System.NotImplementedException();
 
         public override UnitType UnitType => UnitType.Magician;
 
@@ -34,12 +31,6 @@ namespace DCLBattle.Battle
             attack = 10;
             maxAttackCooldown = 5f;
             postAttackDelay = 1f;
-        }
-
-        private void Start()
-        {
-            // TODO not a fan of that one
-            _color = GetComponentInChildren<Renderer>().material.color;
         }
 
         public void Attack(IAttackReceiver target)

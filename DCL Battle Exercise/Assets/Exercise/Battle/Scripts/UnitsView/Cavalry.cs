@@ -11,8 +11,7 @@ namespace DCLBattle.Battle
 
         private float _attackRangeSq;
 
-        public int ArmyID => throw new System.NotImplementedException();
-        public Color ArmyColor => throw new System.NotImplementedException();
+        public IArmy Army => throw new System.NotImplementedException();
 
         public override UnitType UnitType => UnitType.Cavalry;
 

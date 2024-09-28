@@ -6,6 +6,7 @@ namespace DCLBattle.Battle
     {
         [SerializeField]
         private float _speed;
+
         private float _speedSq;
 
         [SerializeField]
@@ -28,7 +29,7 @@ namespace DCLBattle.Battle
             _target = target;
 
             transform.position = attacker.Position;
-            GetComponent<Renderer>().material.color = attacker.ArmyColor;
+            GetComponent<Renderer>().material.color = attacker.Army.ArmyColor;
         }
 
         // TODO have a system go other every arrow instead of each arrow having an update
