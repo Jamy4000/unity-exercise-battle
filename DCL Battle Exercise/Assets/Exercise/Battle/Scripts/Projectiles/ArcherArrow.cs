@@ -26,7 +26,8 @@ namespace DCLBattle.Battle
             _target = target;
 
             transform.position = attacker.Position;
-            GetComponent<Renderer>().material.color = attacker.Army.ArmyColor;
+
+            GetComponent<Renderer>().material.color = attacker.Army.Model.ArmyColor;
         }
 
         // TODO have a system go other every arrow instead of each arrow having an update

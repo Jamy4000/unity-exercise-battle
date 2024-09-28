@@ -13,4 +13,4 @@ MonoBehaviour:
   m_Name: Archer
   m_EditorClassIdentifier: 
   _unitType: 1
-  _unitViewPrefab: {fileID: 7211230073387977219, guid: d5b353320e661744aa811b1a632ee53e, type: 3}
+  _unitFactory: {fileID: 11400000, guid: 8b0d9d9f3e4bd874383e2111992841aa, type: 2}

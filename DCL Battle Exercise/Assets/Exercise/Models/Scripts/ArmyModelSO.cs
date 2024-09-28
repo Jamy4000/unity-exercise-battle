@@ -1,7 +1,6 @@
-using DCLBattle.LaunchMenu;
+using DCLBattle.Battle;
 using EditorUtils;
 using UnityEngine;
-
 
 /// <summary>
 /// ScriptableObject containing the data of an army
@@ -48,11 +47,42 @@ public class ArmyModelSO : ScriptableObject, IArmyModel
 
 
     // This one is the only one that needs to be set in editor
-    [SerializeField, DrawEnumBasedArray(typeof(UnitType))]
+    [SerializeField, Interface(typeof(IUnitModel))]
     private Object[] _unitsModels = new Object[IArmyModel.UnitLength];
+
+    public bool TryGetUnitModel(UnitType type, out IUnitModel unitModel)
+    {
+        foreach (var model in _unitsModels)
+        {
+            unitModel = model as IUnitModel;
+            if (unitModel.UnitType == type)
+                return true;
+        }
+
+        unitModel = null;
+        return false;
+    }
+
     public IUnitModel GetUnitModel(UnitType type)
     {
-        return _unitsModels[(int)type] as IUnitModel;
+        foreach (var modelObject in _unitsModels)
+        {
+            IUnitModel unitModel = (modelObject as IUnitModel);
+            if (unitModel.UnitType == type)
+                return unitModel;
+        }
+        return null;
+    }
+
+    public IUnitFactory GetUnitFactory(UnitType type)
+    {
+        foreach (var modelObject in _unitsModels)
+        {
+            IUnitModel unitModel = (modelObject as IUnitModel);
+            if (unitModel.UnitType == type)
+                return unitModel.UnitFactory;
+        }
+        return null;
     }
 
     // This makes sure our Units Prefabs are always in the right order
@@ -64,13 +94,6 @@ public class ArmyModelSO : ScriptableObject, IArmyModel
             var unitCountCopy = new int[IArmyModel.UnitLength];
             _unitsCount.CopyTo(unitCountCopy, 0);
             _unitsCount = unitCountCopy;
-        }
-
-        if (_unitsModels.Length != IArmyModel.UnitLength)
-        {
-            var unitPrefabsCopy = new Object[IArmyModel.UnitLength];
-            _unitsModels.CopyTo(unitPrefabsCopy, 0);
-            _unitsModels = unitPrefabsCopy;
         }
 
         // We could technically add a check to see if the assigned prefab is of the right unit type compared to the array index

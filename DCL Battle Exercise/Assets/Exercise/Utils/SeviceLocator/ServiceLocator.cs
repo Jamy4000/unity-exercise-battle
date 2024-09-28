@@ -5,8 +5,14 @@ using UnityEditor;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 
-namespace UnityServiceLocator {
-    public class ServiceLocator : MonoBehaviour {
+namespace UnityServiceLocator
+{
+    /// <summary>
+    /// Service locator stolen from this repository:
+    /// https://github.com/adammyhre/Unity-Service-Locator
+    /// </summary>
+    public class ServiceLocator : MonoBehaviour 
+    {
         static ServiceLocator global;
         static Dictionary<Scene, ServiceLocator> sceneContainers;
         static List<GameObject> tmpSceneGameObjects;

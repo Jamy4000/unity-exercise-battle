@@ -1,11 +1,10 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
 
 namespace DCLBattle.Battle
 {
-    public abstract class UnitBase : MonoBehaviour, IAttackReceiver
+    public abstract class UnitBase : MonoBehaviour, IAttackReceiver, IUnit
     {
         // todo turn those as abstract getters
         public float health { get; protected set; }
@@ -17,8 +16,7 @@ namespace DCLBattle.Battle
         
         public abstract UnitType UnitType { get; }
 
-        // TODO Inject this on Spawn
-        public IArmy Army { get; set; }
+        public IArmy Army { get; private set; }
 
         protected float _attackCooldown;
         private Vector3 _lastPosition;
@@ -36,10 +34,11 @@ namespace DCLBattle.Battle
             Animator = GetComponentInChildren<Animator>();
         }
 
-        protected virtual void Start()
+        public virtual void Initialize(IArmy parentArmy, UnitCreationParameters parameters)
         {
-            // TODO do this when pooling creates the unit
-            GetComponentInChildren<Renderer>().material.color = Army.ArmyColor;
+            Army = parentArmy;
+            GetComponentInChildren<Renderer>().material.color = parentArmy.Model.ArmyColor;
+            transform.SetPositionAndRotation(parameters.Position, parameters.Rotation);
         }
 
         public virtual void Move(Vector3 delta)

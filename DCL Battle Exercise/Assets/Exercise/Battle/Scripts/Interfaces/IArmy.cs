@@ -1,16 +1,16 @@
+using UnityEngine;
+
 namespace DCLBattle.Battle
 {
     public interface IArmy
     {
-        UnityEngine.Color ArmyColor { get; }
-        ArmyStrategy Strategy { get; }
+        IArmyModel Model { get; }
         int RemainingUnitsCount { get; }
 
-        UnityEngine.Vector3 CalculateCenterPoint();
-
         void Update();
+        Vector3 CalculateCenterPoint();
 
-        void AddUnit(UnitBase unit);
-        void RemoveUnit(UnitBase unit);
+        void AddUnit(IUnit unit);
+        void RemoveUnit(IUnit unit);
     }
 }

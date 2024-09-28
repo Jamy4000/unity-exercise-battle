@@ -1,9 +1,16 @@
-namespace DCLBattle.LaunchMenu
+using DCLBattle.Battle;
+
+public enum UnitType
 {
-    public interface IUnitModel
-    {
-        string UnitName { get; }
-        UnitType UnitType { get; }
-        UnityEngine.GameObject UnitViewPrefab { get; }
-    }
+    Warrior = 0,
+    Archer = 1,
+    Cavalry = 2,
+    Magician = 3,
+}
+
+public interface IUnitModel
+{
+    string UnitName { get; }
+    UnitType UnitType { get; }
+    IUnitFactory UnitFactory { get; }
 }

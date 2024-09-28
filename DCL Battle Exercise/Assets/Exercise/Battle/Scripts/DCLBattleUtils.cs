@@ -13,13 +13,13 @@ public static class DCLBattleUtils
     }
 
     public static Vector3 GetCenter<T>( List<T> objects )
-        where T : Component
+        where T : DCLBattle.Battle.IUnit
     {
         Vector3 result = Vector3.zero;
 
         foreach ( var o in objects )
         {
-            result += o.transform.position;
+            result += o.Position;
         }
 
         result.x /= objects.Count;
@@ -55,6 +55,26 @@ public static class DCLBattleUtils
             float sqDist = Vector3.SqrMagnitude(source.transform.position - obj.transform.position);
 
             if ( sqDist < minDistSq )
+            {
+                minDistSq = sqDist;
+                nearestObject = obj;
+            }
+        }
+
+        return Mathf.Sqrt(minDistSq);
+    }
+
+    public static float GetNearestUnit<T>(T source, List<T> objects, out T nearestObject)
+        where T : DCLBattle.Battle.IUnit
+    {
+        float minDistSq = float.MaxValue;
+        nearestObject = default;
+
+        foreach (var obj in objects)
+        {
+            float sqDist = Vector3.SqrMagnitude(source.Position - obj.Position);
+
+            if (sqDist < minDistSq)
             {
                 minDistSq = sqDist;
                 nearestObject = obj;

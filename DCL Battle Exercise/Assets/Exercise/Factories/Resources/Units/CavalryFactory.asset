@@ -9,8 +9,7 @@ MonoBehaviour:
   m_GameObject: {fileID: 0}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 2ede462626db1ec4892cad320913bad5, type: 3}
-  m_Name: Cavalry
+  m_Script: {fileID: 11500000, guid: a8d32a37beb406243b25be5ccdeb94de, type: 3}
+  m_Name: CavalryFactory
   m_EditorClassIdentifier: 
-  _unitType: 2
-  _unitFactory: {fileID: 11400000, guid: 9b20c381f130d1d4cafa9bc3b3e8864e, type: 2}
+  _unitPrefab: {fileID: 5761066131136756735, guid: 9dbff414d5bc57844b73d286c238de1a, type: 3}

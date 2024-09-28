@@ -15,9 +15,8 @@ MonoBehaviour:
   _armyName: Rivendell
   _armyColor: {r: 0.2432805, g: 0.6698113, b: 0.28535095, a: 0.72156864}
   _strategyValue: 0
-  _unitsCount: 00000000000000000000000000000000
+  _unitsCount: 3c000000280000000000000028000000
   _unitsModels:
   - {fileID: 11400000, guid: 78ce89d1c7df59f4faa247d06072a8f6, type: 2}
   - {fileID: 11400000, guid: 099a6477133f9284d83560b10634a78e, type: 2}
-  - {fileID: 0}
   - {fileID: 11400000, guid: e8d5e2d043ca6784f9f5123e427a6dbb, type: 2}

@@ -35,6 +35,7 @@ namespace DCLBattle.LaunchMenu
         {
             title.text = armyModel.ArmyName;
             background.color = armyModel.ArmyColor;
+            enumDropdown.SetValueWithoutNotify(armyModel.Strategy);
 
             for (int unitTypeIndex = 0; unitTypeIndex < IArmyModel.UnitLength; unitTypeIndex++)
             {

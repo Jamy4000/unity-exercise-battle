@@ -9,26 +9,27 @@ namespace DCLBattle.Battle
 {
     public sealed class GameOverMenu : MonoBehaviour
     {
-        public TextMeshProUGUI armyWins;
-        public Button goToMenu;
-
-        // TODO use event instead
-        public void Populate()
-        {
-            int armyCount = BattleInstantiator.Instance.GetArmiesCount();
-            for (int armyIndex = 0; armyIndex < armyCount; armyIndex++)
-            {
-                if (BattleInstantiator.Instance.GetArmy(armyIndex).RemainingUnitsCount > 0)
-                {
-                    armyWins.text = $"Army {armyIndex} wins!";
-                    return;
-                }
-            }
-        }
+        [SerializeField]
+        private TextMeshProUGUI _armyWins;
+        [SerializeField]
+        public Button _goToMenu;
 
         void Awake()
         {
-            goToMenu.onClick.AddListener(GoToMenu);
+            _goToMenu.onClick.AddListener(GoToMenu);
+
+            gameObject.SetActive(false);
+        }
+
+        private void Start()
+        {
+            
+        }
+
+        // TODO use event instead
+        public void OnArmyWon(IArmy winner)
+        {
+            _armyWins.text = $"The Armies of {winner.Model.ArmyName} wins!";
         }
 
         void GoToMenu()

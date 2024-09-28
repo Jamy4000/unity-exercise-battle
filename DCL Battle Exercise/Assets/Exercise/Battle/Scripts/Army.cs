@@ -5,25 +5,33 @@ namespace DCLBattle.Battle
 {
     public sealed class Army : IArmy
     {
-        private readonly IArmyModel _model;
-        private readonly List<UnitBase> _units = new();
-
-        public Color ArmyColor => _model.ArmyColor;
-        public ArmyStrategy Strategy => _model.Strategy;
+        public IArmyModel Model { get; }
         public int RemainingUnitsCount => _units.Count;
+
+        private readonly List<IUnit> _units;
 
 
         public Army(IArmyModel model)
         {
-            _model = model;
+            Model = model;
+
+            // pre-allocate the list
+            int armySize = 0;
+            for (int i = 0; i < IArmyModel.UnitLength; i++)
+            {
+                armySize += model.GetUnitCount((UnitType)i);
+            }
+            _units = new(armySize);
         }
 
         public void Update()
         {
-            foreach (UnitBase unit in _units)
+            /*
+            foreach (IUnit unit in _units)
             {
                 unit.ManualUpdate();
             }
+            */
         }
 
         public Vector3 CalculateCenterPoint()
@@ -31,12 +39,12 @@ namespace DCLBattle.Battle
             return DCLBattleUtils.GetCenter(_units);
         }
 
-        public void RemoveUnit(UnitBase unit)
+        public void RemoveUnit(IUnit unit)
         {
             _units.Remove(unit);
         }
 
-        public void AddUnit(UnitBase unit)
+        public void AddUnit(IUnit unit)
         {
             _units.Add(unit);
         }
