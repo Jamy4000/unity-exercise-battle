@@ -1,0 +1,19 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 2ede462626db1ec4892cad320913bad5, type: 3}
+  m_Name: CavalryModel
+  m_EditorClassIdentifier: 
+  _unitType: 2
+  _unitFactory: {fileID: 11400000, guid: 38eb355caddc96d4f9a4a396f0bfcaa6, type: 2}
+  _strategyCreators:
+  - {fileID: 11400000, guid: 9684062cb79e4234cb2eb0bbbaea52e4, type: 2}
+  - {fileID: 11400000, guid: 9bf3aa5a3de13a64784905805a60fc8c, type: 2}

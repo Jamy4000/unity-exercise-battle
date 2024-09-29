@@ -1,0 +1,19 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 2ede462626db1ec4892cad320913bad5, type: 3}
+  m_Name: WarriorModel
+  m_EditorClassIdentifier: 
+  _unitType: 0
+  _unitFactory: {fileID: 11400000, guid: 06e5f8daa8bc7d94d9c2d968c27a0c7f, type: 2}
+  _strategyCreators:
+  - {fileID: 11400000, guid: 3ec02e8fdb74f284caa782cee6dee052, type: 2}
+  - {fileID: 11400000, guid: 86a5bc8d7a891e6458a27838e992339f, type: 2}

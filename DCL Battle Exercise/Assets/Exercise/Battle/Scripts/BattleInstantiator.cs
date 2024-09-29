@@ -11,7 +11,7 @@ namespace DCLBattle.Battle
         [System.Serializable]
         private struct ArmySpawnParameters
         {
-            [SerializeField, Interface(typeof(IArmyModel))]
+            [SerializeField]
             private Object _armyModel;
             public readonly IArmyModel ArmyModel => _armyModel as IArmyModel;
 
@@ -30,9 +30,15 @@ namespace DCLBattle.Battle
         public IArmy GetArmy(int index) => _armies[index];
         public int ArmiesCount => _armies.Length;
 
+
+        private static readonly IStrategyUpdater[,] _strategyUpdaters = new IStrategyUpdater[IArmyModel.UnitLength, IStrategyUpdater.StrategyCount];
+
+
+
         void Awake()
         {
             _armies = new IArmy[_armiesToSpawn.Length];
+
 
             // For each army that should spawn on the map
             for (int armyIndex = 0; armyIndex < _armiesToSpawn.Length; armyIndex++)
@@ -48,8 +54,17 @@ namespace DCLBattle.Battle
                 {
                     // If the current army has this type of unit in its rank
                     UnitType unitType = (UnitType)unitTypeIndex;
-                    if (armySpawnParam.ArmyModel.TryGetUnitModel(unitType, out IUnitModel unitModel))
+                    if (armySpawnParam.ArmyModel.TryGetUnitModel(unitType, out IUnitModel model))
                     {
+                        // No need to recreate the strategy updaters multiple tile, one object for all units of the same type using the same strategy is enough
+                        if (_strategyUpdaters[unitTypeIndex, 0] == null)
+                        {
+                            for (int strategyIndex = 0; strategyIndex < IStrategyUpdater.StrategyCount; strategyIndex++)
+                            {
+                                _strategyUpdaters[unitTypeIndex, strategyIndex] = model.CreateStrategyUpdater((ArmyStrategy)strategyIndex);
+                            }
+                        }
+
                         // We spawn the amount of units of this type provided in the Launch Menu
                         int maxUnitCount = armySpawnParam.ArmyModel.GetUnitCount(unitType);
                         for (int unitIndex = 0; unitIndex < maxUnitCount; unitIndex++)
@@ -58,10 +73,12 @@ namespace DCLBattle.Battle
                             Vector3 position = DCLBattleUtils.GetRandomPosInBounds(armySpawnParam.GetSpawnBounds());
                             // Could randomize that or make them face a certain direction
                             Quaternion rotation = Quaternion.identity;
+                            IStrategyUpdater strategyUpdater = _strategyUpdaters[(int)model.UnitType, (int)armySpawnParam.ArmyModel.Strategy];
 
-                            UnitCreationParameters parameters = new(position, rotation, army, unitModel);
+                            UnitCreationParameters parameters = new(position, rotation, army, model.UnitType, strategyUpdater);
 
-                            IUnit newUnit = unitModel.UnitFactory.CreateUnit(parameters);
+                            // Todo do we really need a model ?
+                            IUnit newUnit = model.UnitFactory.CreateUnit(parameters);
                             
                             army.AddUnit(newUnit);
                         }

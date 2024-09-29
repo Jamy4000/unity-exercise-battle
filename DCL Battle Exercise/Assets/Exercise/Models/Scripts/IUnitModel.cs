@@ -13,4 +13,6 @@ public interface IUnitModel
     string UnitName { get; }
     UnitType UnitType { get; }
     IUnitFactory UnitFactory { get; }
+
+    IStrategyUpdater CreateStrategyUpdater(ArmyStrategy armyStrategy);
 }
