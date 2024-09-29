@@ -12,4 +12,4 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 80c627940f9fc494abcd7b6f9c62ad3d, type: 3}
   m_Name: MagicianFactory
   m_EditorClassIdentifier: 
-  _unitPrefab: {fileID: 7211230073387977219, guid: 092688a92b2e5b74794afd6783e355b6, type: 3}
+  _unitPrefab: {fileID: 1167668433936451836, guid: ea4bfd8c0c2c9714b9a0e8bc49bd0a4e, type: 3}

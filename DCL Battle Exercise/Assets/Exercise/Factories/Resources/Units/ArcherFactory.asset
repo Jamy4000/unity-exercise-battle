@@ -12,4 +12,4 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 80c627940f9fc494abcd7b6f9c62ad3d, type: 3}
   m_Name: ArcherFactory
   m_EditorClassIdentifier: 
-  _unitPrefab: {fileID: 7211230073387977219, guid: d5b353320e661744aa811b1a632ee53e, type: 3}
+  _unitPrefab: {fileID: 9015656096387748827, guid: 7fcbf22a3d6b39e4a94225667d73e4ff, type: 3}

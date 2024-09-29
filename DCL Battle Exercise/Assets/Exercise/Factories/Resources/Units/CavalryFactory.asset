@@ -12,4 +12,4 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 80c627940f9fc494abcd7b6f9c62ad3d, type: 3}
   m_Name: CavalryFactory
   m_EditorClassIdentifier: 
-  _unitPrefab: {fileID: 5761066131136756735, guid: 9dbff414d5bc57844b73d286c238de1a, type: 3}
+  _unitPrefab: {fileID: 5348068810476815009, guid: f510237c62738da49980e2cd2a5d6e83, type: 3}

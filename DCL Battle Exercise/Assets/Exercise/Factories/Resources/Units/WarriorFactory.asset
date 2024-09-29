@@ -12,4 +12,4 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 80c627940f9fc494abcd7b6f9c62ad3d, type: 3}
   m_Name: WarriorFactory
   m_EditorClassIdentifier: 
-  _unitPrefab: {fileID: 5761066131136756735, guid: d84cac85cdce1be419a5e701d52e9cee, type: 3}
+  _unitPrefab: {fileID: 2551365212733471747, guid: 0fd0b7e968e3951438b9233a4dd13c50, type: 3}
