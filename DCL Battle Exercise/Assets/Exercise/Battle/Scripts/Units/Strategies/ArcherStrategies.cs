@@ -1,3 +1,5 @@
+using System;
+using System.Collections.Generic;
 using UnityEngine;
 
 namespace DCLBattle.Battle
@@ -8,18 +10,30 @@ namespace DCLBattle.Battle
 
         public void UpdateStrategy(IUnit unitToUpdate)
         {
-            /*
-            DCLBattleUtils.GetNearestObject(this, enemies, out UnitBase nearestEnemy);
+            List<IArmy> enemyArmies = unitToUpdate.Army.GetEnemyArmies();
+            (IUnit, float)[] closestUnits = new (IUnit, float)[enemyArmies.Count];
+            for (int armyIndex = 0; armyIndex < enemyArmies.Count; armyIndex++)
+            {
+                IUnit unit = enemyArmies[armyIndex].GetClosestUnit(unitToUpdate.Position, out float distance);
+                closestUnits[armyIndex] = (unit, distance);
+            }
 
-            if (nearestEnemy == null)
-                return;
+            (IUnit unit, float distance) closestUnit = (null, Mathf.Infinity);
+            foreach ((IUnit unit, float distance) unitDistancePair in closestUnits)
+            {
+                if (unitDistancePair.unit == null)
+                    continue;
 
-            Vector3 toNearest = (nearestEnemy.transform.position - transform.position).normalized;
-            toNearest.Scale(_flatScale);
-            Move(toNearest.normalized);
+                if (closestUnit.unit == null || unitDistancePair.distance < closestUnit.distance)
+                    closestUnit = unitDistancePair;
+            }
 
-            Attack(nearestEnemy);
-            */
+            Vector3 toNearest = Vector3.Normalize(closestUnit.unit.Position - unitToUpdate.Position);
+            toNearest.Scale(IStrategyUpdater.FlatScale);
+            unitToUpdate.Move(toNearest.normalized);
+
+            // TODO this is bad
+            unitToUpdate.Attack(closestUnit.unit as IAttackReceiver);
         }
     }
 

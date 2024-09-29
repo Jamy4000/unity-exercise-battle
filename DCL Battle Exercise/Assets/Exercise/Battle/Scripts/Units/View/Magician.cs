@@ -29,7 +29,7 @@ namespace DCLBattle.Battle
             _attackRangeSq = _attackRange * _attackRange;
         }
 
-        public void Attack(IAttackReceiver target)
+        public override void Attack(IAttackReceiver target)
         {
             if (_attackCooldown > 0)
                 return;

@@ -18,6 +18,9 @@ namespace EditorUtils
             // https://answers.unity.com/questions/1589226/showing-an-array-with-enum-as-keys-in-the-property.html
             int index = System.Convert.ToInt32(property.propertyPath.Substring(property.propertyPath.IndexOf("[")).Replace("[", "").Replace("]", ""));
 
+            if (index < 0)
+                return;
+
             //change the label
             label.text = System.Enum.GetName(enumAttribute.EnumType, index);
 

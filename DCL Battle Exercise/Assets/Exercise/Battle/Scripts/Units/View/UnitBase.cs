@@ -15,15 +15,13 @@ namespace DCLBattle.Battle
         // TODO 
         public float speed { get; protected set; } = 0.1f;
 
-
-        // TODO seperate this with a View component
         protected Animator Animator { get; private set; }
 
         private IStrategyUpdater _strategyUpdater;
 
         // TODO
-        public float Health { get; private set; }
-        public float Defense => throw new System.NotImplementedException();
+        public float Health { get; private set; } = 10f;
+        public float Defense => 2f;
 
         protected virtual void Awake()
         {
@@ -42,13 +40,7 @@ namespace DCLBattle.Battle
 
         public virtual void Move(Vector3 delta)
         {
-            /*
-             *TODO This shouldn't be in UnitBase
-                if (_attackCooldown > maxAttackCooldown - postAttackDelay)
-                    return;
-
-                transform.position += delta * speed;
-            */
+            transform.position += delta * speed;
         }
 
         public virtual void Hit(IAttacker attacker, Vector3 hitPosition, float damage)
@@ -120,5 +112,8 @@ namespace DCLBattle.Battle
                 }
             }
         }
+
+        // TODO This shouldn't be here
+        public abstract void Attack(IAttackReceiver attackReceiver);
     }
 }

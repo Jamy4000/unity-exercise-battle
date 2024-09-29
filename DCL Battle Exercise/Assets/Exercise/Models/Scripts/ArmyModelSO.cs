@@ -13,17 +13,26 @@ public class ArmyModelSO : ScriptableObject, IArmyModel
     // TODO Could control this from UI too
     [SerializeField] private string _armyName = "Army";
     public string ArmyName
-    { 
-        get => _armyName; 
-        set => _armyName = value; 
+    {
+        get => _armyName;
+        set => _armyName = value;
     }
 
     // TODO Could control this from UI too
     [SerializeField] private Color _armyColor;
-    public Color ArmyColor 
-    { 
-        get => _armyColor; 
-        set => _armyColor = value; 
+    public Color ArmyColor
+    {
+        get => _armyColor;
+        set => _armyColor = value;
+    }
+
+    // TODO Could control this from UI too
+    // TODO Pretty bad, I'd rather create another struct or class to represent alliances instead
+    // Using the SO directly here for simplicity
+    [SerializeField] private ArmyModelSO[] _enemyArmies;
+    public IArmyModel[] EnemyArmies
+    {
+        get => _enemyArmies;
     }
 
     [ReadOnly, SerializeField] private ArmyStrategy _strategyValue = ArmyStrategy.Basic;

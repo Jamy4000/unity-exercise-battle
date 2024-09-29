@@ -14,9 +14,10 @@ namespace DCLBattle.Battle
 
         private float _attackCooldown = 0f;
 
-        public float Damage => throw new System.NotImplementedException();
-        public float MaxAttackCooldown => throw new System.NotImplementedException();
-        public float PostAttackDelay => throw new System.NotImplementedException();
+        // TODO
+        public float Damage => 5f;
+        public float MaxAttackCooldown => 0.5f;
+        public float PostAttackDelay => 1f;
 
         public override UnitType UnitType => UnitType.Archer;
 
@@ -26,7 +27,17 @@ namespace DCLBattle.Battle
             _attackRangeSq = _attackRange * _attackRange;
         }
 
-        public void Attack(IAttackReceiver target)
+        public override void Move(Vector3 delta)
+        {
+            _attackCooldown -= Time.deltaTime;
+            // TODO This shouldn't be in UnitBase
+            if (_attackCooldown > MaxAttackCooldown - PostAttackDelay)
+                return;
+
+            base.Move(delta);
+        }
+
+        public override void Attack(IAttackReceiver target)
         {
             if (_attackCooldown > 0)
                 return;

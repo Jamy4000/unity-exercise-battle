@@ -8,11 +8,13 @@ public enum ArmyStrategy
 
 public interface IArmyModel
 {
-    public static readonly int UnitLength = System.Enum.GetValues(typeof(UnitType)).Length;
+    public static readonly int UnitLength = System.Enum.GetValues(typeof(UnitType)).Length - 1;
 
     string ArmyName { get; set; }
 
     UnityEngine.Color ArmyColor { get; set; }
+
+    public IArmyModel[] EnemyArmies { get; }
 
     ArmyStrategy Strategy { get; set; }
 

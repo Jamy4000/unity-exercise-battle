@@ -43,6 +43,27 @@ namespace DCLBattle.Battle
                 _armies[armyIndex] = CreateArmy(armySpawnParam.ArmyModel, armySpawnParam.GetSpawnBounds());
             }
 
+            // Second pass to feed the enemy armies inside each army
+            // TODO This feels wrong
+            for (int armyIndex = 0; armyIndex < _armies.Length; armyIndex++)
+            {
+                IArmyModel[] enemies = _armiesToSpawn[armyIndex].ArmyModel.EnemyArmies;
+                for (int secondArmyIndex = 0; secondArmyIndex < _armies.Length; secondArmyIndex++)
+                {
+                    for (int enemyIndex = 0; enemyIndex < enemies.Length; enemyIndex++)
+                    {
+                        if (secondArmyIndex == armyIndex)
+                            continue;
+
+                        // TODO Could use an enum instead, string will do for now though
+                        string enemyName = enemies[enemyIndex].ArmyName;
+
+                        if (_armies[secondArmyIndex].Model.ArmyName == enemyName)
+                            _armies[armyIndex].AddEnemyArmy(_armies[secondArmyIndex]);
+                    }
+                }
+            }
+
             // Registering this as global, but if we want multiple BattleManagers, we could register it on the Scene level as well
             ServiceLocator.Global.Register(this);
         }
