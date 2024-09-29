@@ -27,6 +27,23 @@ namespace DCLBattle.Battle
     public abstract class UnitState<TData> : UnitState
         where TData : UnitStateData
     {
+        protected readonly TData StateData;
 
+        public override UnitStateID StateEnum => StateData.StateID;
+
+        protected UnitState(TData stateData)
+        {
+            StateData = stateData;
+        }
+
+        public override List<UnitStateID> GetTransitionsStates()
+        {
+            return StateData.ExitStates;
+        }
+
+        public override bool HasPossibleTransitionsTo(UnitStateID stateEnum)
+        {
+            return StateData.ExitStates.Contains(stateEnum);
+        }
     }
 }

@@ -10,8 +10,12 @@ PrefabInstance:
     m_Modifications:
     - target: {fileID: 4759996949350980251, guid: 9fd4ec4d367907940934ac6f192a30c9, type: 3}
       propertyPath: m_Name
-      value: Cavalry Variant
+      value: Cavalry
       objectReference: {fileID: 0}
+    - target: {fileID: 5848535917504361985, guid: 9fd4ec4d367907940934ac6f192a30c9, type: 3}
+      propertyPath: m_Mesh
+      value: 
+      objectReference: {fileID: 10206, guid: 0000000000000000e000000000000000, type: 0}
     - target: {fileID: 6621763950709155128, guid: 9fd4ec4d367907940934ac6f192a30c9, type: 3}
       propertyPath: m_LocalEulerAnglesHint.x
       value: 0
@@ -24,6 +28,22 @@ PrefabInstance:
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: 8176869281510590783, guid: 9fd4ec4d367907940934ac6f192a30c9, type: 3}
+      propertyPath: _unitStatesData.Array.size
+      value: 3
+      objectReference: {fileID: 0}
+    - target: {fileID: 8176869281510590783, guid: 9fd4ec4d367907940934ac6f192a30c9, type: 3}
+      propertyPath: _unitStatesData.Array.data[0]
+      value: 
+      objectReference: {fileID: 11400000, guid: 47a6708b3f5d13f4892d8662bb7daf81, type: 2}
+    - target: {fileID: 8176869281510590783, guid: 9fd4ec4d367907940934ac6f192a30c9, type: 3}
+      propertyPath: _unitStatesData.Array.data[1]
+      value: 
+      objectReference: {fileID: 11400000, guid: 453b1303609380140ab9afead0c3cdb8, type: 2}
+    - target: {fileID: 8176869281510590783, guid: 9fd4ec4d367907940934ac6f192a30c9, type: 3}
+      propertyPath: _unitStatesData.Array.data[2]
+      value: 
+      objectReference: {fileID: 11400000, guid: 75fd2a77a325cce49bf76bc7232dcf1f, type: 2}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []

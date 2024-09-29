@@ -31,7 +31,7 @@ namespace DCLBattle.Battle
     /// Note: This feels to me overkill and unnecessary; this could simply be placed in the UnitModelSO.
     /// However, in order to follow the Single Responsibility Principle, I will keep it as is.
     /// </summary>
-    [CreateAssetMenu(menuName = "Create Unit Factory", fileName = "ArmyModel", order = 0)]
+    [CreateAssetMenu(menuName = "DCLBattle/Units/Create Unit Factory", fileName = "ArmyModel", order = 0)]
     public class UnitFactorySO : ScriptableObject, IUnitFactory
     {
         [SerializeField]

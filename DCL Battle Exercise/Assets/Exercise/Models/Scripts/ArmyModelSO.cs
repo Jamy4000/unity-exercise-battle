@@ -7,7 +7,7 @@ using UnityEngine;
 /// for simplicity's sake the use-case of updating the SO manually has been discarded, and
 /// therefore the usage of ReadOnlyAttribute
 /// </summary>
-[CreateAssetMenu(menuName = "Create ArmyModel", fileName = "ArmyModel", order = 0)]
+[CreateAssetMenu(menuName = "DCLBattle/Army/Create Army Model", fileName = "ArmyModel", order = 0)]
 public class ArmyModelSO : ScriptableObject, IArmyModel
 {
     // TODO Could control this from UI too
