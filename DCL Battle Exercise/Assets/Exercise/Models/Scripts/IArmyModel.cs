@@ -21,7 +21,4 @@ public interface IArmyModel
 
     bool TryGetUnitModel(UnitType type, out IUnitModel unitModel);
     IUnitModel GetUnitModel(UnitType type);
-
-    // TODO We may want to move this away, or make the model itself the factory
-    DCLBattle.Battle.IUnitFactory GetUnitFactory(UnitType type);
 }

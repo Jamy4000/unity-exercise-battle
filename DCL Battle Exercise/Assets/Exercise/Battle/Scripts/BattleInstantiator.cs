@@ -78,7 +78,7 @@ namespace DCLBattle.Battle
                             UnitCreationParameters parameters = new(position, rotation, army, model.UnitType, strategyUpdater);
 
                             // Todo do we really need a model ?
-                            IUnit newUnit = model.UnitFactory.CreateUnit(parameters);
+                            IUnit newUnit = model.InstantiateUnit(parameters);
                             
                             army.AddUnit(newUnit);
                         }

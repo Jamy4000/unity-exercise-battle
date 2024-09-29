@@ -74,17 +74,6 @@ public class ArmyModelSO : ScriptableObject, IArmyModel
         return null;
     }
 
-    public IUnitFactory GetUnitFactory(UnitType type)
-    {
-        foreach (var modelObject in _unitsModels)
-        {
-            IUnitModel unitModel = (modelObject as IUnitModel);
-            if (unitModel.UnitType == type)
-                return unitModel.UnitFactory;
-        }
-        return null;
-    }
-
     // This makes sure our Units Prefabs are always in the right order
     private void OnValidate()
     {

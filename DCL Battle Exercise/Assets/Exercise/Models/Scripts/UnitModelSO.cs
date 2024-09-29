@@ -12,12 +12,19 @@ public class UnitModelSO : ScriptableObject, IUnitModel
     public UnitType UnitType => _unitType;
     public string UnitName => UnitType.ToString();
 
-    [SerializeField, Interface(typeof(IUnitFactory))]
-    private Object _unitFactory;
-    public IUnitFactory UnitFactory => _unitFactory as IUnitFactory;
+    [SerializeField]
+    private GameObject _unitPrefab;
 
     [SerializeField]
     private StrategySO[] _strategyCreators;
+
+    public virtual IUnit InstantiateUnit(UnitCreationParameters parameters)
+    {
+        // TODO Pooling
+        IUnit unitGameobject = Instantiate(_unitPrefab).GetComponent<IUnit>();
+        unitGameobject.Initialize(parameters);
+        return unitGameobject;
+    }
 
     public IStrategyUpdater CreateStrategyUpdater(ArmyStrategy strategy)
     {
@@ -36,4 +43,24 @@ public abstract class StrategySO : ScriptableObject
 {
     public abstract ArmyStrategy ArmyStrategy { get; }
     public abstract IStrategyUpdater CreateStrategyUpdater();
+}
+
+// Data Transfer Object; this avoid modifying the signature of CreateUnit if we want to add more data later on.
+// If some units have specific data that need to be injected, they can extend this class to do so
+public class UnitCreationParameters
+{
+    public readonly Vector3 Position;
+    public readonly Quaternion Rotation;
+    public readonly UnitType UnitType;
+    public readonly IArmy ParentArmy;
+    public readonly IStrategyUpdater StrategyUpdater;
+
+    public UnitCreationParameters(Vector3 position, Quaternion rotation, IArmy parentArmy, UnitType unitType, IStrategyUpdater strategyUpdater)
+    {
+        Position = position;
+        Rotation = rotation;
+        UnitType = unitType;
+        ParentArmy = parentArmy;
+        StrategyUpdater = strategyUpdater;
+    }
 }
