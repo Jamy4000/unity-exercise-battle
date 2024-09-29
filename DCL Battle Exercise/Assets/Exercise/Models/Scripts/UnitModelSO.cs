@@ -7,8 +7,8 @@ using UnityEngine;
 [CreateAssetMenu(menuName = "DCLBattle/Units/Create Unit Model", fileName = "UnitModel", order = 0)]
 public class UnitModelSO : ScriptableObject, IUnitModel
 {
-    [SerializeField]
-    private UnitType _unitType;
+    [SerializeField, ReadOnly]
+    private UnitType _unitType = UnitType.UNDEFINED;
     public UnitType UnitType => _unitType;
     public string UnitName => UnitType.ToString();
 
@@ -36,6 +36,11 @@ public class UnitModelSO : ScriptableObject, IUnitModel
 
         Debug.LogWarning($"No WarriorStrategySO was provided for {UnitName}'s {strategy} Strategy.");
         return null;
+    }
+
+    private void OnValidate()
+    {
+        _unitType = _unitPrefab != null ? _unitPrefab.GetComponent<IUnit>().UnitType : UnitType.UNDEFINED;
     }
 }
 

@@ -8,6 +8,7 @@ namespace DCLBattle.Battle
 
         public void UpdateStrategy(IUnit unitToUpdate)
         {
+            /*
             DCLBattleUtils.GetNearestObject(this, enemies, out UnitBase nearestEnemy);
 
             if (nearestEnemy == null)
@@ -18,6 +19,7 @@ namespace DCLBattle.Battle
             Move(toNearest.normalized);
 
             Attack(nearestEnemy);
+            */
         }
     }
 
@@ -27,6 +29,7 @@ namespace DCLBattle.Battle
 
         public void UpdateStrategy(IUnit unitToUpdate)
         {
+            /*
             Vector3 enemyCenter = DCLBattleUtils.GetCenter(enemies);
             float distToEnemyX = Mathf.Abs(enemyCenter.x - transform.position.x);
 
@@ -60,6 +63,7 @@ namespace DCLBattle.Battle
             }
 
             Attack(nearestEnemy);
+            */
         }
     }
 }

@@ -13,7 +13,7 @@ MonoBehaviour:
   m_Name: MagicianModel
   m_EditorClassIdentifier: 
   _unitType: 3
-  _unitFactory: {fileID: 11400000, guid: a55e94718b8243b45b978e19b4b00a98, type: 2}
+  _unitPrefab: {fileID: 1167668433936451836, guid: ea4bfd8c0c2c9714b9a0e8bc49bd0a4e, type: 3}
   _strategyCreators:
   - {fileID: 11400000, guid: 3c1a8cd04d742af42bd8cca2b9b350ba, type: 2}
   - {fileID: 11400000, guid: b55df920370ae2c43822bce01503c374, type: 2}

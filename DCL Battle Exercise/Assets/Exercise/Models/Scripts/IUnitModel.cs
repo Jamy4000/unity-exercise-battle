@@ -2,6 +2,7 @@ using DCLBattle.Battle;
 
 public enum UnitType
 {
+    UNDEFINED = -1,
     Warrior = 0,
     Archer = 1,
     Cavalry = 2,

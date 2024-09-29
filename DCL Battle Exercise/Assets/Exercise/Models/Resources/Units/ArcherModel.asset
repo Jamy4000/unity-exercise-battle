@@ -13,7 +13,7 @@ MonoBehaviour:
   m_Name: ArcherModel
   m_EditorClassIdentifier: 
   _unitType: 1
-  _unitFactory: {fileID: 11400000, guid: eb64a905eec18834ebee10b00ebebe1e, type: 2}
+  _unitPrefab: {fileID: 9015656096387748827, guid: 7fcbf22a3d6b39e4a94225667d73e4ff, type: 3}
   _strategyCreators:
   - {fileID: 11400000, guid: f7b5060d77d2b4a43b11bd203f36d41f, type: 2}
   - {fileID: 11400000, guid: 4dee95b6508767b4cb805854905d58ff, type: 2}

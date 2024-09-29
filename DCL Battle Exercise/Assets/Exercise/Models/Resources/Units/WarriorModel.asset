@@ -13,7 +13,7 @@ MonoBehaviour:
   m_Name: WarriorModel
   m_EditorClassIdentifier: 
   _unitType: 0
-  _unitFactory: {fileID: 11400000, guid: 06e5f8daa8bc7d94d9c2d968c27a0c7f, type: 2}
+  _unitPrefab: {fileID: 2551365212733471747, guid: 0fd0b7e968e3951438b9233a4dd13c50, type: 3}
   _strategyCreators:
   - {fileID: 11400000, guid: 3ec02e8fdb74f284caa782cee6dee052, type: 2}
   - {fileID: 11400000, guid: 86a5bc8d7a891e6458a27838e992339f, type: 2}

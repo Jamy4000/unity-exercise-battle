@@ -8,7 +8,7 @@ namespace DCLBattle.Battle
     {
         protected static readonly Vector3 _flatScale = new Vector3(1f, 0f, 1f);
 
-        public UnitType UnitType { get; private set; }
+        public abstract UnitType UnitType { get; }
         public IArmy Army { get; private set; }
         public Vector3 Position => transform.position;
 
@@ -33,7 +33,6 @@ namespace DCLBattle.Battle
         public virtual void Initialize(UnitCreationParameters parameters)
         {
             Army = parameters.ParentArmy;
-            UnitType = parameters.UnitType;
             _strategyUpdater = parameters.StrategyUpdater;
 
             GetComponentInChildren<Renderer>().material.color = Army.Model.ArmyColor;

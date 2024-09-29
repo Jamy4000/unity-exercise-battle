@@ -21,6 +21,8 @@ namespace DCLBattle.Battle
         public float MaxAttackCooldown => throw new System.NotImplementedException();
         public float PostAttackDelay => throw new System.NotImplementedException();
 
+        public override UnitType UnitType => UnitType.Magician;
+
         protected override void Awake()
         {
             base.Awake();
