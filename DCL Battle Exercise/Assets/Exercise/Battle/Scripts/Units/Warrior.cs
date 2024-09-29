@@ -10,19 +10,16 @@ namespace DCLBattle.Battle
 
         private float _attackRangeSq;
 
-        public override UnitType UnitType => UnitType.Warrior;
+        private float _attackCooldown = 0f;
+
+        public float Damage => throw new System.NotImplementedException();
+        public float MaxAttackCooldown => throw new System.NotImplementedException();
+        public float PostAttackDelay => throw new System.NotImplementedException();
 
         protected override void Awake()
         {
             base.Awake();
             _attackRangeSq = _attackRange * _attackRange;
-
-            // TODO Move this in SO
-            health = 50;
-            defense = 5;
-            attack = 20;
-            maxAttackCooldown = 1f;
-            postAttackDelay = 0;
         }
 
         public void Attack(IAttackReceiver target)
@@ -33,11 +30,11 @@ namespace DCLBattle.Battle
             if (Vector3.SqrMagnitude(transform.position - target.Position) > _attackRangeSq)
                 return;
 
-            _attackCooldown = maxAttackCooldown;
+            _attackCooldown = MaxAttackCooldown;
 
             Animator.SetTrigger("Attack");
 
-            target.Hit(this, target.Position, attack);
+            target.Hit(this, target.Position, Damage);
         }
 
         public void OnDeathAnimFinished()
@@ -49,6 +46,7 @@ namespace DCLBattle.Battle
 
         protected override void UpdateDefensive(List<UnitBase> allies, List<UnitBase> enemies)
         {
+            /*
             Vector3 enemyCenter = DCLBattleUtils.GetCenter(enemies);
 
             // TODO Hard coded value
@@ -76,10 +74,12 @@ namespace DCLBattle.Battle
             }
 
             Attack(nearestObject);
+            */
         }
 
         protected override void UpdateBasic(List<UnitBase> allies, List<UnitBase> enemies)
         {
+            /*
             DCLBattleUtils.GetNearestObject(this, enemies, out UnitBase nearestEnemy);
 
             if (nearestEnemy == null)
@@ -90,6 +90,7 @@ namespace DCLBattle.Battle
             Move(toNearest.normalized);
 
             Attack(nearestEnemy);
+            */
         }
     }
 }

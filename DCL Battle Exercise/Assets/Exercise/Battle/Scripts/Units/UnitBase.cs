@@ -6,25 +6,21 @@ namespace DCLBattle.Battle
 {
     public abstract class UnitBase : MonoBehaviour, IAttackReceiver, IUnit
     {
-        // todo turn those as abstract getters
-        public float health { get; protected set; }
-        public float defense { get; protected set; }
-        public float attack { get; protected set; }
-        public float maxAttackCooldown { get; protected set; }
-        public float postAttackDelay { get; protected set; }
-        public float speed { get; protected set; } = 0.1f;
-        
-        public abstract UnitType UnitType { get; }
+        protected static readonly Vector3 _flatScale = new Vector3(1f, 0f, 1f);
 
+        public UnitType UnitType { get; private set; }
         public IArmy Army { get; private set; }
+        public Vector3 Position => transform.position;
 
-        protected float _attackCooldown;
-        private Vector3 _lastPosition;
+        // TODO 
+        public float speed { get; protected set; } = 0.1f;
+
 
         // TODO seperate this with a View component
         protected Animator Animator { get; private set; }
 
-        public Vector3 Position => transform.position;
+        public float Health { get; private set; }
+        public float Defense => throw new System.NotImplementedException();
 
         protected abstract void UpdateDefensive(List<UnitBase> allies, List<UnitBase> enemies);
         protected abstract void UpdateBasic(List<UnitBase> allies, List<UnitBase> enemies);
@@ -37,10 +33,14 @@ namespace DCLBattle.Battle
         public virtual void Initialize(UnitCreationParameters parameters)
         {
             Army = parameters.ParentArmy;
+            UnitType = parameters.Model.UnitType;
+
             GetComponentInChildren<Renderer>().material.color = Army.Model.ArmyColor;
             transform.SetPositionAndRotation(parameters.Position, parameters.Rotation);
         }
 
+        /*
+         *TODO This shouldn't be in UnitBase
         public virtual void Move(Vector3 delta)
         {
             if (_attackCooldown > maxAttackCooldown - postAttackDelay)
@@ -48,12 +48,13 @@ namespace DCLBattle.Battle
 
             transform.position += delta * speed;
         }
+        */
 
         public virtual void Hit(IAttacker attacker, Vector3 hitPosition, float damage)
         {
-            health -= Mathf.Max(damage - defense, 0);
+            Health -= Mathf.Max(damage - Defense, 0);
 
-            if (health < 0)
+            if (Health < 0)
             {
                 transform.forward = attacker.Position - transform.position;
 
@@ -93,11 +94,14 @@ namespace DCLBattle.Battle
             */
         }
 
+        /*
+         * TODO Should be linked to IAttacker instead
         void UpdateBasicRules(List<UnitBase> allies, List<UnitBase> enemies)
         {
             _attackCooldown -= Time.deltaTime;
             EvadeAllies(allies, enemies);
         }
+        */
 
         void EvadeAllies(List<UnitBase> allies, List<UnitBase> enemies)
         {

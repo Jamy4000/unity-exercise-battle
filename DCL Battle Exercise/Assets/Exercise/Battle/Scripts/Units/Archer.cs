@@ -13,21 +13,16 @@ namespace DCLBattle.Battle
         private Object _arrowPrefab;
         
 
-        private static readonly Vector3 _flatScale = new Vector3(1f, 0f, 1f);
+        private float _attackCooldown = 0f;
 
-        public override UnitType UnitType => UnitType.Archer;
+        public float Damage => throw new System.NotImplementedException();
+        public float MaxAttackCooldown => throw new System.NotImplementedException();
+        public float PostAttackDelay => throw new System.NotImplementedException();
 
         protected override void Awake()
         {
             base.Awake();
             _attackRangeSq = _attackRange * _attackRange;
-
-            // TODO Move this to a SO
-            health = 5;
-            defense = 0;
-            attack = 10;
-            maxAttackCooldown = 5f;
-            postAttackDelay = 1f;
         }
 
         public void Attack(IAttackReceiver target)
@@ -43,7 +38,7 @@ namespace DCLBattle.Battle
             projectile.Launch(this, target);
 
             Animator.SetTrigger("Attack");
-            _attackCooldown = maxAttackCooldown;
+            _attackCooldown = MaxAttackCooldown;
         }
 
         public void OnDeathAnimFinished()

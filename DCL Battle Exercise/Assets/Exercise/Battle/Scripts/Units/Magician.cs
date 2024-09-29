@@ -14,21 +14,17 @@ namespace DCLBattle.Battle
         [SerializeField, Interface(typeof(IProjectile))]
         private Object _arrowPrefab;
 
-        public override UnitType UnitType => UnitType.Magician;
 
-        private static readonly Vector3 _flatScale = new Vector3(1f, 0f, 1f);
+        private float _attackCooldown = 0f;
+
+        public float Damage => throw new System.NotImplementedException();
+        public float MaxAttackCooldown => throw new System.NotImplementedException();
+        public float PostAttackDelay => throw new System.NotImplementedException();
 
         protected override void Awake()
         {
             base.Awake();
             _attackRangeSq = _attackRange * _attackRange;
-
-            // TODO Move this to a SO
-            health = 5;
-            defense = 0;
-            attack = 10;
-            maxAttackCooldown = 5f;
-            postAttackDelay = 1f;
         }
 
         public void Attack(IAttackReceiver target)
@@ -44,7 +40,7 @@ namespace DCLBattle.Battle
             projectile.Launch(this, target);
 
             Animator.SetTrigger("Attack");
-            _attackCooldown = maxAttackCooldown;
+            _attackCooldown = MaxAttackCooldown;
         }
 
         public void OnDeathAnimFinished()
@@ -54,6 +50,7 @@ namespace DCLBattle.Battle
 
         protected override void UpdateDefensive(List<UnitBase> allies, List<UnitBase> enemies)
         {
+            /*
             Vector3 enemyCenter = DCLBattleUtils.GetCenter(enemies);
             float distToEnemyX = Mathf.Abs(enemyCenter.x - transform.position.x);
 
@@ -87,10 +84,12 @@ namespace DCLBattle.Battle
             }
 
             Attack(nearestEnemy);
+            */
         }
 
         protected override void UpdateBasic(List<UnitBase> allies, List<UnitBase> enemies)
         {
+            /*
             DCLBattleUtils.GetNearestObject(this, enemies, out UnitBase nearestEnemy);
 
             if (nearestEnemy == null)
@@ -101,6 +100,7 @@ namespace DCLBattle.Battle
             Move(toNearest.normalized);
 
             Attack(nearestEnemy);
+            */
         }
     }
 }
