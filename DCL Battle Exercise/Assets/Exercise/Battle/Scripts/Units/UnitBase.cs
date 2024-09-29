@@ -39,16 +39,16 @@ namespace DCLBattle.Battle
             transform.SetPositionAndRotation(parameters.Position, parameters.Rotation);
         }
 
-        /*
-         *TODO This shouldn't be in UnitBase
         public virtual void Move(Vector3 delta)
         {
-            if (_attackCooldown > maxAttackCooldown - postAttackDelay)
-                return;
+            /*
+             *TODO This shouldn't be in UnitBase
+                if (_attackCooldown > maxAttackCooldown - postAttackDelay)
+                    return;
 
-            transform.position += delta * speed;
+                transform.position += delta * speed;
+            */
         }
-        */
 
         public virtual void Hit(IAttacker attacker, Vector3 hitPosition, float damage)
         {
