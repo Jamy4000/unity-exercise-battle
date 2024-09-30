@@ -19,6 +19,9 @@ public interface IUnitModel
     float AttackRange { get; }
     float AttackCooldown { get; }
 
+    UnitStateData[] UnitStatesData { get; }
+    UnitStateID DefaultState { get; }
+
     IStrategyUpdater CreateStrategyUpdater(ArmyStrategy armyStrategy);
     UnitBase InstantiateUnit(UnitCreationParameters unitCreationParameters);
 }

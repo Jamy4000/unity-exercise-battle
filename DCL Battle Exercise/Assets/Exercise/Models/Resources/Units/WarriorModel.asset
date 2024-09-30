@@ -21,4 +21,9 @@ MonoBehaviour:
   _defense: 2
   _attackRange: 2
   _attackCooldown: 1
+  _unitStatesData:
+  - {fileID: 11400000, guid: 0f115658fe11f134b826f7c39ca300ec, type: 2}
+  - {fileID: 11400000, guid: e24b1b4afb92a1b448bf9e723088faa3, type: 2}
+  - {fileID: 11400000, guid: 141aa7d96dbbeec438e07a2de1dd2349, type: 2}
+  _defaultState: 0
   _damage: 10

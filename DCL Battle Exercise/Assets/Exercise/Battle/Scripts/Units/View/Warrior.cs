@@ -11,7 +11,7 @@ namespace DCLBattle.Battle
             if (AttackCooldown > 0)
                 return;
 
-            if (Vector3.SqrMagnitude(transform.position - target.Position) > (AttackRange * AttackRange))
+            if (Vector3.SqrMagnitude(transform.position - target.Position) > Model.AttackRangeSq)
                 return;
 
             Animator.SetTrigger("Attack");

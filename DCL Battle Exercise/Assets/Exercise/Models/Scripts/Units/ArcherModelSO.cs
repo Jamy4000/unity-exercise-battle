@@ -4,6 +4,7 @@ using UnityEngine;
 [CreateAssetMenu(menuName = "DCLBattle/Units/Model/Archer", fileName = "ArcherModel", order = 0)]
 public sealed class ArcherModelSO : UnitModelSO
 {
+    [Header("Range Attack Parameters")]
     [SerializeField]
     private float _maxAttackCooldown = 2f;
     public float MaxAttackCooldown => _maxAttackCooldown;

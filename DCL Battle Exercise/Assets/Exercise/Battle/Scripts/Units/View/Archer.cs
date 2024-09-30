@@ -6,7 +6,6 @@ namespace DCLBattle.Battle
     {
         public override UnitType UnitType => UnitType.Archer;
 
-
         public override void Move(Vector3 delta)
         {
             // TODO We could avoid a bunch of calculations if we were to check this before updating the strategy and evade plan

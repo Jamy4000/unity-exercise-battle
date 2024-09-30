@@ -18,9 +18,8 @@ namespace DCLBattle.Battle
 
         public override void Initialize(UnitCreationParameters parameters)
         {
-            base.Initialize(parameters);
-
             Model = parameters.UnitModel as TModel;
+            base.Initialize(parameters);
         }
 
         protected override void Update()
@@ -33,6 +32,22 @@ namespace DCLBattle.Battle
         {
             AttackCooldown = Model.AttackCooldown;
         }
+
+        protected override UnitFSM CreateFsm()
+        {
+            List<UnitState> states = new(Model.UnitStatesData.Length);
+            UnitState defaultState = null;
+
+            for (int i = 0; i < Model.UnitStatesData.Length; i++)
+            {
+                UnitState state = Model.UnitStatesData[i].CreateStateInstance(this);
+                states.Add(state);
+                if (state.StateEnum == Model.DefaultState)
+                    defaultState = state;
+            }
+
+            return new UnitFSM(defaultState, states);
+        }
     }
 
     /// <summary>
@@ -40,12 +55,6 @@ namespace DCLBattle.Battle
     /// </summary>
     public abstract class UnitBase : MonoBehaviour, IAttackReceiver, IAttacker
     {
-        [Header("FSM Data"), SerializeField]
-        private UnitStateData[] _unitStatesData;
-
-        [SerializeField]
-        private UnitStateID _defaultState = UnitStateID.Idle;
-
         public Army Army { get; private set; }
         public Vector3 Position => transform.position;
 
@@ -73,7 +82,6 @@ namespace DCLBattle.Battle
         protected virtual void Awake()
         {
             Animator = GetComponentInChildren<Animator>();
-            InitializeFsm();
         }
 
         // Create when instantiated
@@ -81,6 +89,7 @@ namespace DCLBattle.Battle
         {
             Army = parameters.ParentArmy;
             StrategyUpdater = parameters.StrategyUpdater;
+            Fsm = CreateFsm();
 
             _currentHealth = parameters.UnitModel.BaseHealth;
             
@@ -89,22 +98,6 @@ namespace DCLBattle.Battle
             transform.name = $"{parameters.ParentArmy.Model.ArmyName} - {parameters.UnitModel.UnitName}";
 
             _lastPosition = transform.position;
-        }
-
-        private void InitializeFsm()
-        {
-            List<UnitState> states = new(_unitStatesData.Length);
-            UnitState defaultState = null;
-
-            for (int i = 0; i < _unitStatesData.Length; i++)
-            {
-                UnitState state = _unitStatesData[i].CreateStateInstance(this);
-                states.Add(state);
-                if (state.StateEnum == _defaultState)
-                    defaultState = state;
-            }
-
-            Fsm = new UnitFSM(defaultState, states);
         }
 
         protected virtual void Update()
@@ -174,6 +167,7 @@ namespace DCLBattle.Battle
             Move(moveOffset);
         }
 
+        protected abstract UnitFSM CreateFsm();
         public abstract void Attack(IAttackReceiver attackReceiver);
     }
 }

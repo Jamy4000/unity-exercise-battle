@@ -18,6 +18,7 @@ public class UnitModelSO : ScriptableObject, IUnitModel
     [SerializeField]
     private StrategySO[] _strategyCreators;
 
+    [Header("Defense Parameters")]
     [SerializeField]
     private float _baseHealth = 50f;
     public float BaseHealth => _baseHealth;
@@ -26,6 +27,7 @@ public class UnitModelSO : ScriptableObject, IUnitModel
     private float _defense = 2f;
     public float Defense => _defense;
 
+    [Header("Attack Parameters")]
     [SerializeField]
     private float _attackRange = 2f;
     public float AttackRange => _attackRange;
@@ -34,6 +36,14 @@ public class UnitModelSO : ScriptableObject, IUnitModel
     [SerializeField]
     private float _attackCooldown = 1f;
     public float AttackCooldown => _attackCooldown;
+
+    [Header("FSM Data"), SerializeField]
+    private UnitStateData[] _unitStatesData;
+    public UnitStateData[] UnitStatesData => _unitStatesData;
+
+    [SerializeField]
+    private UnitStateID _defaultState = UnitStateID.Idle;
+    public UnitStateID DefaultState => _defaultState;
 
     private void OnEnable()
     {
