@@ -27,7 +27,7 @@ namespace DCLBattle.Battle
         }
 
         // TODO use event instead
-        public void OnArmyWon(IArmy winner)
+        public void OnArmyWon(Army winner)
         {
             _armyWins.text = $"The Armies of {winner.Model.ArmyName} wins!";
         }

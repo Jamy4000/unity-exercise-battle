@@ -25,16 +25,16 @@ namespace DCLBattle.Battle
         [SerializeField]
         private ArmySpawnParameters[] _armiesToSpawn;
 
-        private IArmy[] _armies;
+        private Army[] _armies;
 
-        public IArmy GetArmy(int index) => _armies[index];
+        public Army GetArmy(int index) => _armies[index];
         public int ArmiesCount => _armies.Length;
 
         private static readonly IStrategyUpdater[,] _strategyUpdaters = new IStrategyUpdater[IArmyModel.UnitLength, IStrategyUpdater.StrategyCount];
 
         void Awake()
         {
-            _armies = new IArmy[_armiesToSpawn.Length];
+            _armies = new Army[_armiesToSpawn.Length];
 
             // For each army that should spawn on the map
             for (int armyIndex = 0; armyIndex < _armiesToSpawn.Length; armyIndex++)
@@ -73,10 +73,10 @@ namespace DCLBattle.Battle
             }
         }
 
-        private IArmy CreateArmy(IArmyModel armyModel, Bounds spawnBounds)
+        private Army CreateArmy(IArmyModel armyModel, Bounds spawnBounds)
         {
             // TODO remove hard implementation
-            IArmy army = new Army(armyModel);
+            Army army = new Army(armyModel);
 
             // For each type of unit in the game
             for (int unitTypeIndex = 0; unitTypeIndex < IArmyModel.UnitLength; unitTypeIndex++)
@@ -95,7 +95,7 @@ namespace DCLBattle.Battle
             return army;
         }
 
-        private void CreateUnitsForArmy(IArmyModel armyModel, IArmy army, IUnitModel unitModel, Bounds spawnBounds)
+        private void CreateUnitsForArmy(IArmyModel armyModel, Army army, IUnitModel unitModel, Bounds spawnBounds)
         {
             // We spawn the amount of units of this type provided in the Launch Menu
             int maxUnitCount = armyModel.GetUnitCount(unitModel.UnitType);

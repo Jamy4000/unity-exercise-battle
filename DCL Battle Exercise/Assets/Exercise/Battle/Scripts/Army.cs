@@ -4,7 +4,7 @@ using UnityEngine;
 
 namespace DCLBattle.Battle
 {
-    public sealed class Army : IArmy
+    public class Army
     {
         public IArmyModel Model { get; }
         public int RemainingUnitsCount => _units.Count;
@@ -17,7 +17,7 @@ namespace DCLBattle.Battle
         private readonly List<float> _queryDistances = new(128);
 
         private const int _MAX_POINTS_PER_LEAF_NODE = 32;
-        private List<IArmy> _enemyArmies = new();
+        private readonly List<Army> _enemyArmies = new();
 
         public Army(IArmyModel model)
         {
@@ -67,7 +67,13 @@ namespace DCLBattle.Battle
 
         public IUnit GetClosestUnit(Vector3 source, out float distance)
         {
-            // TODO Check that there are still units
+            // TODO this check shouldn't be necessary, search should not be done if an army is empty
+            if (_units.Count == 0)
+            {
+                distance = Mathf.Infinity;
+                return null;
+            }
+
             _queryResults.Clear();
 
             // spherical query
@@ -93,12 +99,12 @@ namespace DCLBattle.Battle
             return maxResults;
         }
 
-        public List<IArmy> GetEnemyArmies()
+        public List<Army> GetEnemyArmies()
         {
             return _enemyArmies;
         }
 
-        public void AddEnemyArmy(IArmy enemy)
+        public void AddEnemyArmy(Army enemy)
         {
             _enemyArmies.Add(enemy);
         }

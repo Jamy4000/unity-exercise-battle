@@ -9,7 +9,7 @@ namespace DCLBattle.Battle
         protected static readonly Vector3 _flatScale = new Vector3(1f, 0f, 1f);
 
         public abstract UnitType UnitType { get; }
-        public IArmy Army { get; private set; }
+        public Army Army { get; private set; }
         public Vector3 Position => transform.position;
 
         // TODO 

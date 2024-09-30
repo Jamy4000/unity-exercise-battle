@@ -10,23 +10,24 @@ namespace DCLBattle.Battle
 
         public void UpdateStrategy(IUnit unitToUpdate)
         {
-            List<IArmy> enemyArmies = unitToUpdate.Army.GetEnemyArmies();
-            (IUnit, float)[] closestUnits = new (IUnit, float)[enemyArmies.Count];
+            List<Army> enemyArmies = unitToUpdate.Army.GetEnemyArmies();
+
+            (IUnit unit, float distance) closestUnit = new (null, Mathf.Infinity);
             for (int armyIndex = 0; armyIndex < enemyArmies.Count; armyIndex++)
             {
-                IUnit unit = enemyArmies[armyIndex].GetClosestUnit(unitToUpdate.Position, out float distance);
-                closestUnits[armyIndex] = (unit, distance);
-            }
-
-            (IUnit unit, float distance) closestUnit = (null, Mathf.Infinity);
-            foreach ((IUnit unit, float distance) unitDistancePair in closestUnits)
-            {
-                if (unitDistancePair.unit == null)
+                IUnit enemyUnit = enemyArmies[armyIndex].GetClosestUnit(unitToUpdate.Position, out float enemyDistance);
+                // no unit found
+                if (enemyUnit == null)
                     continue;
 
-                if (closestUnit.unit == null || unitDistancePair.distance < closestUnit.distance)
-                    closestUnit = unitDistancePair;
+                if (closestUnit.unit == null || enemyDistance < closestUnit.distance)
+                    closestUnit = (enemyUnit, enemyDistance);
             }
+
+            // if they are no more unit to attack, this army won.
+            // TODO This check isn't really necessary as systems should stop as soon as 
+            if (closestUnit.unit == null)
+                return;
 
             Vector3 toNearest = Vector3.Normalize(closestUnit.unit.Position - unitToUpdate.Position);
             toNearest.Scale(IStrategyUpdater.FlatScale);

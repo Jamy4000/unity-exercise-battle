@@ -57,10 +57,10 @@ public class UnitCreationParameters
     public readonly Vector3 Position;
     public readonly Quaternion Rotation;
     public readonly UnitType UnitType;
-    public readonly IArmy ParentArmy;
+    public readonly Army ParentArmy;
     public readonly IStrategyUpdater StrategyUpdater;
 
-    public UnitCreationParameters(Vector3 position, Quaternion rotation, IArmy parentArmy, UnitType unitType, IStrategyUpdater strategyUpdater)
+    public UnitCreationParameters(Vector3 position, Quaternion rotation, Army parentArmy, UnitType unitType, IStrategyUpdater strategyUpdater)
     {
         Position = position;
         Rotation = rotation;
