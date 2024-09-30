@@ -69,3 +69,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: c99726f495e5840449eec2a95534084c, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  _unitStatesData:
+  - {fileID: 11400000, guid: 47a6708b3f5d13f4892d8662bb7daf81, type: 2}
+  - {fileID: 11400000, guid: 453b1303609380140ab9afead0c3cdb8, type: 2}
+  - {fileID: 11400000, guid: 75fd2a77a325cce49bf76bc7232dcf1f, type: 2}
+  - {fileID: 11400000, guid: 734f08eb1e0b523499c07a73764169db, type: 2}
+  _defaultState: 0

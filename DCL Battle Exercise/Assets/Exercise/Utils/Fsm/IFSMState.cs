@@ -24,6 +24,8 @@ namespace Utils
 
         void StartState(TStateEnum previousState);
 
+        void UpdateState();
+
         void EndState();
 
         List<TStateEnum> GetTransitionsStates();

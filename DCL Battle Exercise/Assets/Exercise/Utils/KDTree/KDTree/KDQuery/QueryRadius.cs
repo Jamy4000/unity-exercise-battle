@@ -36,7 +36,7 @@ namespace DataStructures.ViliWonka.KDTree {
         /// <param name="queryPosition">Position</param>
         /// <param name="queryRadius">Radius</param>
         /// <param name="resultIndices">Initialized list, cleared.</param>
-        public void Radius(KDTree tree, Vector3 queryPosition, float queryRadius, List<int> resultIndices) {
+        public void Radius(KDTree tree, Vector3 queryPosition, float queryRadius, List<int> resultIndices, List<float> resultDistances = null) {
 
             Reset();
 
@@ -120,6 +120,7 @@ namespace DataStructures.ViliWonka.KDTree {
                         if(Vector3.SqrMagnitude(points[index] - queryPosition) <= squaredRadius) {
 
                             resultIndices.Add(index);
+                            resultDistances?.Add(Mathf.Sqrt(squaredRadius));
                         }
                     }
 

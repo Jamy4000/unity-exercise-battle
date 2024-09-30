@@ -16,6 +16,7 @@ namespace DCLBattle.Battle
         public virtual bool CanBeExited() => true;
 
         public abstract void StartState(UnitStateID previousState);
+        public abstract void UpdateState();
         public abstract void EndState();
 
         public abstract bool HasPossibleTransitionsTo(UnitStateID stateEnum);
@@ -28,12 +29,14 @@ namespace DCLBattle.Battle
         where TData : UnitStateData
     {
         protected readonly TData StateData;
+        protected readonly UnitBase Unit;
 
         public override UnitStateID StateEnum => StateData.StateID;
 
-        protected UnitState(TData stateData)
+        protected UnitState(TData stateData, UnitBase unit)
         {
             StateData = stateData;
+            Unit = unit;
         }
 
         public override List<UnitStateID> GetTransitionsStates()

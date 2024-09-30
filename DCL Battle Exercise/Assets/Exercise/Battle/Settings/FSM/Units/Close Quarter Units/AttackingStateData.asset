@@ -12,4 +12,4 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: f19cb8839994b10459eaab8491b92d0e, type: 3}
   m_Name: AttackingStateData
   m_EditorClassIdentifier: 
-  <ExitStates>k__BackingField: 0100000000000000
+  <ExitStates>k__BackingField: 040000000100000000000000

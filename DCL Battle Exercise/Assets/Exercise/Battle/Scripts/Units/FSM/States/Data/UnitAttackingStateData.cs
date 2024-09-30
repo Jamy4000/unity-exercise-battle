@@ -7,9 +7,9 @@ namespace DCLBattle.Battle
     {
         public override UnitStateID StateID => UnitStateID.Attacking;
 
-        public override UnitState CreateStateInstance()
+        public override UnitState CreateStateInstance(UnitBase unit)
         {
-            return new UnitAttackingState(this);
+            return new UnitAttackingState(this, unit);
         }
     }
 

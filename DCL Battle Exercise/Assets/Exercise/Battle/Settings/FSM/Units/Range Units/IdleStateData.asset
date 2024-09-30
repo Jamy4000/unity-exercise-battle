@@ -12,4 +12,4 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: ebbff121d2bde3e4cb5dbb2a77ac63e2, type: 3}
   m_Name: IdleStateData
   m_EditorClassIdentifier: 
-  <ExitStates>k__BackingField: 0200000001000000
+  <ExitStates>k__BackingField: 020000000400000001000000

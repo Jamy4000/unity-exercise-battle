@@ -1,8 +1,10 @@
+using UnityEngine;
+
 namespace DCLBattle.Battle
 {
-    public sealed class UnitIdleState : UnitState<UnitIdleStateData>
+    public sealed class UnitWalkState : UnitState<UnitWalkStateData>
     {
-        public UnitIdleState(UnitIdleStateData stateData) : base(stateData)
+        public UnitWalkState(UnitWalkStateData stateData, UnitBase unitBase) : base(stateData, unitBase)
         {
         }
 
@@ -16,6 +18,10 @@ namespace DCLBattle.Battle
         }
 
         public override void StartState(UnitStateID previousState)
+        {
+        }
+
+        public override void UpdateState()
         {
         }
 

@@ -29,6 +29,7 @@ namespace DCLBattle.Battle
 
         public Army GetArmy(int index) => _armies[index];
         public int ArmiesCount => _armies.Length;
+        public Vector3 BattleCenter { get; private set; }
 
         private static readonly IStrategyUpdater[,] _strategyUpdaters = new IStrategyUpdater[IArmyModel.UnitLength, IStrategyUpdater.StrategyCount];
 
@@ -66,11 +67,17 @@ namespace DCLBattle.Battle
 
         void Update()
         {
-            // TODO introduce GameUpdater
             foreach (var army in _armies)
             {
+                if (army.RemainingUnitsCount == 0)
+                    continue;
+
+                BattleCenter += army.GetCenter();
+                
                 army.Update();
             }
+
+            BattleCenter /= _armies.Length;
         }
 
         private Army CreateArmy(IArmyModel armyModel, Bounds spawnBounds)

@@ -6,18 +6,24 @@ namespace DCLBattle.Battle
 {
     public abstract class UnitBase : MonoBehaviour, IAttackReceiver
     {
-        protected static readonly Vector3 _flatScale = new Vector3(1f, 0f, 1f);
+        [Header("FSM Data"), SerializeField]
+        private UnitStateData[] _unitStatesData;
 
-        public abstract UnitType UnitType { get; }
+        [SerializeField]
+        private UnitStateID _defaultState = UnitStateID.Idle;
+
+        protected UnitFSM Fsm { get; private set; } = null;
         public Army Army { get; private set; }
         public Vector3 Position => transform.position;
 
-        // TODO 
-        public float speed { get; protected set; } = 0.1f;
+        public abstract UnitType UnitType { get; }
 
         protected Animator Animator { get; private set; }
 
         private IStrategyUpdater _strategyUpdater;
+
+        // TODO static for now as I don't see why we would want to have that for every unit, except if we end up threading this
+        private static readonly (UnitBase unit, float distance)[] _unitsInRadius = new (UnitBase, float)[16];
 
         // TODO
         public float Health { get; private set; } = 10f;
@@ -26,8 +32,10 @@ namespace DCLBattle.Battle
         protected virtual void Awake()
         {
             Animator = GetComponentInChildren<Animator>();
+            InitializeFsm();
         }
 
+        // Create when instantiated
         public virtual void Initialize(UnitCreationParameters parameters)
         {
             Army = parameters.ParentArmy;
@@ -38,9 +46,25 @@ namespace DCLBattle.Battle
             transform.name = $"{parameters.ParentArmy.Model.ArmyName} - {parameters.UnitType}";
         }
 
+        private void InitializeFsm()
+        {
+            List<UnitState> states = new List<UnitState>(_unitStatesData.Length);
+            UnitState defaultState = null;
+
+            for (int i = 0; i < _unitStatesData.Length; i++)
+            {
+                UnitState state = _unitStatesData[i].CreateStateInstance(this);
+                states.Add(state);
+                if (state.StateEnum == _defaultState)
+                    defaultState = state;
+            }
+
+            Fsm = new UnitFSM(defaultState, states);
+        }
+
         public virtual void Move(Vector3 delta)
         {
-            transform.position += delta * speed;
+            transform.position += delta;
         }
 
         public virtual void Hit(IAttacker attacker, Vector3 hitPosition, float damage)
@@ -68,49 +92,34 @@ namespace DCLBattle.Battle
             // TODO
             //UpdateBasicRules(allies, enemies);
 
-            _strategyUpdater.UpdateStrategy(this);
+            //_strategyUpdater.UpdateStrategy(this);
 
             // TODO
             //Animator.SetFloat("MovementSpeed", (transform.position - _lastPosition).magnitude / speed);
             //_lastPosition = transform.position;
         }
 
-        void UpdateBasicRules(List<UnitBase> allies, List<UnitBase> enemies)
+        void EvadeCloseUnits()
         {
-            // TODO
-            // _attackCooldown -= Time.deltaTime;
-            EvadeCloseUnits(allies, enemies);
-        }
+            // TODO we should not be doing that every frame for every unit
+            var battleInstantiator = UnityServiceLocator.ServiceLocator.Global.Get<BattleInstantiator>();
 
-        void EvadeCloseUnits(List<UnitBase> allies, List<UnitBase> enemies)
-        {
-            var allUnits = allies.Union(enemies).ToList();
-
-            // TODO that would be nice to cache
-            Vector3 center = DCLBattleUtils.GetCenter(allUnits);
-
-            float centerSqDist = Vector3.SqrMagnitude(gameObject.transform.position - center);
-
-            // TODO Hard coded value
-            if (centerSqDist > (80.0f * 80.0f))
+            Vector3 moveOffset = Vector3.zero;
+            for (int armyIndex = 0; armyIndex < battleInstantiator.ArmiesCount; armyIndex++)
             {
-                Vector3 toNearest = Vector3.Normalize(center - transform.position);
-                transform.position -= toNearest * (80.0f - Mathf.Sqrt(centerSqDist));
-                return;
-            }
+                var army = battleInstantiator.GetArmy(armyIndex);
+                // TODO Hard Coded value
+                int unitsInRadiusCount = army.GetUnitsInRadius_NoAlloc(Position, 2f, _unitsInRadius);
 
-            foreach (var obj in allUnits)
-            {
-                float sqDist = Vector3.SqrMagnitude(gameObject.transform.position - obj.transform.position);
-
-                // TODO Hard coded value
-                if (sqDist < 4f)
+                for (int unitIndex = 0; unitIndex < unitsInRadiusCount; unitIndex++)
                 {
-                    Vector3 toNearest = Vector3.Normalize(obj.transform.position - transform.position);
+                    Vector3 toNearest = Vector3.Normalize(_unitsInRadius[unitIndex].unit.Position - transform.position);
                     // TODO Hard Coded value
-                    transform.position -= toNearest * (2f - Mathf.Sqrt(sqDist));
+                    moveOffset -= toNearest * (2f - Mathf.Sqrt(_unitsInRadius[unitIndex].distance));
                 }
             }
+
+            Move(moveOffset);
         }
 
         // TODO This shouldn't be here

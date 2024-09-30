@@ -1,8 +1,9 @@
 ﻿using System.Collections.Generic;
+using UnityEngine.UIElements;
 
 namespace Utils
 {
-    public abstract class FSM<TState, TStateEnum> : I_LateUpdateOnly, System.IDisposable
+    public abstract class FSM<TState, TStateEnum> : I_UpdateOnly, I_LateUpdateOnly, System.IDisposable
         where TState : class, IFSMState<TStateEnum>
         where TStateEnum : struct, System.Enum
     {
@@ -21,7 +22,14 @@ namespace Utils
             {
                 RegisterNewState(states[stateIndex]);
             }
+
+            GameUpdater.Register(this);
             StartNewState(defaultState, default);
+        }
+
+        public void ManualUpdate()
+        {
+            ActiveState.UpdateState();
         }
 
         public void ManualLateUpdate()
@@ -39,7 +47,20 @@ namespace Utils
                     StopCurrentState();
                     StartNewState(States[stateEnum], ActiveState.StateEnum);
                     _pendingTransitions.Clear();
-                    GameUpdater.Unregister(this);
+                    return;
+                }
+            }
+
+            // if no pending state was waiting to be entered, we check the potential exit states
+            List<TStateEnum> potentialExitStates = ActiveState.GetTransitionsStates();
+            for (int stateIndex = 0; stateIndex < potentialExitStates.Count; stateIndex++)
+            {
+                TState state = States[potentialExitStates[stateIndex]];
+                if (state.CanBeEntered())
+                {
+                    StopCurrentState();
+                    StartNewState(state, ActiveState.StateEnum);
+                    _pendingTransitions.Clear();
                     return;
                 }
             }
@@ -67,7 +88,6 @@ namespace Utils
             States.Clear();
             _currentStatePotentialTransitions.Clear();
             _pendingTransitions.Clear();
-            GameUpdater.Unregister(this);
         }
 
         public void RegisterNewState(TState stateToRegister)
@@ -153,8 +173,6 @@ namespace Utils
             // The transition was already requested
             if (!_pendingTransitions.Contains(newStateEnum))
                 _pendingTransitions.Add(newStateEnum);
-
-            GameUpdater.Register(this);
         }
 
         private void ExitCurrentState()
@@ -171,7 +189,6 @@ namespace Utils
                 if (state.CanBeEntered())
                 {
                     _pendingTransitions.Add(stateEnum);
-                    GameUpdater.Register(this);
                     return;
                 }
             }

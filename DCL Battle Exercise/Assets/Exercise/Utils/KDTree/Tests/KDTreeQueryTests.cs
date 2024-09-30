@@ -121,6 +121,7 @@ namespace DataStructures.ViliWonka.Tests {
             }
 
             var resultIndices = new List<int>();
+            var resultDistances = new List<float>();
 
             Color markColor = Color.red;
             markColor.a = 0.5f;

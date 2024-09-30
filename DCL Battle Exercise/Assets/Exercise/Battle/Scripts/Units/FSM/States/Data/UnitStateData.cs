@@ -12,6 +12,6 @@ namespace DCLBattle.Battle
 
         // Thid is an alternative to the factory pattern boilerplate code;
         // the data provides the implementation of the logic while injecting itself in the state.
-        public abstract UnitState CreateStateInstance();
+        public abstract UnitState CreateStateInstance(UnitBase unit);
     }
 }

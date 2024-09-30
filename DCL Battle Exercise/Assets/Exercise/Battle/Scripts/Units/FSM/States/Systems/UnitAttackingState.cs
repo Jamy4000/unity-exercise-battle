@@ -2,7 +2,7 @@ namespace DCLBattle.Battle
 {
     public sealed class UnitAttackingState : UnitState<UnitAttackingStateData>
     {
-        public UnitAttackingState(UnitAttackingStateData stateData) : base(stateData)
+        public UnitAttackingState(UnitAttackingStateData stateData, UnitBase unit) : base(stateData, unit)
         {
         }
 
@@ -16,6 +16,10 @@ namespace DCLBattle.Battle
         }
 
         public override void StartState(UnitStateID previousState)
+        {
+        }
+
+        public override void UpdateState()
         {
         }
 

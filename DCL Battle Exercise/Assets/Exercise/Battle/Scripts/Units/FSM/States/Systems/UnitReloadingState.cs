@@ -1,8 +1,10 @@
+using static UnityEngine.UI.CanvasScaler;
+
 namespace DCLBattle.Battle
 {
-    public sealed class UnitWalkState : UnitState<UnitWalkStateData>
+    public sealed class UnitReloadingState : UnitState<UnitReloadingStateData>
     {
-        public UnitWalkState(UnitWalkStateData stateData) : base(stateData)
+        public UnitReloadingState(UnitReloadingStateData stateData, UnitBase unit) : base(stateData, unit)
         {
         }
 
@@ -16,6 +18,10 @@ namespace DCLBattle.Battle
         }
 
         public override void StartState(UnitStateID previousState)
+        {
+        }
+
+        public override void UpdateState()
         {
         }
 

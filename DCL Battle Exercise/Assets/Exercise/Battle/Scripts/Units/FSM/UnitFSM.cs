@@ -13,7 +13,8 @@ namespace DCLBattle.Battle
         Idle = 0,
         Walk = 1,
         Attacking = 2,
-        Reloading = 3
+        Reloading = 3,
+        MoveToCenter = 4
     }
 
     public sealed class UnitFSM : FSM<UnitState, UnitStateID>

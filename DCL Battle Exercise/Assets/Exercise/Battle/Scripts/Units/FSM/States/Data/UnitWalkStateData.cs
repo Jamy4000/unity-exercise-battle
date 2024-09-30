@@ -7,10 +7,9 @@ namespace DCLBattle.Battle
     {
         public override UnitStateID StateID => UnitStateID.Walk;
 
-        public override UnitState CreateStateInstance()
+        public override UnitState CreateStateInstance(UnitBase unit)
         {
-            return new UnitWalkState(this);
+            return new UnitWalkState(this, unit);
         }
     }
-
 }

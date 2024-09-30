@@ -65,6 +65,16 @@ namespace DCLBattle.Battle
             _units.Add(unit);
         }
 
+        public Vector3 GetCenter()
+        {
+            Vector3 center = Vector3.zero;
+            foreach (var unit in _units)
+            {
+                center += unit.Position;
+            }
+            return center / _units.Count;
+        }
+
         public UnitBase GetClosestUnit(Vector3 source, out float distance)
         {
             // TODO this check shouldn't be necessary, search should not be done if an army is empty
@@ -83,17 +93,17 @@ namespace DCLBattle.Battle
             return _units[_queryResults[0]];
         }
 
-        public int GetUnitsInRadius_NoAlloc(Vector3 source, float radius, UnitBase[] result)
+        public int GetUnitsInRadius_NoAlloc(Vector3 source, float radius, (UnitBase unit, float distance)[] result)
         {
             _queryResults.Clear();
 
             // spherical query
-            _query.Radius(_tree, source, radius, _queryResults);
+            _query.Radius(_tree, source, radius, _queryResults, _queryDistances);
 
             int maxResults = Mathf.Min(result.Length, _queryResults.Count);
             for (int resultIndex = 0; resultIndex < maxResults; resultIndex++)
             {
-                result[resultIndex] = _units[_queryResults[resultIndex]];
+                result[resultIndex] = (_units[_queryResults[resultIndex]], _queryDistances[resultIndex]);
             }
 
             return maxResults;

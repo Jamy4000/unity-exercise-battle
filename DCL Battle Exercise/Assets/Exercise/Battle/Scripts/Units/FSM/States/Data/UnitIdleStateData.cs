@@ -7,9 +7,9 @@ namespace DCLBattle.Battle
     {
         public override UnitStateID StateID => UnitStateID.Idle;
 
-        public override UnitState CreateStateInstance()
+        public override UnitState CreateStateInstance(UnitBase unit)
         {
-            return new UnitIdleState(this);
+            return new UnitIdleState(this, unit);
         }
     }
 
