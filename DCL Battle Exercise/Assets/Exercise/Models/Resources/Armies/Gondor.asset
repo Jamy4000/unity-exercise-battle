@@ -14,6 +14,9 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::ArmyModelSO
   _armyName: Gondor
   _armyColor: {r: 0.011747932, g: 0.51119846, b: 0.8301887, a: 0.7176471}
+  _enemyArmies:
+  - {fileID: 11400000, guid: 72f780312aa8e3c40b08fe23dd9b7117, type: 2}
+  - {fileID: 11400000, guid: 1534cd5a897919044ba600c86ae550c3, type: 2}
   _strategyValue: 1
   _unitsCount: 3e000000280000002100000000000000
   _unitsModels:

@@ -14,6 +14,9 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::ArmyModelSO
   _armyName: Rivendell
   _armyColor: {r: 0.2432805, g: 0.6698113, b: 0.28535095, a: 0.72156864}
+  _enemyArmies:
+  - {fileID: 11400000, guid: 72f780312aa8e3c40b08fe23dd9b7117, type: 2}
+  - {fileID: 11400000, guid: a6c80dd762eaa2942967f75607f7c7a3, type: 2}
   _strategyValue: 0
   _unitsCount: 3c0000001e000000000000001e000000
   _unitsModels:

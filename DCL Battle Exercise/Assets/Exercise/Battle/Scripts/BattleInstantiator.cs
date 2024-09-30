@@ -44,23 +44,19 @@ namespace DCLBattle.Battle
             }
 
             // Second pass to feed the enemy armies inside each army
-            // TODO This feels wrong
             for (int armyIndex = 0; armyIndex < _armies.Length; armyIndex++)
             {
-                IArmyModel[] enemies = _armiesToSpawn[armyIndex].ArmyModel.EnemyArmies;
+                int allianceID = _armies[armyIndex].Model.AllianceID;
+
                 for (int secondArmyIndex = 0; secondArmyIndex < _armies.Length; secondArmyIndex++)
                 {
-                    for (int enemyIndex = 0; enemyIndex < enemies.Length; enemyIndex++)
-                    {
-                        if (secondArmyIndex == armyIndex)
-                            continue;
+                    // If we are checking the army against itself, skip
+                    if (armyIndex == secondArmyIndex)
+                        continue;
 
-                        // TODO Could use an enum instead, string will do for now though
-                        string enemyName = enemies[enemyIndex].ArmyName;
-
-                        if (_armies[secondArmyIndex].Model.ArmyName == enemyName)
-                            _armies[armyIndex].AddEnemyArmy(_armies[secondArmyIndex]);
-                    }
+                    // If the two armies have different alliance id, we mark them as enemies
+                    if (_armies[secondArmyIndex].Model.AllianceID != allianceID)
+                        _armies[armyIndex].AddEnemyArmy(_armies[secondArmyIndex]);
                 }
             }
 

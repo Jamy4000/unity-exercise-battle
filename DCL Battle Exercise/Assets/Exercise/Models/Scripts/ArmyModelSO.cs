@@ -1,4 +1,3 @@
-using DCLBattle.Battle;
 using EditorUtils;
 using UnityEngine;
 
@@ -27,12 +26,12 @@ public class ArmyModelSO : ScriptableObject, IArmyModel
     }
 
     // TODO Could control this from UI too
-    // TODO Pretty bad, I'd rather create another struct or class to represent alliances instead
-    // Using the SO directly here for simplicity
-    [SerializeField] private ArmyModelSO[] _enemyArmies;
-    public IArmyModel[] EnemyArmies
+    // if two armies have the same alliance ID, they will not attack each other
+    [SerializeField] private int _allianceId;
+    public int AllianceID
     {
-        get => _enemyArmies;
+        get => _allianceId;
+        set => _allianceId = value;
     }
 
     [ReadOnly, SerializeField] private ArmyStrategy _strategyValue = ArmyStrategy.Basic;

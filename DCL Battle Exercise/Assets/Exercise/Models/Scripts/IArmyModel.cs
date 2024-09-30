@@ -14,9 +14,9 @@ public interface IArmyModel
 
     UnityEngine.Color ArmyColor { get; set; }
 
-    public IArmyModel[] EnemyArmies { get; }
-
     ArmyStrategy Strategy { get; set; }
+
+    int AllianceID { get; set; }
 
     int GetUnitCount(UnitType type);
     void SetUnitCount(UnitType type, int newCount);
