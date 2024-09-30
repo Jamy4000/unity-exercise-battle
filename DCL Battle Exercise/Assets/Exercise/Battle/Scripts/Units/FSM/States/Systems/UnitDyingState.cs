@@ -1,10 +1,8 @@
-using UnityEngine;
-
 namespace DCLBattle.Battle
 {
-    public sealed class UnitWalkState : UnitState<UnitWalkStateData>
+    public class UnitDyingState : UnitState<UnitDyingStateData>
     {
-        public UnitWalkState(UnitWalkStateData stateData, UnitBase unitBase) : base(stateData, unitBase)
+        public UnitDyingState(UnitDyingStateData stateData, UnitBase unit) : base(stateData, unit)
         {
         }
 

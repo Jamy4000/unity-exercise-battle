@@ -3,7 +3,7 @@ using UnityEngine.UIElements;
 
 namespace Utils
 {
-    public abstract class FSM<TState, TStateEnum> : I_UpdateOnly, I_LateUpdateOnly, System.IDisposable
+    public abstract class FSM<TState, TStateEnum> : System.IDisposable
         where TState : class, IFSMState<TStateEnum>
         where TStateEnum : struct, System.Enum
     {
@@ -23,7 +23,6 @@ namespace Utils
                 RegisterNewState(states[stateIndex]);
             }
 
-            GameUpdater.Register(this);
             StartNewState(defaultState, default);
         }
 

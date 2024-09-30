@@ -7,6 +7,7 @@ namespace DCLBattle.Battle
     {
         [SerializeField]
         private float _attackRange = 20f;
+        public float AttackRange => _attackRange;
         private float _attackRangeSq;
 
         [SerializeField, Interface(typeof(IProjectile))]

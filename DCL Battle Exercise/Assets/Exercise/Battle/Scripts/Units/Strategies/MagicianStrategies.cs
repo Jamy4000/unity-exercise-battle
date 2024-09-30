@@ -6,8 +6,9 @@ namespace DCLBattle.Battle
     {
         public ArmyStrategy ArmyStrategy => ArmyStrategy.Basic;
 
-        public void UpdateStrategy(UnitBase unitToUpdate)
+        public Vector3 UpdateStrategy(UnitBase unitToUpdate)
         {
+            return Vector3.zero;
         }
     }
 
@@ -15,8 +16,9 @@ namespace DCLBattle.Battle
     {
         public ArmyStrategy ArmyStrategy => ArmyStrategy.Defensive;
 
-        public void UpdateStrategy(UnitBase unitToUpdate)
+        public Vector3 UpdateStrategy(UnitBase unitToUpdate)
         {
+            return Vector3.zero;
         }
     }
 }

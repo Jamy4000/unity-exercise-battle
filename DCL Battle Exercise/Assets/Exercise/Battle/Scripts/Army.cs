@@ -1,4 +1,5 @@
 ﻿using DataStructures.ViliWonka.KDTree;
+using System;
 using System.Collections.Generic;
 using UnityEngine;
 
@@ -6,18 +7,21 @@ namespace DCLBattle.Battle
 {
     public class Army
     {
-        public IArmyModel Model { get; }
+        public readonly IArmyModel Model;
         public int RemainingUnitsCount => _units.Count;
 
         private readonly List<UnitBase> _units;
 
-        private readonly KDTree _tree = new KDTree(_MAX_POINTS_PER_LEAF_NODE);
-        private readonly KDQuery _query = new KDQuery();
+        private readonly KDTree _tree = new(_MAX_POINTS_PER_LEAF_NODE);
+        private readonly KDQuery _query = new();
         private readonly List<int> _queryResults = new(128);
         private readonly List<float> _queryDistances = new(128);
 
-        private const int _MAX_POINTS_PER_LEAF_NODE = 32;
+        // High value = fast build, slow search; Low value = slow build, fast search
+        private const int _MAX_POINTS_PER_LEAF_NODE = 2;
         private readonly List<Army> _enemyArmies = new();
+
+        public Vector3 Center { get; private set; }
 
         public Army(IArmyModel model)
         {
@@ -37,9 +41,12 @@ namespace DCLBattle.Battle
             Vector3[] pointClound = new Vector3[RemainingUnitsCount];
             for (int i = 0; i < RemainingUnitsCount; i++)
             {
-                pointClound[i] = _units[i].Position;
+                Vector3 position = _units[i].Position;
+                pointClound[i] = position;
+                Center += position;
             }
 
+            Center /= RemainingUnitsCount;
             _tree.Build(pointClound, _MAX_POINTS_PER_LEAF_NODE);
 
             /*
@@ -65,16 +72,6 @@ namespace DCLBattle.Battle
             _units.Add(unit);
         }
 
-        public Vector3 GetCenter()
-        {
-            Vector3 center = Vector3.zero;
-            foreach (var unit in _units)
-            {
-                center += unit.Position;
-            }
-            return center / _units.Count;
-        }
-
         public UnitBase GetClosestUnit(Vector3 source, out float distance)
         {
             // TODO this check shouldn't be necessary, search should not be done if an army is empty
@@ -95,6 +92,12 @@ namespace DCLBattle.Battle
 
         public int GetUnitsInRadius_NoAlloc(Vector3 source, float radius, (UnitBase unit, float distance)[] result)
         {
+            // TODO this check shouldn't be necessary, search should not be done if an army is empty
+            if (_units.Count == 0)
+            {
+                return 0;
+            }
+
             _queryResults.Clear();
 
             // spherical query
@@ -107,6 +110,27 @@ namespace DCLBattle.Battle
             }
 
             return maxResults;
+        }
+
+        public UnitBase GetClosestEnemy(Vector3 position, out float closestDistance)
+        {
+            closestDistance = Mathf.Infinity;
+            UnitBase closestEnemy = null;
+            for (int armyIndex = 0; armyIndex < _enemyArmies.Count; armyIndex++)
+            {
+                UnitBase enemyUnit = _enemyArmies[armyIndex].GetClosestUnit(position, out float enemyDistance);
+                // no unit found
+                if (enemyUnit == null)
+                    continue;
+
+                if (closestEnemy == null || enemyDistance < closestDistance)
+                {
+                    closestEnemy = enemyUnit;
+                    closestDistance = enemyDistance;
+                }
+            }
+
+            return closestEnemy;
         }
 
         public List<Army> GetEnemyArmies()

@@ -9,7 +9,7 @@ MonoBehaviour:
   m_GameObject: {fileID: 0}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 81348530e07947b4193a147fdcb2951d, type: 3}
-  m_Name: WalkStateData
+  m_Script: {fileID: 11500000, guid: ebbff121d2bde3e4cb5dbb2a77ac63e2, type: 3}
+  m_Name: ArcherIdleStateData
   m_EditorClassIdentifier: 
-  <ExitStates>k__BackingField: 040000000200000000000000
+  <ExitStates>k__BackingField: 0100000002000000

@@ -20,7 +20,7 @@ namespace DCLBattle.Battle
 
         protected Animator Animator { get; private set; }
 
-        private IStrategyUpdater _strategyUpdater;
+        public IStrategyUpdater StrategyUpdater { get; private set; }
 
         // TODO static for now as I don't see why we would want to have that for every unit, except if we end up threading this
         private static readonly (UnitBase unit, float distance)[] _unitsInRadius = new (UnitBase, float)[16];
@@ -28,6 +28,10 @@ namespace DCLBattle.Battle
         // TODO
         public float Health { get; private set; } = 10f;
         public float Defense => 2f;
+        public float AttackRange => 20f; // TODO
+
+        private Vector3 _moveOffset;
+        private Vector3 _lastPosition;
 
         protected virtual void Awake()
         {
@@ -39,16 +43,18 @@ namespace DCLBattle.Battle
         public virtual void Initialize(UnitCreationParameters parameters)
         {
             Army = parameters.ParentArmy;
-            _strategyUpdater = parameters.StrategyUpdater;
+            StrategyUpdater = parameters.StrategyUpdater;
 
             GetComponentInChildren<Renderer>().material.color = Army.Model.ArmyColor;
             transform.SetPositionAndRotation(parameters.Position, parameters.Rotation);
             transform.name = $"{parameters.ParentArmy.Model.ArmyName} - {parameters.UnitType}";
+
+            _lastPosition = transform.position;
         }
 
         private void InitializeFsm()
         {
-            List<UnitState> states = new List<UnitState>(_unitStatesData.Length);
+            List<UnitState> states = new(_unitStatesData.Length);
             UnitState defaultState = null;
 
             for (int i = 0; i < _unitStatesData.Length; i++)
@@ -62,9 +68,28 @@ namespace DCLBattle.Battle
             Fsm = new UnitFSM(defaultState, states);
         }
 
+        protected virtual void Update()
+        {
+            EvadeCloseUnits();
+
+            Fsm.ManualUpdate();
+
+            transform.position += _moveOffset;
+            _moveOffset = Vector3.zero;
+
+            // TODO I don't think this should be here + hard coded value for Speed
+            Animator.SetFloat("MovementSpeed", (transform.position - _lastPosition).magnitude / 20f);
+            _lastPosition = transform.position;
+        }
+
+        private void LateUpdate()
+        {
+            Fsm.ManualLateUpdate();
+        }
+
         public virtual void Move(Vector3 delta)
         {
-            transform.position += delta;
+            _moveOffset += delta;
         }
 
         public virtual void Hit(IAttacker attacker, Vector3 hitPosition, float damage)
@@ -87,19 +112,7 @@ namespace DCLBattle.Battle
             }
         }
 
-        protected virtual void Update()
-        {
-            // TODO
-            //UpdateBasicRules(allies, enemies);
-
-            //_strategyUpdater.UpdateStrategy(this);
-
-            // TODO
-            //Animator.SetFloat("MovementSpeed", (transform.position - _lastPosition).magnitude / speed);
-            //_lastPosition = transform.position;
-        }
-
-        void EvadeCloseUnits()
+        private void EvadeCloseUnits()
         {
             // TODO we should not be doing that every frame for every unit
             var battleInstantiator = UnityServiceLocator.ServiceLocator.Global.Get<BattleInstantiator>();
@@ -115,7 +128,7 @@ namespace DCLBattle.Battle
                 {
                     Vector3 toNearest = Vector3.Normalize(_unitsInRadius[unitIndex].unit.Position - transform.position);
                     // TODO Hard Coded value
-                    moveOffset -= toNearest * (2f - Mathf.Sqrt(_unitsInRadius[unitIndex].distance));
+                    moveOffset -= toNearest * ((2f - Mathf.Sqrt(_unitsInRadius[unitIndex].distance)) * Time.deltaTime);
                 }
             }
 

@@ -70,8 +70,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   _unitStatesData:
-  - {fileID: 11400000, guid: 47a6708b3f5d13f4892d8662bb7daf81, type: 2}
-  - {fileID: 11400000, guid: 453b1303609380140ab9afead0c3cdb8, type: 2}
-  - {fileID: 11400000, guid: 75fd2a77a325cce49bf76bc7232dcf1f, type: 2}
-  - {fileID: 11400000, guid: 734f08eb1e0b523499c07a73764169db, type: 2}
+  - {fileID: 11400000, guid: 0f115658fe11f134b826f7c39ca300ec, type: 2}
+  - {fileID: 11400000, guid: e24b1b4afb92a1b448bf9e723088faa3, type: 2}
+  - {fileID: 11400000, guid: 141aa7d96dbbeec438e07a2de1dd2349, type: 2}
   _defaultState: 0

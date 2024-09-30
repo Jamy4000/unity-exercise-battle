@@ -11,10 +11,8 @@ namespace DCLBattle.Battle
     public enum UnitStateID
     {
         Idle = 0,
-        Walk = 1,
-        Attacking = 2,
-        Reloading = 3,
-        MoveToCenter = 4
+        Fighting = 1,
+        Dying = 2
     }
 
     public sealed class UnitFSM : FSM<UnitState, UnitStateID>

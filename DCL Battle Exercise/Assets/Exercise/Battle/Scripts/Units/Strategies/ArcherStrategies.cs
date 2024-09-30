@@ -1,4 +1,3 @@
-using System;
 using System.Collections.Generic;
 using UnityEngine;
 
@@ -8,33 +7,21 @@ namespace DCLBattle.Battle
     {
         public ArmyStrategy ArmyStrategy => ArmyStrategy.Basic;
 
-        public void UpdateStrategy(UnitBase unitToUpdate)
+        public Vector3 UpdateStrategy(UnitBase unitToUpdate)
         {
-            List<Army> enemyArmies = unitToUpdate.Army.GetEnemyArmies();
-
-            (UnitBase unit, float distance) closestUnit = new (null, Mathf.Infinity);
-            for (int armyIndex = 0; armyIndex < enemyArmies.Count; armyIndex++)
-            {
-                UnitBase enemyUnit = enemyArmies[armyIndex].GetClosestUnit(unitToUpdate.Position, out float enemyDistance);
-                // no unit found
-                if (enemyUnit == null)
-                    continue;
-
-                if (closestUnit.unit == null || enemyDistance < closestUnit.distance)
-                    closestUnit = (enemyUnit, enemyDistance);
-            }
+            UnitBase closestEnemy = unitToUpdate.Army.GetClosestEnemy(unitToUpdate.Position, out _);
 
             // if they are no more unit to attack, this army won.
-            // TODO This check isn't really necessary as systems should stop as soon as 
-            if (closestUnit.unit == null)
-                return;
+            // TODO This check isn't really necessary as systems should stop as soon as there ar no more unit to fight
+            if (closestEnemy == null)
+                return Vector3.zero;
 
-            Vector3 toNearest = Vector3.Normalize(closestUnit.unit.Position - unitToUpdate.Position);
+            // TODO I don't think this should be here
+            unitToUpdate.Attack(closestEnemy);
+
+            Vector3 toNearest = Vector3.Normalize(closestEnemy.Position - unitToUpdate.Position);
             toNearest.Scale(IStrategyUpdater.FlatScale);
-            unitToUpdate.Move(toNearest.normalized);
-
-            // TODO this is bad
-            unitToUpdate.Attack(closestUnit.unit);
+            return toNearest;
         }
     }
 
@@ -42,43 +29,62 @@ namespace DCLBattle.Battle
     {
         public ArmyStrategy ArmyStrategy => ArmyStrategy.Defensive;
 
-        public void UpdateStrategy(UnitBase unitToUpdate)
+        private readonly ArcherDefensiveStrategySO _data;
+
+        public ArcherDefensiveStrategyUpdater(ArcherDefensiveStrategySO data)
         {
-            /*
-            Vector3 enemyCenter = DCLBattleUtils.GetCenter(enemies);
-            float distToEnemyX = Mathf.Abs(enemyCenter.x - transform.position.x);
+            _data = data;
+        }
 
-            if (distToEnemyX > _attackRange)
+        public Vector3 UpdateStrategy(UnitBase unitToUpdate)
+        {
+            Vector3 moveDirection = Vector3.zero;
+
+            // We get the enemies' center point
+            List<Army> enemies = unitToUpdate.Army.GetEnemyArmies();
+            Vector3 enemiesCenter = Vector3.zero;
+            for (int i = 0; i < enemies.Count; i++)
             {
-                if (enemyCenter.x < transform.position.x)
-                    Move(Vector3.left);
+                enemiesCenter += enemies[i].Center;
+            }
+            enemiesCenter /= enemies.Count;
 
-                if (enemyCenter.x > transform.position.x)
-                    Move(Vector3.right);
+            // If we are further away than attack range; we move toward the enemies' center
+            // TODO why are we only using X here ?
+            float unitPositionX = unitToUpdate.Position.x;
+            float distToEnemyX = Mathf.Abs(enemiesCenter.x - unitPositionX);
+            if (distToEnemyX > unitToUpdate.AttackRange)
+            {
+                if (enemiesCenter.x < unitPositionX)
+                    moveDirection += Vector3.left;
+                else if (enemiesCenter.x > unitPositionX)
+                    moveDirection += Vector3.right;
             }
 
-            float distToNearest = DCLBattleUtils.GetNearestObject(this, enemies, out UnitBase nearestEnemy);
+            // We check who the closest enemy is
+            UnitBase closestEnemy = unitToUpdate.Army.GetClosestEnemy(unitToUpdate.Position, out float distance);
+            // TODO This should never happen
+            if (closestEnemy == null)
+                return moveDirection;
 
-            if (nearestEnemy == null)
-                return;
+            Vector3 toNearest = Vector3.Normalize(closestEnemy.Position - unitToUpdate.Position);
+            toNearest.Scale(IStrategyUpdater.FlatScale);
 
-            if (distToNearest < _attackRange)
+            // if the unit is within attack range
+            if (distance < unitToUpdate.AttackRange)
             {
-                Vector3 toNearest = (nearestEnemy.transform.position - transform.position).normalized;
-                toNearest.Scale(_flatScale);
-
                 Vector3 flank = Quaternion.Euler(0f, 90f, 0f) * toNearest;
-                Move(-(toNearest + flank).normalized);
+                moveDirection += Vector3.Normalize(-(toNearest + flank));
+
+                // Slight change in design, we were always attacking the closest enemy, even when not in range
+                unitToUpdate.Attack(closestEnemy);
             }
             else
             {
-                Vector3 toNearest = (nearestEnemy.transform.position - transform.position).normalized;
-                toNearest.Scale(_flatScale);
-                Move(toNearest.normalized);
+                moveDirection += Vector3.Normalize(toNearest);
             }
 
-            Attack(nearestEnemy);
-            */
+            return moveDirection;
         }
     }
 }

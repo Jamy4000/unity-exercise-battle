@@ -72,7 +72,7 @@ namespace DCLBattle.Battle
                 if (army.RemainingUnitsCount == 0)
                     continue;
 
-                BattleCenter += army.GetCenter();
+                BattleCenter += army.Center;
                 
                 army.Update();
             }

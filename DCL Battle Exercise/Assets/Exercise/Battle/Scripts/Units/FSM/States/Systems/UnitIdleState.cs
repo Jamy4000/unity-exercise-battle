@@ -1,8 +1,6 @@
-using static UnityEngine.UI.CanvasScaler;
-
 namespace DCLBattle.Battle
 {
-    public sealed class UnitIdleState : UnitState<UnitIdleStateData>
+    public class UnitIdleState : UnitState<UnitIdleStateData>
     {
         public UnitIdleState(UnitIdleStateData stateData, UnitBase unit) : base(stateData, unit)
         {
