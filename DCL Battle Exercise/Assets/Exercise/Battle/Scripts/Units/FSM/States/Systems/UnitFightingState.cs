@@ -25,7 +25,7 @@ namespace DCLBattle.Battle
         {
             // We first make sure the unit is staying around the battle
             Vector3 moveOffset = CalculateUnitTowardBattleOffset();
-            
+
             // We then calculate the move offset for this unit using the strategy of the army
             moveOffset += Unit.StrategyUpdater.UpdateStrategy(Unit);
             
