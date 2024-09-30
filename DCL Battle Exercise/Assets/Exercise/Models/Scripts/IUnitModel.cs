@@ -15,5 +15,5 @@ public interface IUnitModel
     UnitType UnitType { get; }
 
     IStrategyUpdater CreateStrategyUpdater(ArmyStrategy armyStrategy);
-    IUnit InstantiateUnit(UnitCreationParameters unitCreationParameters);
+    UnitBase InstantiateUnit(UnitCreationParameters unitCreationParameters);
 }

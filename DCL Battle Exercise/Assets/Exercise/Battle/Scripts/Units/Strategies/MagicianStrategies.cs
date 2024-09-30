@@ -6,7 +6,7 @@ namespace DCLBattle.Battle
     {
         public ArmyStrategy ArmyStrategy => ArmyStrategy.Basic;
 
-        public void UpdateStrategy(IUnit unitToUpdate)
+        public void UpdateStrategy(UnitBase unitToUpdate)
         {
         }
     }
@@ -15,7 +15,7 @@ namespace DCLBattle.Battle
     {
         public ArmyStrategy ArmyStrategy => ArmyStrategy.Defensive;
 
-        public void UpdateStrategy(IUnit unitToUpdate)
+        public void UpdateStrategy(UnitBase unitToUpdate)
         {
         }
     }

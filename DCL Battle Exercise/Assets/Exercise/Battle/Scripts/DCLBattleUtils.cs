@@ -13,7 +13,7 @@ public static class DCLBattleUtils
     }
 
     public static Vector3 GetCenter<T>( List<T> objects )
-        where T : DCLBattle.Battle.IUnit
+        where T : DCLBattle.Battle.UnitBase
     {
         Vector3 result = Vector3.zero;
 
@@ -65,7 +65,7 @@ public static class DCLBattleUtils
     }
 
     public static float GetNearestUnit<T>(T source, List<T> objects, out T nearestObject)
-        where T : DCLBattle.Battle.IUnit
+        where T : DCLBattle.Battle.UnitBase
     {
         float minDistSq = float.MaxValue;
         nearestObject = default;

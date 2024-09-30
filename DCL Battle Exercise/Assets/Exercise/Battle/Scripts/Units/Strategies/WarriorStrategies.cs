@@ -6,7 +6,7 @@ namespace DCLBattle.Battle
     {
         public ArmyStrategy ArmyStrategy => ArmyStrategy.Basic;
 
-        public void UpdateStrategy(IUnit unitToUpdate)
+        public void UpdateStrategy(UnitBase unitToUpdate)
         {
             /*
             DCLBattleUtils.GetNearestObject(this, enemies, out UnitBase nearestEnemy);
@@ -27,7 +27,7 @@ namespace DCLBattle.Battle
     {
         public ArmyStrategy ArmyStrategy => ArmyStrategy.Defensive;
 
-        public void UpdateStrategy(IUnit unitToUpdate)
+        public void UpdateStrategy(UnitBase unitToUpdate)
         {
             /*
             Vector3 enemyCenter = DCLBattleUtils.GetCenter(enemies);

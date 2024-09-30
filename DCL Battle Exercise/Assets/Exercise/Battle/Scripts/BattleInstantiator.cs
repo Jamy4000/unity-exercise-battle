@@ -110,7 +110,7 @@ namespace DCLBattle.Battle
 
                 UnitCreationParameters parameters = new(position, rotation, army, unitModel.UnitType, strategyUpdater);
 
-                IUnit newUnit = unitModel.InstantiateUnit(parameters);
+                UnitBase newUnit = unitModel.InstantiateUnit(parameters);
 
                 army.AddUnit(newUnit);
             }

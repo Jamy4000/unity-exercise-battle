@@ -9,7 +9,7 @@ namespace DCLBattle.Battle
         public IArmyModel Model { get; }
         public int RemainingUnitsCount => _units.Count;
 
-        private readonly List<IUnit> _units;
+        private readonly List<UnitBase> _units;
 
         private readonly KDTree _tree = new KDTree(_MAX_POINTS_PER_LEAF_NODE);
         private readonly KDQuery _query = new KDQuery();
@@ -43,7 +43,7 @@ namespace DCLBattle.Battle
             _tree.Build(pointClound, _MAX_POINTS_PER_LEAF_NODE);
 
             /*
-            foreach (IUnit unit in _units)
+            foreach (UnitBase unit in _units)
             {
                 unit.ManualUpdate();
             }
@@ -55,17 +55,17 @@ namespace DCLBattle.Battle
             return DCLBattleUtils.GetCenter(_units);
         }
 
-        public void RemoveUnit(IUnit unit)
+        public void RemoveUnit(UnitBase unit)
         {
             _units.Remove(unit);
         }
 
-        public void AddUnit(IUnit unit)
+        public void AddUnit(UnitBase unit)
         {
             _units.Add(unit);
         }
 
-        public IUnit GetClosestUnit(Vector3 source, out float distance)
+        public UnitBase GetClosestUnit(Vector3 source, out float distance)
         {
             // TODO this check shouldn't be necessary, search should not be done if an army is empty
             if (_units.Count == 0)
@@ -83,7 +83,7 @@ namespace DCLBattle.Battle
             return _units[_queryResults[0]];
         }
 
-        public int GetUnitsInRadius_NoAlloc(Vector3 source, float radius, IUnit[] result)
+        public int GetUnitsInRadius_NoAlloc(Vector3 source, float radius, UnitBase[] result)
         {
             _queryResults.Clear();
 

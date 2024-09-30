@@ -8,14 +8,14 @@ namespace DCLBattle.Battle
     {
         public ArmyStrategy ArmyStrategy => ArmyStrategy.Basic;
 
-        public void UpdateStrategy(IUnit unitToUpdate)
+        public void UpdateStrategy(UnitBase unitToUpdate)
         {
             List<Army> enemyArmies = unitToUpdate.Army.GetEnemyArmies();
 
-            (IUnit unit, float distance) closestUnit = new (null, Mathf.Infinity);
+            (UnitBase unit, float distance) closestUnit = new (null, Mathf.Infinity);
             for (int armyIndex = 0; armyIndex < enemyArmies.Count; armyIndex++)
             {
-                IUnit enemyUnit = enemyArmies[armyIndex].GetClosestUnit(unitToUpdate.Position, out float enemyDistance);
+                UnitBase enemyUnit = enemyArmies[armyIndex].GetClosestUnit(unitToUpdate.Position, out float enemyDistance);
                 // no unit found
                 if (enemyUnit == null)
                     continue;
@@ -34,7 +34,7 @@ namespace DCLBattle.Battle
             unitToUpdate.Move(toNearest.normalized);
 
             // TODO this is bad
-            unitToUpdate.Attack(closestUnit.unit as IAttackReceiver);
+            unitToUpdate.Attack(closestUnit.unit);
         }
     }
 
@@ -42,7 +42,7 @@ namespace DCLBattle.Battle
     {
         public ArmyStrategy ArmyStrategy => ArmyStrategy.Defensive;
 
-        public void UpdateStrategy(IUnit unitToUpdate)
+        public void UpdateStrategy(UnitBase unitToUpdate)
         {
             /*
             Vector3 enemyCenter = DCLBattleUtils.GetCenter(enemies);

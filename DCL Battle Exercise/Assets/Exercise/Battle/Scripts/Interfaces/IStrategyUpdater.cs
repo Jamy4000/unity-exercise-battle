@@ -8,6 +8,6 @@ namespace DCLBattle.Battle
 
         ArmyStrategy ArmyStrategy { get; }
 
-        void UpdateStrategy(IUnit unitToUpdate);
+        void UpdateStrategy(UnitBase unitToUpdate);
     }
 }

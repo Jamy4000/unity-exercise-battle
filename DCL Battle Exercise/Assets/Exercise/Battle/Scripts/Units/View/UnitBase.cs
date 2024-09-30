@@ -4,7 +4,7 @@ using UnityEngine;
 
 namespace DCLBattle.Battle
 {
-    public abstract class UnitBase : MonoBehaviour, IAttackReceiver, IUnit
+    public abstract class UnitBase : MonoBehaviour, IAttackReceiver
     {
         protected static readonly Vector3 _flatScale = new Vector3(1f, 0f, 1f);
 

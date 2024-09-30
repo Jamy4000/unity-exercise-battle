@@ -18,10 +18,10 @@ public class UnitModelSO : ScriptableObject, IUnitModel
     [SerializeField]
     private StrategySO[] _strategyCreators;
 
-    public virtual IUnit InstantiateUnit(UnitCreationParameters parameters)
+    public virtual UnitBase InstantiateUnit(UnitCreationParameters parameters)
     {
         // TODO Pooling
-        IUnit unitGameobject = Instantiate(_unitPrefab).GetComponent<IUnit>();
+        UnitBase unitGameobject = Instantiate(_unitPrefab).GetComponent<UnitBase>();
         unitGameobject.Initialize(parameters);
         return unitGameobject;
     }
@@ -40,7 +40,7 @@ public class UnitModelSO : ScriptableObject, IUnitModel
 
     private void OnValidate()
     {
-        _unitType = _unitPrefab != null ? _unitPrefab.GetComponent<IUnit>().UnitType : UnitType.UNDEFINED;
+        _unitType = _unitPrefab != null ? _unitPrefab.GetComponent<UnitBase>().UnitType : UnitType.UNDEFINED;
     }
 }
 

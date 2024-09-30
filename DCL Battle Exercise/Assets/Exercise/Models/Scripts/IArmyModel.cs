@@ -9,6 +9,7 @@ public enum ArmyStrategy
 public interface IArmyModel
 {
     public static readonly int UnitLength = System.Enum.GetValues(typeof(UnitType)).Length - 1;
+    public static readonly int StrategyCount = System.Enum.GetValues(typeof(ArmyStrategy)).Length;
 
     string ArmyName { get; set; }
 
