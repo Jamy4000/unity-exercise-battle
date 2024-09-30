@@ -62,8 +62,7 @@ namespace DCLBattle.Battle
 
         public UnitBase GetClosestUnit(Vector3 source, out float distance)
         {
-            // TODO this check shouldn't be necessary, search should not be done if an army is empty
-            if (_units.Count == 0)
+            if (RemainingUnitsCount == 0)
             {
                 distance = Mathf.Infinity;
                 return null;
@@ -80,8 +79,7 @@ namespace DCLBattle.Battle
 
         public int GetUnitsInRadius_NoAlloc(Vector3 source, float radius, (UnitBase unit, float distance)[] result)
         {
-            // TODO this check shouldn't be necessary, search should not be done if an army is empty
-            if (_units.Count == 0)
+            if (RemainingUnitsCount == 0)
             {
                 return 0;
             }

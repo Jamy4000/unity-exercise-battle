@@ -89,6 +89,7 @@ public class InterfacePropertyDrawer : PropertyDrawer
 
         EditorGUI.EndProperty();
     }
+
     public override float GetPropertyHeight(SerializedProperty property, GUIContent label)
     {
         int totalLines = 1;

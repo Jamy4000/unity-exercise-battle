@@ -6,6 +6,19 @@ namespace DCLBattle.Battle
     {
         public override UnitType UnitType => UnitType.Archer;
 
+        private static ArcherArrowPool _arrowsPool;
+
+        public override void Initialize(UnitCreationParameters parameters)
+        {
+            base.Initialize(parameters);
+            
+            // TODO this is kind of avoidable I think
+            if (_arrowsPool == null)
+            {
+                _arrowsPool = new ArcherArrowPool(Model.ArrowPrefab, Model.MinArrowPoolSize, Model.MaxArrowPoolSize);
+            }
+        }
+
         public override void Move(Vector3 delta)
         {
             // TODO We could avoid a bunch of calculations if we were to check this before updating the strategy and evade plan
@@ -23,8 +36,7 @@ namespace DCLBattle.Battle
             if (Vector3.SqrMagnitude(transform.position - target.Position) > Model.AttackRangeSq)
                 return;
 
-            // TODO Pooling
-            IProjectile projectile = Instantiate(Model.ArrowPrefab) as IProjectile;
+            IProjectile projectile = _arrowsPool.RequestPoolableObject();
             projectile.Launch(this, target);
 
             Animator.SetTrigger("Attack");

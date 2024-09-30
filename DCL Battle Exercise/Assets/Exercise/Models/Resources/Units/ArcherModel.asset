@@ -17,10 +17,10 @@ MonoBehaviour:
   _strategyCreators:
   - {fileID: 11400000, guid: 4dee95b6508767b4cb805854905d58ff, type: 2}
   - {fileID: 11400000, guid: f7b5060d77d2b4a43b11bd203f36d41f, type: 2}
-  _baseHealth: 50
-  _defense: 2
-  _attackRange: 2
-  _attackCooldown: 1
+  _baseHealth: 20
+  _defense: 1
+  _attackRange: 20
+  _attackCooldown: 2
   _unitStatesData:
   - {fileID: 11400000, guid: a4dea0abbd19ee149b581b235c9af7e9, type: 2}
   - {fileID: 11400000, guid: dcc8201a79a8b294e99f4e3032816685, type: 2}
@@ -29,3 +29,5 @@ MonoBehaviour:
   _maxAttackCooldown: 2
   _postAttackDelay: 0.5
   _arrowPrefab: {fileID: 4995913744683215106, guid: 43df16efbb83b484d91bf87170fd46c2, type: 3}
+  _minArrowPoolSize: 64
+  _maxArrowPoolSize: 256

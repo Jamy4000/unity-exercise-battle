@@ -10,5 +10,8 @@ namespace DCLBattle.Battle
         float Defense { get; }
 
         void Hit(IAttacker attacker, Vector3 hitPosition, float damage);
+
+        void RegisterOnDeathCallback(System.Action callback);
+        void UnregisterOnDeathCallback(System.Action callback);
     }
 }

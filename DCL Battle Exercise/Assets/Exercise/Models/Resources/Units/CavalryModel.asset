@@ -17,8 +17,8 @@ MonoBehaviour:
   _strategyCreators:
   - {fileID: 11400000, guid: 9684062cb79e4234cb2eb0bbbaea52e4, type: 2}
   - {fileID: 11400000, guid: 9bf3aa5a3de13a64784905805a60fc8c, type: 2}
-  _baseHealth: 50
-  _defense: 2
+  _baseHealth: 40
+  _defense: 3
   _attackRange: 2
   _attackCooldown: 1
   _unitStatesData:

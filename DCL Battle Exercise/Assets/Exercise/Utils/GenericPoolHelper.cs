@@ -1,6 +1,6 @@
 ﻿using UnityEngine.Pool;
 
-namespace PRISMUtils
+namespace Utils
 {
     public abstract class GenericPoolHelper<TPoolable> where TPoolable : class, IGenericPoolable
     {

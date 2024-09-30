@@ -1,5 +1,4 @@
 using UnityEngine;
-using UnityServiceLocator;
 
 namespace DCLBattle.Battle
 {
@@ -62,7 +61,7 @@ namespace DCLBattle.Battle
             }
 
             // Registering this as global, but if we want multiple BattleManagers, we could register it on the Scene level as well
-            ServiceLocator.Global.Register(this);
+            UnityServiceLocator.ServiceLocator.Global.Register(this);
         }
 
         void Update()
