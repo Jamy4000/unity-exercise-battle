@@ -1,10 +1,9 @@
 ﻿using System.Collections.Generic;
-using System.Linq;
 using UnityEngine;
 
 namespace DCLBattle.Battle
 {
-    public abstract class UnitBase : MonoBehaviour, IAttackReceiver
+    public abstract class UnitBase : MonoBehaviour, IAttackReceiver, IAttacker
     {
         [Header("FSM Data"), SerializeField]
         private UnitStateData[] _unitStatesData;
@@ -16,22 +15,28 @@ namespace DCLBattle.Battle
         public Army Army { get; private set; }
         public Vector3 Position => transform.position;
 
-        public abstract UnitType UnitType { get; }
-
         protected Animator Animator { get; private set; }
 
+        private IUnitModel _model;
+        // not returning _model.UnitType in order to use the value in OnValidate method of a SO
+        public abstract UnitType UnitType { get; }
         public IStrategyUpdater StrategyUpdater { get; private set; }
 
-        // TODO static for now as I don't see why we would want to have that for every unit, except if we end up threading this
-        private static readonly (UnitBase unit, float distance)[] _unitsInRadius = new (UnitBase, float)[16];
+        private float _currentHealth;
+        // IAttackReceiver
+        public float Health             => _currentHealth;
+        public float Defense            => _model.Defense;
 
-        // TODO
-        public float Health { get; private set; } = 10f;
-        public float Defense => 2f;
-        public float AttackRange => 20f; // TODO
+        protected float AttackCooldown { get; private set; }
+        // IAttacker
+        public float AttackRange        => _model.AttackRange;
+
 
         private Vector3 _moveOffset;
         private Vector3 _lastPosition;
+
+        // TODO static for now as I don't see why we would want to have that for every unit, except if we end up threading this
+        private static readonly (UnitBase unit, float distance)[] _unitsInRadius = new (UnitBase, float)[16];
 
         protected virtual void Awake()
         {
@@ -45,9 +50,12 @@ namespace DCLBattle.Battle
             Army = parameters.ParentArmy;
             StrategyUpdater = parameters.StrategyUpdater;
 
+            _model = parameters.UnitModel;
+            _currentHealth = parameters.UnitModel.BaseHealth;
+            
             GetComponentInChildren<Renderer>().material.color = Army.Model.ArmyColor;
             transform.SetPositionAndRotation(parameters.Position, parameters.Rotation);
-            transform.name = $"{parameters.ParentArmy.Model.ArmyName} - {parameters.UnitType}";
+            transform.name = $"{parameters.ParentArmy.Model.ArmyName} - {parameters.UnitModel.UnitName}";
 
             _lastPosition = transform.position;
         }
@@ -70,6 +78,8 @@ namespace DCLBattle.Battle
 
         protected virtual void Update()
         {
+            AttackCooldown -= Time.deltaTime;
+
             EvadeCloseUnits();
 
             Fsm.ManualUpdate();
@@ -94,7 +104,7 @@ namespace DCLBattle.Battle
 
         public virtual void Hit(IAttacker attacker, Vector3 hitPosition, float damage)
         {
-            Health -= Mathf.Max(damage - Defense, 0);
+            _currentHealth -= Mathf.Max(damage - Defense, 0f);
 
             if (Health < 0)
             {
@@ -133,6 +143,11 @@ namespace DCLBattle.Battle
             }
 
             Move(moveOffset);
+        }
+
+        protected void ResetAttackCooldown()
+        {
+            AttackCooldown = _model.AttackCooldown;
         }
 
         // TODO This shouldn't be here

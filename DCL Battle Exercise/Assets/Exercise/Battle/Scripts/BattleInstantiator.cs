@@ -115,7 +115,7 @@ namespace DCLBattle.Battle
                 // Provides the reference to the strategy Updater that this unit will be using at the start of the battle, based on its army configuration
                 IStrategyUpdater strategyUpdater = _strategyUpdaters[(int)unitModel.UnitType, (int)armyModel.Strategy];
 
-                UnitCreationParameters parameters = new(position, rotation, army, unitModel.UnitType, strategyUpdater);
+                UnitCreationParameters parameters = new(position, rotation, army, unitModel, strategyUpdater);
 
                 UnitBase newUnit = unitModel.InstantiateUnit(parameters);
 

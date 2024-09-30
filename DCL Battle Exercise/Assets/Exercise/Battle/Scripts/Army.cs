@@ -10,6 +10,8 @@ namespace DCLBattle.Battle
         public readonly IArmyModel Model;
         public int RemainingUnitsCount => _units.Count;
 
+        public Vector3 Center { get; private set; }
+
         private readonly List<UnitBase> _units;
 
         private readonly KDTree _tree = new(_MAX_POINTS_PER_LEAF_NODE);
@@ -20,8 +22,6 @@ namespace DCLBattle.Battle
         // High value = fast build, slow search; Low value = slow build, fast search
         private const int _MAX_POINTS_PER_LEAF_NODE = 2;
         private readonly List<Army> _enemyArmies = new();
-
-        public Vector3 Center { get; private set; }
 
         public Army(IArmyModel model)
         {
@@ -48,28 +48,16 @@ namespace DCLBattle.Battle
 
             Center /= RemainingUnitsCount;
             _tree.Build(pointClound, _MAX_POINTS_PER_LEAF_NODE);
-
-            /*
-            foreach (UnitBase unit in _units)
-            {
-                unit.ManualUpdate();
-            }
-            */
-        }
-
-        public Vector3 CalculateCenterPoint()
-        {
-            return DCLBattleUtils.GetCenter(_units);
-        }
-
-        public void RemoveUnit(UnitBase unit)
-        {
-            _units.Remove(unit);
         }
 
         public void AddUnit(UnitBase unit)
         {
             _units.Add(unit);
+        }
+
+        public void RemoveUnit(UnitBase unit)
+        {
+            _units.Remove(unit);
         }
 
         public UnitBase GetClosestUnit(Vector3 source, out float distance)
@@ -141,6 +129,11 @@ namespace DCLBattle.Battle
         public void AddEnemyArmy(Army enemy)
         {
             _enemyArmies.Add(enemy);
+        }
+
+        public void RemoveEnemyArmy(Army enemy)
+        {
+            _enemyArmies.Remove(enemy);
         }
     }
 }

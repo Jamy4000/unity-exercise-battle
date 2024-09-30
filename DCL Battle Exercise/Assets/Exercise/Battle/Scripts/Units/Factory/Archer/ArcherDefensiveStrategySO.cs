@@ -7,10 +7,6 @@ namespace DCLBattle.Battle
     {
         public override ArmyStrategy ArmyStrategy => ArmyStrategy.Defensive;
 
-        [SerializeField]
-        private float _maxDistanceWithEnemies = 10f;
-        public float DefensingDistanceWithEnemies => _maxDistanceWithEnemies;
-
         public override IStrategyUpdater CreateStrategyUpdater()
         {
             return new ArcherDefensiveStrategyUpdater(this);

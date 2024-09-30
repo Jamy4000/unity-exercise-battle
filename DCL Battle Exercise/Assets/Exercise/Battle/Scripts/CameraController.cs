@@ -20,7 +20,7 @@ namespace DCLBattle.Battle
             int armyCount = _battleInstantiator.ArmiesCount;
             for (int armyIndex = 0; armyIndex < armyCount; armyIndex++)
             {
-                mainCenter += _battleInstantiator.GetArmy(armyIndex).CalculateCenterPoint();
+                mainCenter += _battleInstantiator.GetArmy(armyIndex).Center;
             }
 
             mainCenter /= armyCount;

@@ -18,6 +18,22 @@ public class UnitModelSO : ScriptableObject, IUnitModel
     [SerializeField]
     private StrategySO[] _strategyCreators;
 
+    [SerializeField]
+    private float _baseHealth = 50f;
+    public float BaseHealth => _baseHealth;
+
+    [SerializeField]
+    private float _defense = 2f;
+    public float Defense => _defense;
+
+    [SerializeField]
+    private float _attackRange = 2f;
+    public float AttackRange => _attackRange;
+
+    [SerializeField]
+    private float _attackCooldown = 1f;
+    public float AttackCooldown => _attackCooldown;
+
     public virtual UnitBase InstantiateUnit(UnitCreationParameters parameters)
     {
         // TODO Pooling
@@ -56,15 +72,15 @@ public class UnitCreationParameters
 {
     public readonly Vector3 Position;
     public readonly Quaternion Rotation;
-    public readonly UnitType UnitType;
+    public readonly IUnitModel UnitModel;
     public readonly Army ParentArmy;
     public readonly IStrategyUpdater StrategyUpdater;
 
-    public UnitCreationParameters(Vector3 position, Quaternion rotation, Army parentArmy, UnitType unitType, IStrategyUpdater strategyUpdater)
+    public UnitCreationParameters(Vector3 position, Quaternion rotation, Army parentArmy, IUnitModel unitModel, IStrategyUpdater strategyUpdater)
     {
         Position = position;
         Rotation = rotation;
-        UnitType = unitType;
+        UnitModel = unitModel;
         ParentArmy = parentArmy;
         StrategyUpdater = strategyUpdater;
     }

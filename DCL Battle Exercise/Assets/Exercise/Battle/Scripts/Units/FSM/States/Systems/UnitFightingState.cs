@@ -23,8 +23,13 @@ namespace DCLBattle.Battle
 
         public override void UpdateState()
         {
+            // We first make sure the unit is staying around the battle
             Vector3 moveOffset = CalculateUnitTowardBattleOffset();
+            
+            // We then calculate the move offset for this unit using the strategy of the army
             moveOffset += Unit.StrategyUpdater.UpdateStrategy(Unit);
+            
+            // We finally move the unit
             Unit.Move(moveOffset * (Time.deltaTime * StateData.UnitMoveSpeed));
         }
 

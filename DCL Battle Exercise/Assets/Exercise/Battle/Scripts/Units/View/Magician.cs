@@ -1,25 +1,23 @@
-using System.Collections.Generic;
 using UnityEngine;
 
 namespace DCLBattle.Battle
 {
     // THis is really a copy of Archer class so far
-    public sealed class Magician : UnitBase, IAttacker
+    public sealed class Magician : UnitBase
     {
         // TODO add this to SO ?
         [SerializeField]
         private float _attackRange = 20f;
         private float _attackRangeSq;
 
+        [SerializeField]
+        private float _maxAttackCooldown = 2f;
+
+        [SerializeField]
+        private float _postAttackDelay = 0.5f;
+
         [SerializeField, Interface(typeof(IProjectile))]
         private Object _arrowPrefab;
-
-
-        private float _attackCooldown = 0f;
-
-        public float Damage => throw new System.NotImplementedException();
-        public float MaxAttackCooldown => throw new System.NotImplementedException();
-        public float PostAttackDelay => throw new System.NotImplementedException();
 
         public override UnitType UnitType => UnitType.Magician;
 
@@ -29,9 +27,18 @@ namespace DCLBattle.Battle
             _attackRangeSq = _attackRange * _attackRange;
         }
 
+        public override void Move(Vector3 delta)
+        {
+            // TODO We could avoid a bunch of calculations if we were to check this before updating the strategy and evade plan
+            if (AttackCooldown > _maxAttackCooldown - _postAttackDelay)
+                return;
+
+            base.Move(delta);
+        }
+
         public override void Attack(IAttackReceiver target)
         {
-            if (_attackCooldown > 0)
+            if (AttackCooldown > 0f)
                 return;
 
             if (Vector3.SqrMagnitude(transform.position - target.Position) > _attackRangeSq)
@@ -42,7 +49,7 @@ namespace DCLBattle.Battle
             projectile.Launch(this, target);
 
             Animator.SetTrigger("Attack");
-            _attackCooldown = MaxAttackCooldown;
+            ResetAttackCooldown();
         }
 
         public void OnDeathAnimFinished()

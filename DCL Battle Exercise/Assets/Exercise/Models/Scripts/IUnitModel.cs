@@ -14,6 +14,11 @@ public interface IUnitModel
     string UnitName { get; }
     UnitType UnitType { get; }
 
+    float BaseHealth { get; }
+    float Defense { get; }
+    float AttackRange { get; }
+    float AttackCooldown { get; }
+
     IStrategyUpdater CreateStrategyUpdater(ArmyStrategy armyStrategy);
     UnitBase InstantiateUnit(UnitCreationParameters unitCreationParameters);
 }

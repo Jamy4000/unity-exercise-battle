@@ -4,19 +4,14 @@ using UnityEngine;
 namespace DCLBattle.Battle
 {
     // copy of warrior, just for the sake of argument
-    public sealed class Cavalry : UnitBase, IAttacker
+    public sealed class Cavalry : UnitBase
     {
-        // TODO add in SO
+        [SerializeField]
         private float _attackRange = 2.5f;
-
         private float _attackRangeSq;
 
-
-        private float _attackCooldown = 0f;
-
-        public float Damage => throw new System.NotImplementedException();
-        public float MaxAttackCooldown => throw new System.NotImplementedException();
-        public float PostAttackDelay => throw new System.NotImplementedException();
+        [SerializeField]
+        private float _damage = 10f;
 
         public override UnitType UnitType => UnitType.Cavalry;
 
@@ -28,17 +23,16 @@ namespace DCLBattle.Battle
 
         public override void Attack(IAttackReceiver target)
         {
-            if (_attackCooldown > 0)
+            if (AttackCooldown > 0)
                 return;
 
             if (Vector3.SqrMagnitude(transform.position - target.Position) > _attackRangeSq)
                 return;
 
-            _attackCooldown = MaxAttackCooldown;
-
             Animator.SetTrigger("Attack");
 
-            target.Hit(this, target.Position, Damage);
+            target.Hit(this, target.Position, _damage);
+            ResetAttackCooldown();
         }
 
         public void OnDeathAnimFinished()
