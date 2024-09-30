@@ -3,6 +3,41 @@ using UnityEngine;
 
 namespace DCLBattle.Battle
 {
+    /// <summary>
+    /// A variant to UnitBase that allows us to get the specific model implementation in the derived class
+    /// </summary>
+    /// <typeparam name="TModel"></typeparam>
+    public abstract class UnitBase<TModel> : UnitBase where TModel : class, IUnitModel
+    {
+        protected TModel Model { get; private set; }
+
+        public override float Defense => Model.Defense;
+        public override float AttackRange => Model.AttackRange;
+
+        protected float AttackCooldown { get; private set; }
+
+        public override void Initialize(UnitCreationParameters parameters)
+        {
+            base.Initialize(parameters);
+
+            Model = parameters.UnitModel as TModel;
+        }
+
+        protected override void Update()
+        {
+            base.Update();
+            AttackCooldown -= Time.deltaTime;
+        }
+
+        protected void ResetAttackCooldown()
+        {
+            AttackCooldown = Model.AttackCooldown;
+        }
+    }
+
+    /// <summary>
+    /// This base class for Units is mainly useful to pass reference around without worrying about the Generic type
+    /// </summary>
     public abstract class UnitBase : MonoBehaviour, IAttackReceiver, IAttacker
     {
         [Header("FSM Data"), SerializeField]
@@ -11,27 +46,24 @@ namespace DCLBattle.Battle
         [SerializeField]
         private UnitStateID _defaultState = UnitStateID.Idle;
 
-        protected UnitFSM Fsm { get; private set; } = null;
         public Army Army { get; private set; }
         public Vector3 Position => transform.position;
 
-        protected Animator Animator { get; private set; }
-
-        private IUnitModel _model;
         // not returning _model.UnitType in order to use the value in OnValidate method of a SO
         public abstract UnitType UnitType { get; }
         public IStrategyUpdater StrategyUpdater { get; private set; }
 
-        private float _currentHealth;
         // IAttackReceiver
         public float Health             => _currentHealth;
-        public float Defense            => _model.Defense;
+        public abstract float Defense { get; }
 
-        protected float AttackCooldown { get; private set; }
         // IAttacker
-        public float AttackRange        => _model.AttackRange;
+        public abstract float AttackRange { get; }
 
+        protected Animator Animator { get; private set; }
+        protected UnitFSM Fsm { get; private set; } = null;
 
+        private float _currentHealth;
         private Vector3 _moveOffset;
         private Vector3 _lastPosition;
 
@@ -50,7 +82,6 @@ namespace DCLBattle.Battle
             Army = parameters.ParentArmy;
             StrategyUpdater = parameters.StrategyUpdater;
 
-            _model = parameters.UnitModel;
             _currentHealth = parameters.UnitModel.BaseHealth;
             
             GetComponentInChildren<Renderer>().material.color = Army.Model.ArmyColor;
@@ -78,8 +109,6 @@ namespace DCLBattle.Battle
 
         protected virtual void Update()
         {
-            AttackCooldown -= Time.deltaTime;
-
             EvadeCloseUnits();
 
             Fsm.ManualUpdate();
@@ -145,12 +174,6 @@ namespace DCLBattle.Battle
             Move(moveOffset);
         }
 
-        protected void ResetAttackCooldown()
-        {
-            AttackCooldown = _model.AttackCooldown;
-        }
-
-        // TODO This shouldn't be here
         public abstract void Attack(IAttackReceiver attackReceiver);
     }
 }

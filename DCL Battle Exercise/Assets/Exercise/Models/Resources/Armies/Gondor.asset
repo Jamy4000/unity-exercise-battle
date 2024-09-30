@@ -15,8 +15,8 @@ MonoBehaviour:
   _armyName: Gondor
   _armyColor: {r: 0.011747932, g: 0.51119846, b: 0.8301887, a: 0.7176471}
   _allianceId: 1
-  _strategyValue: 0
-  _unitsCount: 01000000350000000100000000000000
+  _strategyValue: 1
+  _unitsCount: 64000000640000006400000000000000
   _unitsModels:
   - {fileID: 11400000, guid: 12266ae65baa3b240ad34d29a2fb18b9, type: 2}
   - {fileID: 11400000, guid: 5122c87e380a6f04396026a28f45a541, type: 2}

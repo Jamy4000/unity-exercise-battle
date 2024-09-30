@@ -9,11 +9,18 @@ MonoBehaviour:
   m_GameObject: {fileID: 0}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 2ede462626db1ec4892cad320913bad5, type: 3}
+  m_Script: {fileID: 11500000, guid: 92f91dabd91a2c84088ff53943cccc07, type: 3}
   m_Name: ArcherModel
   m_EditorClassIdentifier: 
   _unitType: 1
   _unitPrefab: {fileID: 9015656096387748827, guid: 7fcbf22a3d6b39e4a94225667d73e4ff, type: 3}
   _strategyCreators:
-  - {fileID: 11400000, guid: f7b5060d77d2b4a43b11bd203f36d41f, type: 2}
   - {fileID: 11400000, guid: 4dee95b6508767b4cb805854905d58ff, type: 2}
+  - {fileID: 11400000, guid: f7b5060d77d2b4a43b11bd203f36d41f, type: 2}
+  _baseHealth: 50
+  _defense: 2
+  _attackRange: 2
+  _attackCooldown: 1
+  _maxAttackCooldown: 2
+  _postAttackDelay: 0.5
+  _arrowPrefab: {fileID: 4995913744683215106, guid: 43df16efbb83b484d91bf87170fd46c2, type: 3}

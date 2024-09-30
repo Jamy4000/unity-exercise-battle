@@ -9,7 +9,7 @@ MonoBehaviour:
   m_GameObject: {fileID: 0}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 2ede462626db1ec4892cad320913bad5, type: 3}
+  m_Script: {fileID: 11500000, guid: da29c0c584c2bb849a321db322aeec3f, type: 3}
   m_Name: WarriorModel
   m_EditorClassIdentifier: 
   _unitType: 0
@@ -17,3 +17,8 @@ MonoBehaviour:
   _strategyCreators:
   - {fileID: 11400000, guid: 3ec02e8fdb74f284caa782cee6dee052, type: 2}
   - {fileID: 11400000, guid: 86a5bc8d7a891e6458a27838e992339f, type: 2}
+  _baseHealth: 50
+  _defense: 2
+  _attackRange: 2
+  _attackCooldown: 1
+  _damage: 10

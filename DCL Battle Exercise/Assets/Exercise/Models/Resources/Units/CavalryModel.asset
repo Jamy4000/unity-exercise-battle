@@ -9,7 +9,7 @@ MonoBehaviour:
   m_GameObject: {fileID: 0}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 2ede462626db1ec4892cad320913bad5, type: 3}
+  m_Script: {fileID: 11500000, guid: 977242a9a1c8cc14bbf94a8d8889a9fb, type: 3}
   m_Name: CavalryModel
   m_EditorClassIdentifier: 
   _unitType: 2
@@ -17,3 +17,8 @@ MonoBehaviour:
   _strategyCreators:
   - {fileID: 11400000, guid: 9684062cb79e4234cb2eb0bbbaea52e4, type: 2}
   - {fileID: 11400000, guid: 9bf3aa5a3de13a64784905805a60fc8c, type: 2}
+  _baseHealth: 50
+  _defense: 2
+  _attackRange: 2
+  _attackCooldown: 1
+  _damage: 10

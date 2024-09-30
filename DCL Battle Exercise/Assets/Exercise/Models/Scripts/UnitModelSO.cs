@@ -4,7 +4,7 @@ using UnityEngine;
 /// <summary>
 /// ScriptableObject containing the data of a Unit
 /// </summary>
-[CreateAssetMenu(menuName = "DCLBattle/Units/Create Unit Model", fileName = "UnitModel", order = 0)]
+[CreateAssetMenu(menuName = "DCLBattle/Units/Model/Basic", fileName = "UnitModel", order = 0)]
 public class UnitModelSO : ScriptableObject, IUnitModel
 {
     [SerializeField, ReadOnly]
@@ -29,10 +29,16 @@ public class UnitModelSO : ScriptableObject, IUnitModel
     [SerializeField]
     private float _attackRange = 2f;
     public float AttackRange => _attackRange;
+    public float AttackRangeSq { get; private set; }
 
     [SerializeField]
     private float _attackCooldown = 1f;
     public float AttackCooldown => _attackCooldown;
+
+    private void OnEnable()
+    {
+        AttackRangeSq = AttackRange * AttackRange;
+    }
 
     public virtual UnitBase InstantiateUnit(UnitCreationParameters parameters)
     {

@@ -14,12 +14,9 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::ArmyModelSO
   _armyName: Mordor
   _armyColor: {r: 0.7735849, g: 0.105820596, b: 0.105820596, a: 0.7294118}
-  _enemyArmies:
-  - {fileID: 11400000, guid: a6c80dd762eaa2942967f75607f7c7a3, type: 2}
-  - {fileID: 11400000, guid: f3acd28be5a485c43afd74bee773f61d, type: 2}
-  - {fileID: 11400000, guid: 1534cd5a897919044ba600c86ae550c3, type: 2}
-  _strategyValue: 0
-  _unitsCount: 39000000230000001a00000008000000
+  _allianceId: 0
+  _strategyValue: 1
+  _unitsCount: 64000000640000006400000000000000
   _unitsModels:
   - {fileID: 11400000, guid: 12266ae65baa3b240ad34d29a2fb18b9, type: 2}
   - {fileID: 11400000, guid: 5122c87e380a6f04396026a28f45a541, type: 2}

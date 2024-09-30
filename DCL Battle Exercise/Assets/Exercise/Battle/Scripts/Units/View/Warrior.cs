@@ -2,34 +2,21 @@
 
 namespace DCLBattle.Battle
 {
-    public sealed class Warrior : UnitBase, IAttacker
+    public sealed class Warrior : UnitBase<WarriorModelSO>
     {
-        [SerializeField]
-        private float _attackRange = 2.5f;
-        private float _attackRangeSq;
-
-        [SerializeField]
-        private float _damage = 5f;
-
         public override UnitType UnitType => UnitType.Warrior;
-
-        protected override void Awake()
-        {
-            base.Awake();
-            _attackRangeSq = _attackRange * _attackRange;
-        }
 
         public override void Attack(IAttackReceiver target)
         {
             if (AttackCooldown > 0)
                 return;
 
-            if (Vector3.SqrMagnitude(transform.position - target.Position) > _attackRangeSq)
+            if (Vector3.SqrMagnitude(transform.position - target.Position) > (AttackRange * AttackRange))
                 return;
 
             Animator.SetTrigger("Attack");
 
-            target.Hit(this, target.Position, _damage);
+            target.Hit(this, target.Position, Model.Damage);
             ResetAttackCooldown();
         }
 

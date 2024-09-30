@@ -9,7 +9,7 @@ MonoBehaviour:
   m_GameObject: {fileID: 0}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 2ede462626db1ec4892cad320913bad5, type: 3}
+  m_Script: {fileID: 11500000, guid: 7db6d5fac30f4d34fa47e26bf34312d8, type: 3}
   m_Name: MagicianModel
   m_EditorClassIdentifier: 
   _unitType: 3
@@ -17,3 +17,10 @@ MonoBehaviour:
   _strategyCreators:
   - {fileID: 11400000, guid: 3c1a8cd04d742af42bd8cca2b9b350ba, type: 2}
   - {fileID: 11400000, guid: b55df920370ae2c43822bce01503c374, type: 2}
+  _baseHealth: 50
+  _defense: 2
+  _attackRange: 2
+  _attackCooldown: 1
+  _maxAttackCooldown: 2
+  _postAttackDelay: 0.5
+  _fireBallPrefab: {fileID: 4995913744683215106, guid: 43df16efbb83b484d91bf87170fd46c2, type: 3}

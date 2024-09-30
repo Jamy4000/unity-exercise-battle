@@ -4,14 +4,11 @@ using UnityEngine;
 namespace DCLBattle.Battle
 {
     // copy of warrior, just for the sake of argument
-    public sealed class Cavalry : UnitBase
+    public sealed class Cavalry : UnitBase<CavalryModelSO>
     {
         [SerializeField]
         private float _attackRange = 2.5f;
         private float _attackRangeSq;
-
-        [SerializeField]
-        private float _damage = 10f;
 
         public override UnitType UnitType => UnitType.Cavalry;
 
@@ -31,7 +28,7 @@ namespace DCLBattle.Battle
 
             Animator.SetTrigger("Attack");
 
-            target.Hit(this, target.Position, _damage);
+            target.Hit(this, target.Position, Model.Damage);
             ResetAttackCooldown();
         }
 
