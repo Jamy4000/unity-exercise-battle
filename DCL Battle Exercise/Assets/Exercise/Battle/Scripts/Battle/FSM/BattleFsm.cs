@@ -5,7 +5,7 @@ using Utils;
 namespace DCLBattle.Battle
 {
     /// <summary>
-    /// The type of ways the units can behave in the world.
+    /// The different states in which the battle can be.
     /// /!\/!\/!\ WARNING: DO NOT update the index, as it will break Unity's Serialization.
     /// </summary>
     public enum BattleStateID
@@ -20,11 +20,6 @@ namespace DCLBattle.Battle
         public BattleFSM(BattleState defaultState, List<BattleState> states) :
             base(defaultState, states)
         {
-        }
-
-        public override void ManualLateUpdate()
-        {
-            base.ManualLateUpdate();
         }
     }
 }

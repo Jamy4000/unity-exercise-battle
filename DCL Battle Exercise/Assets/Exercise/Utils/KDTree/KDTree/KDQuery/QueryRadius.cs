@@ -116,11 +116,12 @@ namespace DataStructures.ViliWonka.KDTree {
                     for(int i = node.start; i < node.end; i++) {
 
                         int index = permutation[i];
+                        float sqrDistance = Vector3.SqrMagnitude(points[index] - queryPosition);
 
-                        if(Vector3.SqrMagnitude(points[index] - queryPosition) <= squaredRadius) {
+                        if (sqrDistance <= squaredRadius) {
 
                             resultIndices.Add(index);
-                            resultDistances?.Add(Mathf.Sqrt(squaredRadius));
+                            resultDistances?.Add(Mathf.Sqrt(sqrDistance));
                         }
                     }
 

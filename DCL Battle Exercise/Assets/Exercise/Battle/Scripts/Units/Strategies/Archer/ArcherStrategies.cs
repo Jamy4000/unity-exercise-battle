@@ -9,7 +9,7 @@ namespace DCLBattle.Battle
 
         public Vector3 UpdateStrategy(UnitBase unitToUpdate)
         {
-            UnitBase closestEnemy = unitToUpdate.Army.GetClosestEnemy(unitToUpdate.Position, out _);
+            UnitBase closestEnemy = unitToUpdate.Army.GetClosestEnemy(unitToUpdate.Position, out float distance);
 
             // TODO this shouldn't be necessary
             if (closestEnemy == null)
@@ -17,7 +17,8 @@ namespace DCLBattle.Battle
 
             unitToUpdate.Attack(closestEnemy);
 
-            Vector3 toNearest = Vector3.Normalize(closestEnemy.Position - unitToUpdate.Position);
+            // normalizing
+            Vector3 toNearest = (closestEnemy.Position - unitToUpdate.Position) / distance;
             toNearest.Scale(IStrategyUpdater.FlatScale);
             return toNearest;
         }
@@ -28,6 +29,8 @@ namespace DCLBattle.Battle
         public ArmyStrategy ArmyStrategy => ArmyStrategy.Defensive;
 
         private readonly ArcherDefensiveStrategySO _data;
+
+        private static readonly Quaternion _flankRotation = Quaternion.Euler(0f, 90f, 0f);
 
         public ArcherDefensiveStrategyUpdater(ArcherDefensiveStrategySO data)
         {
@@ -71,7 +74,7 @@ namespace DCLBattle.Battle
             // if the unit is within attack range
             if (distance < unitToUpdate.AttackRange)
             {
-                Vector3 flank = Quaternion.Euler(0f, 90f, 0f) * toNearest;
+                Vector3 flank = _flankRotation * toNearest;
                 moveDirection += Vector3.Normalize(-(toNearest + flank));
 
                 // Slight change in design, we were always attacking the closest enemy, even when not in range

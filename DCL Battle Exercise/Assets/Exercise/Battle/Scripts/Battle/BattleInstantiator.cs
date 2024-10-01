@@ -70,8 +70,7 @@ namespace DCLBattle.Battle
                 }
             }
 
-            // Registering this as global, but if we want multiple BattleManagers, we could register it on the Scene level as well
-            UnityServiceLocator.ServiceLocator.Global.Register(this);
+            UnityServiceLocator.ServiceLocator.ForSceneOf(this).Register(this);
 
             _battleFSM = CreateFSM();
         }
@@ -105,6 +104,24 @@ namespace DCLBattle.Battle
             BattleCenter /= _armies.Length;
 
             _battleFSM.ManualUpdate();
+        }
+
+        private void OnDrawGizmos()
+        {
+            if (!Application.isPlaying)
+                return;
+
+            foreach (var army in _armies)
+            {
+                if (army.RemainingUnitsCount == 0)
+                    continue;
+
+                Gizmos.color = army.Model.ArmyColor;
+                Gizmos.DrawSphere(army.Center, 2f);
+            }
+
+            Gizmos.color = Color.magenta;
+            Gizmos.DrawSphere(BattleCenter, 4f);
         }
 
         private void LateUpdate()

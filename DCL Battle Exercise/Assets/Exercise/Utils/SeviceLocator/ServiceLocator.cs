@@ -104,7 +104,19 @@ namespace UnityServiceLocator
             services.Register(service);
             return this;
         }
-        
+
+        /// <summary>
+        /// Unregisters a service to the ServiceLocator using the service's type.
+        /// </summary>
+        /// <param name="service">The service to unregister.</param>  
+        /// <typeparam name="T">Class type of the service to be unregistered.</typeparam>
+        /// <returns>The ServiceLocator instance after unregistering the service.</returns>
+        public ServiceLocator Unregister<T>()
+        {
+            services.Unregister<T>();
+            return this;
+        }
+
         /// <summary>
         /// Registers a service to the ServiceLocator using a specific type.
         /// </summary>

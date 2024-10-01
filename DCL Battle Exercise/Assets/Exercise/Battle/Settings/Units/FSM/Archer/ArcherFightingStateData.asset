@@ -13,4 +13,6 @@ MonoBehaviour:
   m_Name: ArcherFightingStateData
   m_EditorClassIdentifier: 
   <ExitStates>k__BackingField: 02000000
-  _speed: 20
+  _speed: 250
+  _maxDistanceFromCenter: 80
+  _minDistanceFromOtherUnits: 2

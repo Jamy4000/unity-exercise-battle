@@ -33,7 +33,7 @@ namespace DCLBattle.Battle
 
         public void OnEvent(AllianceWonEvent evt)
         {
-            var battleInstatiator = UnityServiceLocator.ServiceLocator.Global.Get<BattleInstantiator>();
+            var battleInstatiator = UnityServiceLocator.ServiceLocator.ForSceneOf(this).Get<BattleInstantiator>();
 
             List<string> winnersList = new(battleInstatiator.ArmiesCount);
 

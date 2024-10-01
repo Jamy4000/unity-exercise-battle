@@ -32,10 +32,10 @@ namespace DCLBattle.Battle
         public override void UpdateState()
         {
             // We first make sure the unit is staying around the battle
-            //Vector3 moveOffset = CalculateEvadeAlliesOffset();
+            Vector3 moveOffset = CalculateEvadeAlliesOffset();
 
             // We then calculate the move offset for this unit using the strategy of the army
-            Vector3 moveOffset = Unit.StrategyUpdater.UpdateStrategy(Unit);
+            moveOffset += Unit.StrategyUpdater.UpdateStrategy(Unit);
 
             // We finally move the unit
             Unit.Move(moveOffset * (Time.deltaTime * StateData.UnitMoveSpeed));
@@ -49,15 +49,14 @@ namespace DCLBattle.Battle
             float centerDistanceSq = Vector3.SqrMagnitude(unitToCenter);
 
             // If unit is too far from the battle's center point
-            // TODO Hard coded values
-            if (centerDistanceSq > 80.0f * 80.0f)
+            if (centerDistanceSq > StateData.MaxDistanceFromCenterSq)
             {
                 // we move them to the center, regardless of them overlapping another unit or not
                 float centerDistance = Mathf.Sqrt(centerDistanceSq);
                 // normalizing
                 unitToCenter /= centerDistance;
 
-                return unitToCenter * (80.0f - centerDistance);
+                return -(unitToCenter * (StateData.MaxDistanceFromCenter - centerDistance));
             }
 
             // if the unit is close enough from the battle, we make sure they are not overlapping other units
@@ -68,9 +67,9 @@ namespace DCLBattle.Battle
             for (int armyIndex = 0; armyIndex < armiesHolder.ArmiesCount; armyIndex++)
             {
                 var army = armiesHolder.GetArmy(armyIndex);
-                // TODO Hard Coded value
+
                 // We check to find the units within X radius of the current unit
-                int unitsInRadiusCount = army.GetUnitsInRadius_NoAlloc(Unit.Position, 2f, _unitsInRadius);
+                int unitsInRadiusCount = army.GetUnitsInRadius_NoAlloc(Unit.Position, StateData.MinDistanceFromOtherUnits, _unitsInRadius);
 
                 // for every unit within that radius
                 for (int unitIndex = 0; unitIndex < unitsInRadiusCount; unitIndex++)
@@ -80,8 +79,7 @@ namespace DCLBattle.Battle
                     float distance = _unitsInRadius[unitIndex].distance;
 
                     Vector3 toNearest = Vector3.Normalize(otherUnit.Position - Unit.Position);
-                    // TODO Hard Coded value
-                    moveOffset -= toNearest * (2f - distance);
+                    moveOffset -= toNearest * (StateData.MinDistanceFromOtherUnits - distance);
                 }
             }
 

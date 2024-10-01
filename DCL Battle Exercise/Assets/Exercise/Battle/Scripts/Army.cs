@@ -54,6 +54,7 @@ namespace DCLBattle.Battle
         private void RebuildTree()
         {
             // TODO Jobify ?
+            Center = Vector3.zero;
             Vector3[] pointClound = new Vector3[RemainingUnitsCount];
             for (int i = 0; i < RemainingUnitsCount; i++)
             {
@@ -91,6 +92,7 @@ namespace DCLBattle.Battle
             }
 
             _queryResults.Clear();
+            _queryDistances.Clear();
 
             // spherical query
             _query.ClosestPoint(_tree, source, _queryResults, _queryDistances);
@@ -107,6 +109,7 @@ namespace DCLBattle.Battle
             }
 
             _queryResults.Clear();
+            _queryDistances.Clear();
 
             // spherical query
             _query.Radius(_tree, source, radius, _queryResults, _queryDistances);

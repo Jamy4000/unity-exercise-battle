@@ -11,9 +11,23 @@ namespace DCLBattle.Battle
         private float _speed = 15f;
         public float UnitMoveSpeed => _speed;
 
+        [SerializeField]
+        private float _maxDistanceFromCenter = 80f;
+        public float MaxDistanceFromCenter => _maxDistanceFromCenter;
+        public float MaxDistanceFromCenterSq {get; private set; }
+
+        [SerializeField]
+        private float _minDistanceFromOtherUnits = 2f;
+        public float MinDistanceFromOtherUnits => _minDistanceFromOtherUnits;
+
         public override UnitState CreateStateInstance(UnitBase unit)
         {
             return new UnitFightingState(this, unit);
+        }
+
+        private void OnEnable()
+        {
+            MaxDistanceFromCenterSq = MaxDistanceFromCenter * MaxDistanceFromCenter;
         }
     }
 

@@ -48,5 +48,32 @@ namespace UnityServiceLocator {
             
             return this;
         }
+
+        public ServiceManager Unregister<T>()
+        {
+            Type type = typeof(T);
+
+            if (!services.Remove(type))
+            {
+                Debug.LogError($"ServiceManager.Unregister: Service of type {type.FullName} cannot be found to unregister");
+            }
+
+            return this;
+        }
+
+        public ServiceManager Unregister(Type type, object service)
+        {
+            if (!type.IsInstanceOfType(service))
+            {
+                throw new ArgumentException("Type of service does not match type of service interface", nameof(service));
+            }
+
+            if (!services.Remove(type))
+            {
+                Debug.LogError($"ServiceManager.Unregister: Service of type {type.FullName} cannot be found to unregister");
+            }
+
+            return this;
+        }
     }
 }
