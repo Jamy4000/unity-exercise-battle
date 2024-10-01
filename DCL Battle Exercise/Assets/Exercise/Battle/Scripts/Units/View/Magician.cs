@@ -24,7 +24,7 @@ namespace DCLBattle.Battle
         {
             if (AttackCooldown > Model.MaxAttackCooldown - Model.PostAttackDelay)
             {
-                AttackCooldown -= Time.deltaTime;
+                CurrentAttackCooldown -= Time.deltaTime;
             }
             else
             {

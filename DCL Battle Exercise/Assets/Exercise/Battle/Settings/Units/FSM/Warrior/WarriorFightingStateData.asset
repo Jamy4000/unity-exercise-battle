@@ -14,3 +14,5 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   <ExitStates>k__BackingField: 02000000
   _speed: 15
+  _maxDistanceFromCenter: 80
+  _minDistanceFromOtherUnits: 2

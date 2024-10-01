@@ -20,7 +20,7 @@ namespace DCLBattle.Battle
             // normalizing
             Vector3 toNearest = (closestEnemy.Position - unitToUpdate.Position) / distance;
             toNearest.Scale(IStrategyUpdater.FlatScale);
-            return toNearest;
+            return Vector3.Normalize(toNearest);
         }
     }
 
@@ -42,23 +42,25 @@ namespace DCLBattle.Battle
             Vector3 moveDirection = Vector3.zero;
 
             // We get the enemies' center point
-            List<Army> enemies = unitToUpdate.Army.GetEnemyArmies();
-            Vector3 enemiesCenter = Vector3.zero;
-            for (int i = 0; i < enemies.Count; i++)
+            List<Army> opponentsArmies = unitToUpdate.Army.GetEnemyArmies();
+            Vector3 opponentsArmiesCenter = Vector3.zero;
+            for (int i = 0; i < opponentsArmies.Count; i++)
             {
-                enemiesCenter += enemies[i].Center;
+                opponentsArmiesCenter += opponentsArmies[i].Center;
             }
-            enemiesCenter /= enemies.Count;
+            opponentsArmiesCenter /= opponentsArmies.Count;
 
             // If we are further away than attack range; we move toward the enemies' center
             // TODO why are we only using X here ?
             float unitPositionX = unitToUpdate.Position.x;
-            float distToEnemyX = Mathf.Abs(enemiesCenter.x - unitPositionX);
+            float distToEnemyX = Mathf.Abs(opponentsArmiesCenter.x - unitPositionX);
+
             if (distToEnemyX > unitToUpdate.AttackRange)
             {
-                if (enemiesCenter.x < unitPositionX)
+                if (opponentsArmiesCenter.x < unitPositionX)
                     moveDirection += Vector3.left;
-                else if (enemiesCenter.x > unitPositionX)
+                
+                if (opponentsArmiesCenter.x > unitPositionX)
                     moveDirection += Vector3.right;
             }
 
@@ -85,7 +87,7 @@ namespace DCLBattle.Battle
                 moveDirection += Vector3.Normalize(toNearest);
             }
 
-            return moveDirection;
+            return Vector3.Normalize(moveDirection);
         }
     }
 }

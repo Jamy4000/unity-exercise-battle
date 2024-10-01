@@ -14,8 +14,8 @@ namespace DCLBattle.Battle
 
         public override float Defense => Model.Defense;
         public override float AttackRange => Model.AttackRange;
-
-        protected float AttackCooldown;
+        protected float CurrentAttackCooldown;
+        public override float AttackCooldown => CurrentAttackCooldown;
 
         public override void Initialize(UnitCreationParameters parameters)
         {
@@ -23,16 +23,15 @@ namespace DCLBattle.Battle
             base.Initialize(parameters);
         }
 
-        // TODO GameUpdater
         public override void ManualUpdate()
         {
-            AttackCooldown -= Time.deltaTime;
+            CurrentAttackCooldown -= Time.deltaTime;
             base.ManualUpdate();
         }
 
         protected void ResetAttackCooldown()
         {
-            AttackCooldown = Model.AttackCooldown;
+            CurrentAttackCooldown = Model.AttackCooldown;
         }
 
         protected override UnitFSM CreateFsm()
@@ -74,6 +73,7 @@ namespace DCLBattle.Battle
 
         // IAttacker
         public abstract float AttackRange { get; }
+        public abstract float AttackCooldown { get; }
 
         public System.Action<float> UnitWasHitEvent { get; set; }
 
@@ -111,10 +111,11 @@ namespace DCLBattle.Battle
 
         public virtual void ManualUpdate()
         {
+            _moveOffset = Vector3.zero;
+
             Fsm.ManualUpdate();
 
             transform.position += _moveOffset;
-            _moveOffset = Vector3.zero;
 
             // TODO I don't think this should be here + hard coded value for Speed
             Animator.SetFloat("MovementSpeed", (transform.position - _lastPosition).magnitude / 20f);
@@ -129,6 +130,7 @@ namespace DCLBattle.Battle
         protected virtual void OnDestroy()
         {
             Fsm.UnregisterStateStartedCallback(OnStateStarted);
+            GameUpdater.Unregister(this);
         }
 
         public virtual void Move(Vector3 delta)

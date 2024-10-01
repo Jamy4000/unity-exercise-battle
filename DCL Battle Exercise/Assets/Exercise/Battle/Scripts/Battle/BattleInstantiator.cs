@@ -93,15 +93,17 @@ namespace DCLBattle.Battle
 
         void Update()
         {
+            int remainingArmies = 0;
             foreach (var army in _armies)
             {
                 if (army.RemainingUnitsCount == 0)
                     continue;
 
                 BattleCenter += army.Center;
+                remainingArmies++;
             }
 
-            BattleCenter /= _armies.Length;
+            BattleCenter /= remainingArmies;
 
             _battleFSM.ManualUpdate();
         }

@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using UnityEngine;
 
 namespace DCLBattle.Battle
@@ -8,19 +9,18 @@ namespace DCLBattle.Battle
 
         public Vector3 UpdateStrategy(UnitBase unitToUpdate)
         {
-            return Vector3.zero;
-            /*
-            DCLBattleUtils.GetNearestObject(this, enemies, out UnitBase nearestEnemy);
+            UnitBase closestEnemy = unitToUpdate.Army.GetClosestEnemy(unitToUpdate.Position, out float distance);
 
-            if (nearestEnemy == null)
-                return;
+            // TODO this shouldn't be necessary
+            if (closestEnemy == null)
+                return Vector3.zero;
 
-            Vector3 toNearest = (nearestEnemy.transform.position - transform.position).normalized;
-            toNearest.Scale(new Vector3(1, 0, 1));
-            Move(toNearest.normalized);
+            unitToUpdate.Attack(closestEnemy);
 
-            Attack(nearestEnemy);
-            */
+            // normalizing
+            Vector3 toNearest = (closestEnemy.Position - unitToUpdate.Position) / distance;
+            toNearest.Scale(IStrategyUpdater.FlatScale);
+            return Vector3.Normalize(toNearest);
         }
     }
 
@@ -30,36 +30,52 @@ namespace DCLBattle.Battle
 
         public Vector3 UpdateStrategy(UnitBase unitToUpdate)
         {
-            return Vector3.zero;
-            /*
-            Vector3 enemyCenter = DCLBattleUtils.GetCenter(enemies);
+            Vector3 moveDirection = Vector3.zero;
+
+            // We get the enemies' center point
+            Vector3 enemyCenter = Vector3.zero;
+
+            List<Army> opponentsArmies = unitToUpdate.Army.GetEnemyArmies();
+            for (int i = 0; i < opponentsArmies.Count; i++)
+            {
+                enemyCenter += opponentsArmies[i].Center;
+            }
+            enemyCenter /= opponentsArmies.Count;
+
+            // If we are further away than attack range; we move toward the enemies' center
+            // TODO why are we only using X here ?
+            float unitPositionX = unitToUpdate.Position.x;
+            float distToEnemyX = Mathf.Abs(enemyCenter.x - unitPositionX);
 
             // TODO Hard coded value
-            if (Mathf.Abs(enemyCenter.x - transform.position.x) > 20f)
+            if (distToEnemyX > 20f)
             {
-                if (enemyCenter.x < transform.position.x)
-                    Move(Vector3.left);
+                if (enemyCenter.x < unitPositionX)
+                    moveDirection += Vector3.left;
 
-                if (enemyCenter.x > transform.position.x)
-                    Move(Vector3.right);
+                else if (enemyCenter.x > unitPositionX)
+                    moveDirection += Vector3.right;
             }
 
-            DCLBattleUtils.GetNearestObject(this, enemies, out UnitBase nearestObject);
+            // We check who the closest enemy is
+            UnitBase closestEnemy = unitToUpdate.Army.GetClosestEnemy(unitToUpdate.Position, out float distance);
+            // TODO This should never happen
+            if (closestEnemy == null)
+                return moveDirection;
 
-            if (nearestObject == null)
-                return;
-
-            if (_attackCooldown <= 0)
+            Vector3 toNearestEnemy = Vector3.Normalize(closestEnemy.Position - unitToUpdate.Position);
+            if (unitToUpdate.AttackCooldown <= 0f)
             {
-                Move((nearestObject.transform.position - transform.position).normalized);
+                moveDirection += toNearestEnemy;
+                if (distance < unitToUpdate.AttackRange)
+                    unitToUpdate.Attack(closestEnemy);
             }
             else
             {
-                Move((nearestObject.transform.position - transform.position).normalized * -1);
+                moveDirection -= toNearestEnemy;
             }
 
-            Attack(nearestObject);
-            */
+            return Vector3.Normalize(moveDirection);
         }
     }
 }

@@ -37,6 +37,8 @@ namespace DCLBattle.Battle
             // We then calculate the move offset for this unit using the strategy of the army
             moveOffset += Unit.StrategyUpdater.UpdateStrategy(Unit);
 
+            moveOffset = Vector3.Normalize(moveOffset);
+
             // We finally move the unit
             Unit.Move(moveOffset * (Time.deltaTime * StateData.UnitMoveSpeed));
         }
@@ -53,10 +55,11 @@ namespace DCLBattle.Battle
             {
                 // we move them to the center, regardless of them overlapping another unit or not
                 float centerDistance = Mathf.Sqrt(centerDistanceSq);
+
                 // normalizing
                 unitToCenter /= centerDistance;
 
-                return -(unitToCenter * (StateData.MaxDistanceFromCenter - centerDistance));
+                return unitToCenter * (centerDistance - StateData.MaxDistanceFromCenter);
             }
 
             // if the unit is close enough from the battle, we make sure they are not overlapping other units
@@ -79,7 +82,8 @@ namespace DCLBattle.Battle
                     float distance = _unitsInRadius[unitIndex].distance;
 
                     Vector3 toNearest = Vector3.Normalize(otherUnit.Position - Unit.Position);
-                    moveOffset -= toNearest * (StateData.MinDistanceFromOtherUnits - distance);
+                    toNearest *= (StateData.MinDistanceFromOtherUnits - distance);
+                    moveOffset -= toNearest;
                 }
             }
 

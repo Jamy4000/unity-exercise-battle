@@ -13,8 +13,8 @@ public sealed class MagicianModelSO : UnitModelSO
     public float PostAttackDelay => _postAttackDelay;
 
     [SerializeField, Interface(typeof(IProjectile))]
-    private GameObject _fireBallPrefab;
-    public GameObject FireBallPrefab => _fireBallPrefab;
+    private Object _fireBallPrefab;
+    public Object FireBallPrefab => _fireBallPrefab;
 
     [Header("Fireball Pool Settings")]
     [SerializeField]
