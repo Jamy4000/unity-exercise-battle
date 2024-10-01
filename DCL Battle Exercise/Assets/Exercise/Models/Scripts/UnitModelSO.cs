@@ -42,7 +42,7 @@ public class UnitModelSO : ScriptableObject, IUnitModel
     public UnitStateData[] UnitStatesData => _unitStatesData;
 
     [SerializeField]
-    private UnitStateID _defaultState = UnitStateID.Idle;
+    private UnitStateID _defaultState = UnitStateID.Fighting;
     public UnitStateID DefaultState => _defaultState;
 
     private void OnEnable()

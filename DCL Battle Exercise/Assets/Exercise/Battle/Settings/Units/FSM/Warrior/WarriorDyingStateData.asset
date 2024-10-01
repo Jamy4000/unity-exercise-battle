@@ -12,4 +12,5 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 5928a169ea32dc143b57bcf8c021e178, type: 3}
   m_Name: WarriorDyingStateData
   m_EditorClassIdentifier: 
-  <ExitStates>k__BackingField: 0000000001000000
+  <ExitStates>k__BackingField: 
+  _deathAnimName: Death

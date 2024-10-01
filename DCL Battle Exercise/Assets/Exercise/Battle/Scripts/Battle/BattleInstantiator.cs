@@ -1,8 +1,10 @@
+using System.Collections.Generic;
 using UnityEngine;
+using Utils;
 
 namespace DCLBattle.Battle
 {
-    public sealed class BattleInstantiator : MonoBehaviour
+    public sealed class BattleInstantiator : MonoBehaviour, IArmiesHolder
     {
         /// <summary>
         /// Simple serialized struct to link an army to its spawn point
@@ -24,6 +26,12 @@ namespace DCLBattle.Battle
         [SerializeField]
         private ArmySpawnParameters[] _armiesToSpawn;
 
+        [Header("FSM Data"), SerializeField]
+        private BattleStateData[] _battleStatesData;
+
+        [SerializeField]
+        private BattleStateID _defaultState = BattleStateID.OnGoing;
+
         private Army[] _armies;
 
         public Army GetArmy(int index) => _armies[index];
@@ -31,6 +39,8 @@ namespace DCLBattle.Battle
         public Vector3 BattleCenter { get; private set; }
 
         private static readonly IStrategyUpdater[,] _strategyUpdaters = new IStrategyUpdater[IArmyModel.UnitLength, IStrategyUpdater.StrategyCount];
+
+        private BattleFSM _battleFSM;
 
         void Awake()
         {
@@ -62,6 +72,24 @@ namespace DCLBattle.Battle
 
             // Registering this as global, but if we want multiple BattleManagers, we could register it on the Scene level as well
             UnityServiceLocator.ServiceLocator.Global.Register(this);
+
+            _battleFSM = CreateFSM();
+        }
+
+        private BattleFSM CreateFSM()
+        {
+            List<BattleState> states = new(_battleStatesData.Length);
+            BattleState defaultState = null;
+
+            for (int i = 0; i < _battleStatesData.Length; i++)
+            {
+                BattleState state = _battleStatesData[i].CreateStateInstance(this);
+                states.Add(state);
+                if (state.StateEnum == _defaultState)
+                    defaultState = state;
+            }
+
+            return new BattleFSM(defaultState, states);
         }
 
         void Update()
@@ -72,17 +100,22 @@ namespace DCLBattle.Battle
                     continue;
 
                 BattleCenter += army.Center;
-                
-                army.Update();
             }
 
             BattleCenter /= _armies.Length;
+
+            _battleFSM.ManualUpdate();
+        }
+
+        private void LateUpdate()
+        {
+            _battleFSM.ManualLateUpdate();
         }
 
         private Army CreateArmy(IArmyModel armyModel, Bounds spawnBounds)
         {
             // TODO remove hard implementation
-            Army army = new Army(armyModel);
+            Army army = new Army(armyModel, this);
 
             // For each type of unit in the game
             for (int unitTypeIndex = 0; unitTypeIndex < IArmyModel.UnitLength; unitTypeIndex++)

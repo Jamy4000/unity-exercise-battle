@@ -20,14 +20,16 @@ namespace DCLBattle.Battle
                 _arrowsPool = new ArcherArrowPool(Model.FireBallPrefab, Model.MinFireballPoolSize, Model.MaxFireballPoolSize);
             }
         }
-
-        public override void Move(Vector3 delta)
+        public override void ManualUpdate()
         {
-            // TODO We could avoid a bunch of calculations if we were to check this before updating the strategy and evade plan
-            if (AttackCooldown > Model.AttackCooldown - Model.PostAttackDelay)
-                return;
-
-            base.Move(delta);
+            if (AttackCooldown > Model.MaxAttackCooldown - Model.PostAttackDelay)
+            {
+                AttackCooldown -= Time.deltaTime;
+            }
+            else
+            {
+                base.ManualUpdate();
+            }
         }
 
         public override void Attack(IAttackReceiver target)

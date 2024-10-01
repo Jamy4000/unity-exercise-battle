@@ -11,12 +11,10 @@ namespace DCLBattle.Battle
         {
             UnitBase closestEnemy = unitToUpdate.Army.GetClosestEnemy(unitToUpdate.Position, out _);
 
-            // if they are no more unit to attack, this army won.
-            // TODO This check isn't really necessary as systems should stop as soon as there ar no more unit to fight
+            // TODO this shouldn't be necessary
             if (closestEnemy == null)
                 return Vector3.zero;
 
-            // TODO I don't think this should be here
             unitToUpdate.Attack(closestEnemy);
 
             Vector3 toNearest = Vector3.Normalize(closestEnemy.Position - unitToUpdate.Position);

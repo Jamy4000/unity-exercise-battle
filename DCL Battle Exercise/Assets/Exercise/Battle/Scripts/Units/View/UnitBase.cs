@@ -1,5 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using UnityEngine;
 using Utils;
 
@@ -16,7 +15,7 @@ namespace DCLBattle.Battle
         public override float Defense => Model.Defense;
         public override float AttackRange => Model.AttackRange;
 
-        protected float AttackCooldown { get; private set; }
+        protected float AttackCooldown;
 
         public override void Initialize(UnitCreationParameters parameters)
         {
@@ -24,10 +23,11 @@ namespace DCLBattle.Battle
             base.Initialize(parameters);
         }
 
-        protected override void Update()
+        // TODO GameUpdater
+        public override void ManualUpdate()
         {
-            base.Update();
             AttackCooldown -= Time.deltaTime;
+            base.ManualUpdate();
         }
 
         protected void ResetAttackCooldown()
@@ -55,37 +55,39 @@ namespace DCLBattle.Battle
     /// <summary>
     /// This base class for Units is mainly useful to pass reference around without worrying about the Generic type
     /// </summary>
-    public abstract class UnitBase : MonoBehaviour, IAttackReceiver, IAttacker
+    public abstract class UnitBase : MonoBehaviour, IAttackReceiver, IAttacker, 
+        I_UpdateOnly, I_LateUpdateOnly, ISubscriber<StartBattleEvent>, ISubscriber<AllianceWonEvent>
     {
-        public Army Army { get; private set; }
-        public Vector3 Position => transform.position;
-
-        // not returning _model.UnitType in order to use the value in OnValidate method of a SO
+        // not returning _model.UnitType in order to use the value in the OnValidate method of the Model SO
         public abstract UnitType UnitType { get; }
+
+        // TODO this crossdependency feels wrong
+        public Army Army { get; private set; }
         public IStrategyUpdater StrategyUpdater { get; private set; }
 
+        public Vector3 Position => transform.position;
+
         // IAttackReceiver
-        public float Health             => _currentHealth;
+        public float Health => _currentHealth;
         public abstract float Defense { get; }
+        public System.Action<IAttackReceiver> AttackReceiverDiedEvent { get; set; }
 
         // IAttacker
         public abstract float AttackRange { get; }
 
-        protected Animator Animator { get; private set; }
-        protected UnitFSM Fsm { get; private set; } = null;
+        public System.Action<float> UnitWasHitEvent { get; set; }
+
+        public Animator Animator { get; private set; }
+        protected UnitFSM Fsm { get; private set; }
 
         private float _currentHealth;
         private Vector3 _moveOffset;
         private Vector3 _lastPosition;
 
-        // TODO static for now as I don't see why we would want to have that for every unit, except if we end up threading this
-        private static readonly (UnitBase unit, float distance)[] _unitsInRadius = new (UnitBase, float)[16];
-
-        private Action _unitDiedEvent;
-
         protected virtual void Awake()
         {
             Animator = GetComponentInChildren<Animator>();
+            MessagingSystem<StartBattleEvent>.Subscribe(this);
         }
 
         // Create when instantiated
@@ -93,7 +95,10 @@ namespace DCLBattle.Battle
         {
             Army = parameters.ParentArmy;
             StrategyUpdater = parameters.StrategyUpdater;
+            MessagingSystem<AllianceWonEvent>.Subscribe(this);
+
             Fsm = CreateFsm();
+            Fsm.RegisterStateStartedCallback(OnStateStarted);
 
             _currentHealth = parameters.UnitModel.BaseHealth;
             
@@ -104,10 +109,8 @@ namespace DCLBattle.Battle
             _lastPosition = transform.position;
         }
 
-        protected virtual void Update()
+        public virtual void ManualUpdate()
         {
-            EvadeCloseUnits();
-
             Fsm.ManualUpdate();
 
             transform.position += _moveOffset;
@@ -118,9 +121,14 @@ namespace DCLBattle.Battle
             _lastPosition = transform.position;
         }
 
-        private void LateUpdate()
+        public virtual void ManualLateUpdate()
         {
             Fsm.ManualLateUpdate();
+        }
+
+        protected virtual void OnDestroy()
+        {
+            Fsm.UnregisterStateStartedCallback(OnStateStarted);
         }
 
         public virtual void Move(Vector3 delta)
@@ -131,54 +139,26 @@ namespace DCLBattle.Battle
         public virtual void Hit(IAttacker attacker, Vector3 hitPosition, float damage)
         {
             _currentHealth -= Mathf.Max(damage - Defense, 0f);
-
-            if (Health < 0)
-            {
-                transform.forward = attacker.Position - transform.position;
-
-                // TODO Death Event needs to be fired
-                Army.RemoveUnit(this);
-
-                Animator.SetTrigger("Death");
-                this.enabled = false;
-            }
-            else
-            {
-                Animator.SetTrigger("Hit");
-            }
+            UnitWasHitEvent?.Invoke(_currentHealth);
         }
 
-        private void EvadeCloseUnits()
+        public void OnEvent(AllianceWonEvent evt)
         {
-            // TODO we should not be doing that every frame for every unit
-            var battleInstantiator = UnityServiceLocator.ServiceLocator.Global.Get<BattleInstantiator>();
+            GameUpdater.Unregister(this);
+        }
 
-            Vector3 moveOffset = Vector3.zero;
-            for (int armyIndex = 0; armyIndex < battleInstantiator.ArmiesCount; armyIndex++)
+        public void OnEvent(StartBattleEvent evt)
+        {
+            GameUpdater.Register(this);
+        }
+
+        private void OnStateStarted(UnitStateID newState)
+        {
+            if (newState == UnitStateID.Dying)
             {
-                var army = battleInstantiator.GetArmy(armyIndex);
-                // TODO Hard Coded value
-                int unitsInRadiusCount = army.GetUnitsInRadius_NoAlloc(Position, 2f, _unitsInRadius);
-
-                for (int unitIndex = 0; unitIndex < unitsInRadiusCount; unitIndex++)
-                {
-                    Vector3 toNearest = Vector3.Normalize(_unitsInRadius[unitIndex].unit.Position - transform.position);
-                    // TODO Hard Coded value
-                    moveOffset -= toNearest * ((2f - Mathf.Sqrt(_unitsInRadius[unitIndex].distance)) * Time.deltaTime);
-                }
+                AttackReceiverDiedEvent?.Invoke(this);
+                GameUpdater.Unregister(this);
             }
-
-            Move(moveOffset);
-        }
-
-        public void RegisterOnDeathCallback(Action callback)
-        {
-            _unitDiedEvent += callback;
-        }
-
-        public void UnregisterOnDeathCallback(Action callback)
-        {
-            _unitDiedEvent -= callback;
         }
 
         protected abstract UnitFSM CreateFsm();

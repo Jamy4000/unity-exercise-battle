@@ -12,20 +12,22 @@ namespace DCLBattle.Battle
         {
             base.Initialize(parameters);
             
-            // TODO this is kind of avoidable I think
+            // TODO this should be avoidable I think
             if (_arrowsPool == null)
             {
                 _arrowsPool = new ArcherArrowPool(Model.ArrowPrefab, Model.MinArrowPoolSize, Model.MaxArrowPoolSize);
             }
         }
-
-        public override void Move(Vector3 delta)
+        public override void ManualUpdate()
         {
-            // TODO We could avoid a bunch of calculations if we were to check this before updating the strategy and evade plan
             if (AttackCooldown > Model.MaxAttackCooldown - Model.PostAttackDelay)
-                return;
-
-            base.Move(delta);
+            {
+                AttackCooldown -= Time.deltaTime;
+            }
+            else
+            {
+                base.ManualUpdate();
+            }
         }
 
         public override void Attack(IAttackReceiver target)

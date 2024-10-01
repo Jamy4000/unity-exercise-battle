@@ -7,6 +7,10 @@ namespace DCLBattle.Battle
     {
         public override UnitStateID StateID => UnitStateID.Dying;
 
+        [SerializeField]
+        private string _deathAnimName = "Death";
+        public string DeathAnimName => _deathAnimName;
+
         public override UnitState CreateStateInstance(UnitBase unit)
         {
             return new UnitDyingState(this, unit);

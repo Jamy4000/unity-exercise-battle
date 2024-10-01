@@ -34,7 +34,7 @@ public class ArmyModelSO : ScriptableObject, IArmyModel
         set => _allianceId = value;
     }
 
-    [ReadOnly, SerializeField] private ArmyStrategy _strategyValue = ArmyStrategy.Basic;
+    [SerializeField] private ArmyStrategy _strategyValue = ArmyStrategy.Basic;
     public ArmyStrategy Strategy
     {
         get => _strategyValue;

@@ -4,6 +4,7 @@ namespace DCLBattle.Battle
     {
         public UnitDyingState(UnitDyingStateData stateData, UnitBase unit) : base(stateData, unit)
         {
+            unit.UnitWasHitEvent += OnUnitWasHit;
         }
 
         public override void OnDestroy()
@@ -12,11 +13,17 @@ namespace DCLBattle.Battle
 
         public override bool CanBeEntered()
         {
-            return true;
+            return false;
+        }
+
+        public override bool CanBeExited()
+        {
+            return false;
         }
 
         public override void StartState(UnitStateID previousState)
         {
+            Unit.Animator.SetTrigger(StateData.DeathAnimName);
         }
 
         public override void UpdateState()
@@ -25,6 +32,12 @@ namespace DCLBattle.Battle
 
         public override void EndState()
         {
+        }
+
+        private void OnUnitWasHit(float newHealth)
+        {
+            if (newHealth <= 0f)
+                RequestEnterState?.Invoke(StateEnum);
         }
     }
 }

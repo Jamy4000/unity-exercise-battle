@@ -1,5 +1,4 @@
 ﻿using System.Collections.Generic;
-using UnityEngine.UIElements;
 
 namespace Utils
 {
@@ -13,6 +12,11 @@ namespace Utils
 
         private readonly List<TStateEnum> _currentStatePotentialTransitions = new(16);
         private readonly List<TStateEnum> _pendingTransitions = new(4);
+
+        private System.Action<TStateEnum> _stateStartedEvent;
+        private System.Action<TStateEnum> _stateEndedEvent;
+
+        private bool _explicitExitRequestReceived;
 
         protected FSM(TState defaultState, List<TState> states)
         {
@@ -31,9 +35,9 @@ namespace Utils
             ActiveState.UpdateState();
         }
 
-        public void ManualLateUpdate()
+        public virtual void ManualLateUpdate()
         {
-            if (!ActiveState.CanBeExited())
+            if (!_explicitExitRequestReceived && !ActiveState.CanBeExited())
                 return;
 
             // Used as a End of Frame Coroutine to check pending states and chose the one with the highest priority
@@ -127,6 +131,8 @@ namespace Utils
             // StartState and prepare new State
             ActiveState = newState;
             ActiveState.IsActiveState = true;
+            _explicitExitRequestReceived = false;
+
             newState.StartState(oldState);
             newState.RequestToExitState += ExitCurrentState;
 
@@ -147,6 +153,8 @@ namespace Utils
             _currentStatePotentialTransitions.Clear();
             _currentStatePotentialTransitions.AddRange(finalTransitions);
             _pendingTransitions.Clear();
+
+            _stateStartedEvent?.Invoke(newState.StateEnum);
         }
 
         protected virtual void StopCurrentState()
@@ -162,6 +170,8 @@ namespace Utils
             }
 
             _currentStatePotentialTransitions.Clear();
+
+            _stateEndedEvent?.Invoke(ActiveState.StateEnum);
         }
 
         protected virtual void AddPendingState(TStateEnum newStateEnum)
@@ -188,11 +198,32 @@ namespace Utils
                 if (state.CanBeEntered())
                 {
                     _pendingTransitions.Add(stateEnum);
+                    _explicitExitRequestReceived = true;
                     return;
                 }
             }
 
             throw new System.Exception($"State {ActiveState} couldn't be exited.");
+        }
+
+        public void RegisterStateStartedCallback(System.Action<TStateEnum> callback)
+        {
+            _stateStartedEvent += callback;
+        }
+
+        public void RegisterStateEndedCallback(System.Action<TStateEnum> callback)
+        {
+            _stateEndedEvent += callback;
+        }
+
+        public void UnregisterStateStartedCallback(System.Action<TStateEnum> callback)
+        {
+            _stateStartedEvent -= callback;
+        }
+
+        public void UnregisterStateEndedCallback(System.Action<TStateEnum> callback)
+        {
+            _stateEndedEvent -= callback;
         }
     }
 }

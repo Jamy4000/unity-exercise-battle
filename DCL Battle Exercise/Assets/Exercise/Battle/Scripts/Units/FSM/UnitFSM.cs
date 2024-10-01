@@ -10,7 +10,6 @@ namespace DCLBattle.Battle
     /// </summary>
     public enum UnitStateID
     {
-        Idle = 0,
         Fighting = 1,
         Dying = 2
     }
@@ -21,7 +20,5 @@ namespace DCLBattle.Battle
             base(defaultState, states)
         {
         }
-
-        // TODO On state starts; send event
     }
 }

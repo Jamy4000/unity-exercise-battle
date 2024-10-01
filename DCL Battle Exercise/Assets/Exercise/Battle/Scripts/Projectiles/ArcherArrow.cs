@@ -31,7 +31,7 @@ namespace DCLBattle.Battle
         {
             _source = attacker;
             _target = target;
-            target.RegisterOnDeathCallback(OnTargetDied);
+            _target.AttackReceiverDiedEvent += OnTargetDied;
 
             transform.position = attacker.Position;
 
@@ -57,8 +57,9 @@ namespace DCLBattle.Battle
             }
         }
 
-        private void OnTargetDied()
+        private void OnTargetDied(IAttackReceiver attackReceiver)
         {
+            // This usually happens when the target dies before the arrow reaches it
             OnShouldReturnToPool?.Invoke(this);
         }
 
@@ -73,7 +74,7 @@ namespace DCLBattle.Battle
         // Raised when returned to pool and disabled
         public void Disable()
         {
-            _target.UnregisterOnDeathCallback(OnTargetDied);
+            _target.AttackReceiverDiedEvent -= OnTargetDied;
             gameObject.SetActive(false);
             GameUpdater.Unregister(this);
         }

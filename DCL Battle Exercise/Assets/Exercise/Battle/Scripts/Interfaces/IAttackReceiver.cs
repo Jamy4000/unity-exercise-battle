@@ -9,9 +9,8 @@ namespace DCLBattle.Battle
         float Health { get; }
         float Defense { get; }
 
-        void Hit(IAttacker attacker, Vector3 hitPosition, float damage);
+        System.Action<IAttackReceiver> AttackReceiverDiedEvent { get; set; }
 
-        void RegisterOnDeathCallback(System.Action callback);
-        void UnregisterOnDeathCallback(System.Action callback);
+        void Hit(IAttacker attacker, Vector3 hitPosition, float damage);
     }
 }

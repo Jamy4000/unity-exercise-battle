@@ -1,16 +1,19 @@
 ﻿using DataStructures.ViliWonka.KDTree;
-using System;
 using System.Collections.Generic;
 using UnityEngine;
+using Utils;
 
 namespace DCLBattle.Battle
 {
-    public class Army
+    public class Army : I_UpdateOnly, I_Startable
     {
+        public readonly IArmiesHolder ArmiesHolder;
         public readonly IArmyModel Model;
         public int RemainingUnitsCount => _units.Count;
 
         public Vector3 Center { get; private set; }
+        public System.Action<Army> ArmyDefeatedEvent { get; set; }
+        public bool HasStarted { get; set; }
 
         private readonly List<UnitBase> _units;
 
@@ -23,8 +26,9 @@ namespace DCLBattle.Battle
         private const int _MAX_POINTS_PER_LEAF_NODE = 2;
         private readonly List<Army> _enemyArmies = new();
 
-        public Army(IArmyModel model)
+        public Army(IArmyModel model, IArmiesHolder armiesHolder)
         {
+            ArmiesHolder = armiesHolder;
             Model = model;
 
             // pre-allocate the list
@@ -34,10 +38,22 @@ namespace DCLBattle.Battle
                 armySize += model.GetUnitCount((UnitType)i);
             }
             _units = new(armySize);
+            GameUpdater.Register(this);
         }
 
-        public void Update()
+        public void ManualUpdate()
         {
+            RebuildTree();
+        }
+
+        public void Start()
+        {
+            RebuildTree();
+        }
+
+        private void RebuildTree()
+        {
+            // TODO Jobify ?
             Vector3[] pointClound = new Vector3[RemainingUnitsCount];
             for (int i = 0; i < RemainingUnitsCount; i++)
             {
@@ -53,11 +69,17 @@ namespace DCLBattle.Battle
         public void AddUnit(UnitBase unit)
         {
             _units.Add(unit);
+            unit.AttackReceiverDiedEvent += RemoveUnit;
         }
 
-        public void RemoveUnit(UnitBase unit)
+        public void RemoveUnit(IAttackReceiver unit)
         {
-            _units.Remove(unit);
+            _units.Remove(unit as UnitBase);
+            if (RemainingUnitsCount == 0)
+            {
+                ArmyDefeatedEvent?.Invoke(this);
+                GameUpdater.Unregister(this);
+            }
         }
 
         public UnitBase GetClosestUnit(Vector3 source, out float distance)

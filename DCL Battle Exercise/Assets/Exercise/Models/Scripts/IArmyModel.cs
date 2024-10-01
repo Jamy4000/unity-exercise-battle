@@ -17,6 +17,9 @@ public interface IArmyModel
 
     ArmyStrategy Strategy { get; set; }
 
+    /// <summary>
+    /// Can't have Mordor fight alongside Rivendell
+    /// </summary>
     int AllianceID { get; set; }
 
     int GetUnitCount(UnitType type);

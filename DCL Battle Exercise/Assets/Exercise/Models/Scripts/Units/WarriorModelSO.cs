@@ -5,5 +5,5 @@ public sealed class WarriorModelSO : UnitModelSO
 {
     [SerializeField]
     private float _damage = 10f;
-    public float Damage { get; private set; }
+    public float Damage => _damage;
 }
