@@ -23,7 +23,7 @@ namespace DCLBattle.Battle
             if (AttackCooldown > 0f)
                 return;
 
-            if (Vector3.SqrMagnitude(transform.position - target.Position) > Model.AttackRangeSq)
+            if (Vector3.SqrMagnitude(Position - target.Position) > Model.AttackRangeSq)
                 return;
 
             IProjectile projectile = Model.ArrowPool.RequestPoolableObject();

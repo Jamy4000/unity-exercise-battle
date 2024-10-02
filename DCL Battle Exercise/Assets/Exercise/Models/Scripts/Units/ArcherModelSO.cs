@@ -26,8 +26,9 @@ public sealed class ArcherModelSO : UnitModelSO, ISubscriber<BattleStartEvent>, 
 
     public ArcherArrowPool ArrowPool { get; private set; }
 
-    private void OnEnable()
+    protected override void OnEnable()
     {
+        base.OnEnable();
         MessagingSystem<BattleStartEvent>.Subscribe(this);
         MessagingSystem<AllianceWonEvent>.Subscribe(this);
     }

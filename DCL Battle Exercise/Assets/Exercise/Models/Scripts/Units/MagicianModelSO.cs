@@ -26,8 +26,9 @@ public sealed class MagicianModelSO : UnitModelSO, ISubscriber<BattleStartEvent>
     // using arrow pool for simplicity
     public ArcherArrowPool FireballPool { get; private set; }
 
-    private void OnEnable()
+    protected override void OnEnable()
     {
+        base.OnEnable();
         MessagingSystem<BattleStartEvent>.Subscribe(this);
         MessagingSystem<AllianceWonEvent>.Subscribe(this);
     }

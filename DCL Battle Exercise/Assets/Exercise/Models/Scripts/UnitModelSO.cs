@@ -45,7 +45,7 @@ public class UnitModelSO : ScriptableObject, IUnitModel
     private UnitStateID _defaultState = UnitStateID.Fighting;
     public UnitStateID DefaultState => _defaultState;
 
-    private void OnEnable()
+    protected virtual void OnEnable()
     {
         AttackRangeSq = AttackRange * AttackRange;
     }
@@ -70,7 +70,7 @@ public class UnitModelSO : ScriptableObject, IUnitModel
         return null;
     }
 
-    private void OnValidate()
+    protected virtual void OnValidate()
     {
         _unitType = _unitPrefab != null ? _unitPrefab.GetComponent<UnitBase>().UnitType : UnitType.UNDEFINED;
     }

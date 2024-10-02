@@ -33,13 +33,13 @@ namespace DCLBattle.Battle
 
         public void OnEvent(AllianceWonEvent evt)
         {
-            var battleInstatiator = UnityServiceLocator.ServiceLocator.ForSceneOf(this).Get<BattleInstantiator>();
+            var armiesHolder = UnityServiceLocator.ServiceLocator.Global.Get<IArmiesHolder>();
 
-            List<string> winnersList = new(battleInstatiator.ArmiesCount);
+            List<string> winnersList = new(armiesHolder.ArmiesCount);
 
-            for (int i = 0; i < battleInstatiator.ArmiesCount; i++)
+            for (int i = 0; i < armiesHolder.ArmiesCount; i++)
             {
-                IArmyModel armyModel = battleInstatiator.GetArmy(i).Model;
+                IArmyModel armyModel = armiesHolder.GetArmy(i).Model;
                 if (armyModel.AllianceID == evt.AllianceID)
                 {
                     winnersList.Add(armyModel.ArmyName);

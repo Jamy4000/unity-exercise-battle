@@ -7,9 +7,10 @@ namespace DCLBattle.Battle
 {
     public class Army
     {
-        public readonly IArmiesHolder ArmiesHolder;
         public readonly IArmyModel Model;
         public int RemainingUnitsCount => _units.Count;
+
+        public IArmiesHolder ArmiesHolder { get; private set; }
 
         public Vector3 Center { get; private set; }
         public System.Action<Army> ArmyDefeatedEvent { get; set; }
@@ -25,9 +26,8 @@ namespace DCLBattle.Battle
         private const int _MAX_POINTS_PER_LEAF_NODE = 2;
         private readonly List<Army> _enemyArmies = new();
 
-        public Army(IArmyModel model, IArmiesHolder armiesHolder)
+        public Army(IArmyModel model)
         {
-            ArmiesHolder = armiesHolder;
             Model = model;
 
             // pre-allocate the list
@@ -41,6 +41,7 @@ namespace DCLBattle.Battle
 
         public void Start()
         {
+            ArmiesHolder = UnityServiceLocator.ServiceLocator.Global.Get<IArmiesHolder>();
             RebuildTree();
         }
 

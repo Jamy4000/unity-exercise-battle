@@ -1,12 +1,13 @@
-using System.Collections.Generic;
-using System.Threading.Tasks;
 using UnityEngine;
 using Utils;
 
 namespace DCLBattle.Battle
 {
-    public sealed class BattleInstantiator : MonoBehaviour, IArmiesHolder, I_UpdateOnly, I_LateUpdateOnly,
-        ISubscriber<BattleStartEvent>, ISubscriber<AllianceWonEvent>
+    /// <summary>
+    /// This is the entry point to create all the armies and units in the game.
+    /// The armies are then updated in the BattleUpdater script, and each army is in charge of updating its own units.
+    /// </summary>
+    public sealed class BattleInstantiator : MonoBehaviour
     {
         /// <summary>
         /// Simple serialized struct to link an army to its spawn point
@@ -34,121 +35,42 @@ namespace DCLBattle.Battle
         [SerializeField]
         private BattleStateID _defaultState = BattleStateID.OnGoing;
 
-        private Army[] _armies;
-
-        public Army GetArmy(int index) => _armies[index];
-        public int ArmiesCount => _armies.Length;
-        public Vector3 BattleCenter { get; private set; }
-
+        // TODO won't work if using parallelization
         private static readonly IStrategyUpdater[,] _strategyUpdaters = new IStrategyUpdater[IArmyModel.UnitLength, IStrategyUpdater.StrategyCount];
 
-        private BattleFSM _battleFSM;
+        private IArmiesHolder _armiesHolder;
 
         void Awake()
         {
-            _armies = new Army[_armiesToSpawn.Length];
+            // TODO Hide Implementation
+            var armies = new Army[_armiesToSpawn.Length];
 
             // For each army that should spawn on the map
             for (int armyIndex = 0; armyIndex < _armiesToSpawn.Length; armyIndex++)
             {
                 ArmySpawnParameters armySpawnParam = _armiesToSpawn[armyIndex];
-                _armies[armyIndex] = CreateArmy(armySpawnParam.ArmyModel, armySpawnParam.GetSpawnBounds());
+                armies[armyIndex] = CreateArmy(armySpawnParam.ArmyModel, armySpawnParam.GetSpawnBounds());
             }
 
             // Second pass to feed the enemy armies inside each army
-            for (int armyIndex = 0; armyIndex < _armies.Length; armyIndex++)
+            for (int armyIndex = 0; armyIndex < armies.Length; armyIndex++)
             {
-                int allianceID = _armies[armyIndex].Model.AllianceID;
+                int allianceID = armies[armyIndex].Model.AllianceID;
 
-                for (int secondArmyIndex = 0; secondArmyIndex < _armies.Length; secondArmyIndex++)
+                for (int secondArmyIndex = 0; secondArmyIndex < armies.Length; secondArmyIndex++)
                 {
                     // If we are checking the army against itself, skip
                     if (armyIndex == secondArmyIndex)
                         continue;
 
                     // If the two armies have different alliance id, we mark them as enemies
-                    if (_armies[secondArmyIndex].Model.AllianceID != allianceID)
-                        _armies[armyIndex].AddEnemyArmy(_armies[secondArmyIndex]);
+                    if (armies[secondArmyIndex].Model.AllianceID != allianceID)
+                        armies[armyIndex].AddEnemyArmy(armies[secondArmyIndex]);
                 }
             }
 
-            UnityServiceLocator.ServiceLocator.ForSceneOf(this).Register(this);
-
-            _battleFSM = CreateFSM();
-
-            MessagingSystem<BattleStartEvent>.Subscribe(this);
-            MessagingSystem<AllianceWonEvent>.Subscribe(this);
-
-            GameUpdater.Register(this);
-        }
-
-        private void Start()
-        {
-            foreach (var army in _armies)
-            {
-                army.Start();
-            }
-        }
-
-        private BattleFSM CreateFSM()
-        {
-            List<BattleState> states = new(_battleStatesData.Length);
-            BattleState defaultState = null;
-
-            for (int i = 0; i < _battleStatesData.Length; i++)
-            {
-                BattleState state = _battleStatesData[i].CreateStateInstance(this);
-                states.Add(state);
-                if (state.StateEnum == _defaultState)
-                    defaultState = state;
-            }
-
-            return new BattleFSM(defaultState, states);
-        }
-
-        public void ManualUpdate()
-        {
-            List<Task> tasks = new List<Task>();
-
-            int remainingArmies = 0;
-            foreach (var army in _armies)
-            {
-                if (army.RemainingUnitsCount > 0)
-                    remainingArmies++;
-
-                tasks.Add(Task.Factory.StartNew(() => army.UpdateArmyData()));
-            }
-            Task.WaitAll(tasks.ToArray());
-
-            BattleCenter = Vector3.zero;
-            foreach (var army in _armies)
-            {
-                BattleCenter += army.Center;
-            }
-            BattleCenter /= remainingArmies;
-
-            foreach (var army in _armies)
-            {
-                if (army.RemainingUnitsCount == 0)
-                    continue;
-
-                army.UpdateUnits();
-            }
-
-            _battleFSM.ManualUpdate();
-
-            foreach (var army in _armies)
-            {
-                if (army.RemainingUnitsCount == 0)
-                    continue;
-
-                army.LateUpdate();
-            }
-        }
-
-        public void ManualLateUpdate()
-        {
-            _battleFSM.ManualLateUpdate();
+            // TODO Hide Implementation
+            _armiesHolder = new BattleUpdater(armies, _battleStatesData, _defaultState);
         }
 
         private void OnDrawGizmos()
@@ -156,8 +78,9 @@ namespace DCLBattle.Battle
             if (!Application.isPlaying)
                 return;
 
-            foreach (var army in _armies)
+            for (int armyIndex = 0; armyIndex < _armiesHolder.ArmiesCount; armyIndex++)
             {
+                var army = _armiesHolder.GetArmy(armyIndex);
                 if (army.RemainingUnitsCount == 0)
                     continue;
 
@@ -166,21 +89,18 @@ namespace DCLBattle.Battle
             }
 
             Gizmos.color = Color.magenta;
-            Gizmos.DrawSphere(BattleCenter, 4f);
+            Gizmos.DrawSphere(_armiesHolder.BattleCenter, 4f);
         }
 
         private void OnDestroy()
         {
-            GameUpdater.Unregister(this);
-
-            MessagingSystem<BattleStartEvent>.Unsubscribe(this);
-            MessagingSystem<AllianceWonEvent>.Unsubscribe(this);
+            _armiesHolder.Dispose();
         }
 
         private Army CreateArmy(IArmyModel armyModel, Bounds spawnBounds)
         {
             // TODO remove hard implementation
-            Army army = new Army(armyModel, this);
+            Army army = new(armyModel);
 
             // For each type of unit in the game
             for (int unitTypeIndex = 0; unitTypeIndex < IArmyModel.UnitLength; unitTypeIndex++)
@@ -233,16 +153,6 @@ namespace DCLBattle.Battle
                     _strategyUpdaters[unitTypeIndex, strategyIndex] = unitModel.CreateStrategyUpdater((ArmyStrategy)strategyIndex);
                 }
             }
-        }
-
-        public void OnEvent(AllianceWonEvent evt)
-        {
-            GameUpdater.Unregister(this);
-        }
-
-        public void OnEvent(BattleStartEvent evt)
-        {
-            GameUpdater.Register(this);
         }
     }
 }
