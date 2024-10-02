@@ -83,7 +83,6 @@ namespace DCLBattle.Battle
             MessagingSystem<AllianceWonEvent>.Unsubscribe(this);
         }
 
-        // TODO parameter should be injected differently
         private BattleFSM CreateFSM(BattleStateData[] battleStatesData, BattleStateID defaultStateEnum)
         {
             List<BattleState> states = new(battleStatesData.Length);

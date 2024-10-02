@@ -8,10 +8,12 @@ namespace DCLBattle.Battle
 
         public UnitFightingState(UnitFightingStateData stateData, UnitBase unit) : base(stateData, unit)
         {
+            unit.UnitWasHitEvent += OnUnitWasHit;
         }
 
         public override void OnDestroy()
         {
+            Unit.UnitWasHitEvent -= OnUnitWasHit;
         }
 
         public override bool CanBeEntered()
@@ -21,7 +23,7 @@ namespace DCLBattle.Battle
 
         public override bool CanBeExited()
         {
-            return Unit.Health <= 0f;
+            return false;
         }
 
         public override void StartState(UnitStateID previousState)
@@ -91,6 +93,16 @@ namespace DCLBattle.Battle
 
         public override void EndState()
         {
+        }
+
+        private void OnUnitWasHit(float newHealth)
+        {
+            if (newHealth <= 0f)
+            {
+                Unit.UnitWasHitEvent -= OnUnitWasHit;
+                RequestToExitCurrentState?.Invoke();
+                Unit.IsMarkedForDeletion = true;
+            }
         }
     }
 }

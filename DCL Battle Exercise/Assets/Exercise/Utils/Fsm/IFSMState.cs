@@ -6,7 +6,7 @@ namespace Utils
     public interface IFSMState
     {
         bool IsActiveState { get; set; }
-        System.Action RequestToExitState { get; set; }
+        System.Action RequestToExitCurrentState { get; set; }
 
         bool CanBeEntered();
         bool CanBeExited();

@@ -134,7 +134,7 @@ namespace Utils
             _explicitExitRequestReceived = false;
 
             newState.StartState(oldState);
-            newState.RequestToExitState += ExitCurrentState;
+            newState.RequestToExitCurrentState += ExitCurrentState;
 
             _currentStatePotentialTransitions.AddRange(newState.GetTransitionsStates());
             // some states may be set as potential transitions, but may not be registered in the FSM yet.
@@ -162,7 +162,7 @@ namespace Utils
             // EndState and Clean old stateEnum
             ActiveState.EndState();
             ActiveState.IsActiveState = false;
-            ActiveState.RequestToExitState -= ExitCurrentState;
+            ActiveState.RequestToExitCurrentState -= ExitCurrentState;
 
             for (int stateIndex = 0; stateIndex < _currentStatePotentialTransitions.Count; stateIndex++)
             {

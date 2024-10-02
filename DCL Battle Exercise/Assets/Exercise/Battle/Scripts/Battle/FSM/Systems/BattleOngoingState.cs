@@ -63,7 +63,7 @@ namespace DCLBattle.Battle
             }
 
             // Only one alliance remaining, we request to exit this state
-            RequestToExitState?.Invoke();
+            RequestToExitCurrentState?.Invoke();
         }
     }
 }

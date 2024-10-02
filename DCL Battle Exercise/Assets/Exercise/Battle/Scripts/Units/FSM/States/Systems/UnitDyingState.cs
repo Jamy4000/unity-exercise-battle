@@ -1,3 +1,4 @@
+using UnityEngine;
 using Utils;
 
 namespace DCLBattle.Battle
@@ -8,19 +9,17 @@ namespace DCLBattle.Battle
 
         public UnitDyingState(UnitDyingStateData stateData, UnitBase unit) : base(stateData, unit)
         {
-            unit.UnitWasHitEvent += OnUnitWasHit;
         }
 
         public override void OnDestroy()
         {
-            Unit.UnitWasHitEvent -= OnUnitWasHit;
             UnityEngine.Object.Destroy(Unit.gameObject);
             GameUpdater.Unregister(this);
         }
 
         public override bool CanBeEntered()
         {
-            return false;
+            return Unit.Health <= Mathf.Epsilon;
         }
 
         public override bool CanBeExited()
@@ -32,6 +31,7 @@ namespace DCLBattle.Battle
         {
             Unit.Animator.SetTrigger(StateData.DeathAnimName);
             _deathAnimTimer = Unit.Animator.GetCurrentAnimatorClipInfo(0).Length;
+            GameUpdater.Register(this);
         }
 
         public override void UpdateState()
@@ -50,17 +50,6 @@ namespace DCLBattle.Battle
 
         public override void EndState()
         {
-        }
-
-        private void OnUnitWasHit(float newHealth)
-        {
-            if (newHealth <= 0f)
-            {
-                Unit.UnitWasHitEvent -= OnUnitWasHit;
-                RequestEnterState?.Invoke(StateEnum);
-                Unit.IsMarkedForDeletion = true;
-                GameUpdater.Register(this);
-            }
         }
     }
 }
