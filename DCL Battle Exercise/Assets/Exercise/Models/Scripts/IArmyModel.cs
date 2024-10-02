@@ -2,8 +2,8 @@ public enum ArmyStrategy
 {
     Basic = 0,
     Defensive = 1,
-    Offensive = 2,
-    Chaos = 3
+    //Offensive = 2,
+    //Chaos = 3
 }
 
 public interface IArmyModel
