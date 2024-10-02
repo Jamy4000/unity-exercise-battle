@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Threading;
 using System.Threading.Tasks;
 using UnityEngine;
 using Utils;
@@ -102,21 +103,20 @@ namespace DCLBattle.Battle
         private void UpdateArmies()
         {
             // we generate the tasks to update the armies (mainly to rebuild the KD-trees)
-            List<Task> tasks = new(ArmiesCount);
-            int remainingArmies = 0;
-            foreach (var army in _armies)
-            {
-                if (army.RemainingUnitsCount > 0)
-                    remainingArmies++;
+            var parallelResult = Parallel.ForEach(_armies, army => army.UpdateArmyData());
 
-                tasks.Add(Task.Factory.StartNew(() => army.UpdateArmyData()));
-            }
-            Task.WaitAll(tasks.ToArray());
+            while (!parallelResult.IsCompleted)
+                continue;
 
             // We calculate the battle center based on armies centers
             BattleCenter = Vector3.zero;
+            int remainingArmies = 0;
             foreach (var army in _armies)
             {
+                if (army.RemainingUnitsCount == 0)
+                    continue;
+
+                remainingArmies++;
                 BattleCenter += army.Center;
             }
             BattleCenter /= remainingArmies;
@@ -124,19 +124,12 @@ namespace DCLBattle.Battle
 
         private void UpdateUnits()
         {
-            // we generate the tasks to calculate unit movement and enemy target
-            List<Task> tasks = new(ArmiesCount);
-            int remainingArmies = 0;
-            foreach (var army in _armies)
-            {
-                if (army.RemainingUnitsCount > 0)
-                    remainingArmies++;
+            var parallelResult = Parallel.ForEach(_armies, army => army.CalculateNewData());
 
-                tasks.Add(Task.Factory.StartNew(() => army.CalculateNewData()));
-            }
-            Task.WaitAll(tasks.ToArray());
+            while (!parallelResult.IsCompleted)
+                continue;
 
-            // We apply the data on the main thread
+                // We apply the data on the main thread
             foreach (var army in _armies)
             {
                 if (army.RemainingUnitsCount == 0)
