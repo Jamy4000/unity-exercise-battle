@@ -7,7 +7,7 @@ namespace DCLBattle.Battle
     {
         public override UnitType UnitType => UnitType.Magician;
 
-        public override void ManualUpdate()
+        public override void ApplyCalculatedData()
         {
             if (AttackCooldown > Model.MaxAttackCooldown - Model.PostAttackDelay)
             {
@@ -15,7 +15,7 @@ namespace DCLBattle.Battle
             }
             else
             {
-                base.ManualUpdate();
+                base.ApplyCalculatedData();
             }
         }
 

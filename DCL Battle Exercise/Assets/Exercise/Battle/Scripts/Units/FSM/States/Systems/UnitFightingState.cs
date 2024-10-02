@@ -4,8 +4,7 @@ namespace DCLBattle.Battle
 {
     public class UnitFightingState : UnitState<UnitFightingStateData>
     {
-        // TODO static for now as I don't see why we would want to have that for every unit, except if we end up threading this
-        private static readonly (UnitBase unit, float distance)[] _unitsInRadius = new (UnitBase, float)[16];
+        private readonly (UnitBase unit, float distance)[] _unitsInRadius = new (UnitBase, float)[16];
 
         public UnitFightingState(UnitFightingStateData stateData, UnitBase unit) : base(stateData, unit)
         {
@@ -40,7 +39,7 @@ namespace DCLBattle.Battle
             moveOffset = Vector3.Normalize(moveOffset);
 
             // We finally move the unit
-            Unit.Move(moveOffset * (Time.deltaTime * StateData.UnitMoveSpeed));
+            Unit.Move(moveOffset * StateData.UnitMoveSpeed);
         }
 
         private Vector3 CalculateEvadeAlliesOffset()

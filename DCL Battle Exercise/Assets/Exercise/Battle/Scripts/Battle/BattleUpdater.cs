@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using UnityEngine;
@@ -16,6 +17,7 @@ namespace DCLBattle.Battle
         public int ArmiesCount => _armies.Length;
         public Vector3 BattleCenter { get; private set; } = Vector3.zero;
         public bool HasStarted { get; set; }
+        public Action<Army> ArmyDefeatedEvent { get; set; }
 
         public Army GetArmy(int armyIndex) => _armies[armyIndex];
 
@@ -52,12 +54,21 @@ namespace DCLBattle.Battle
 
         public void ManualLateUpdate()
         {
+            // for now there is no need to thread this, since this is just removing units marked for deletion
             foreach (var army in _armies)
             {
                 if (army.RemainingUnitsCount == 0)
                     continue;
 
                 army.LateUpdate();
+            }
+
+            foreach (var army in _armies)
+            {
+                if (army.RemainingUnitsCount == 0)
+                {
+                    ArmyDefeatedEvent?.Invoke(army);
+                }
             }
 
             _battleFSM.ManualLateUpdate();
@@ -113,12 +124,25 @@ namespace DCLBattle.Battle
 
         private void UpdateUnits()
         {
+            // we generate the tasks to calculate unit movement and enemy target
+            List<Task> tasks = new(ArmiesCount);
+            int remainingArmies = 0;
+            foreach (var army in _armies)
+            {
+                if (army.RemainingUnitsCount > 0)
+                    remainingArmies++;
+
+                tasks.Add(Task.Factory.StartNew(() => army.CalculateNewData()));
+            }
+            Task.WaitAll(tasks.ToArray());
+
+            // We apply the data on the main thread
             foreach (var army in _armies)
             {
                 if (army.RemainingUnitsCount == 0)
                     continue;
 
-                army.UpdateUnits();
+                army.ApplyCalculatedData();
             }
         }
 

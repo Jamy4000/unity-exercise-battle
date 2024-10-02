@@ -8,15 +8,12 @@ namespace DCLBattle.Battle
 
         public BattleOngoingState(BattleOngoingStateData stateData, IArmiesHolder armiesHolder) : base(stateData)
         {
-            for (int armyIndex = 0; armyIndex < armiesHolder.ArmiesCount; armyIndex++)
-            {
-                armiesHolder.GetArmy(armyIndex).ArmyDefeatedEvent += OnArmyDefeatedEvent;
-            }
             _armiesHolder = armiesHolder;
         }
 
         public override void OnDestroy()
         {
+            _armiesHolder.ArmyDefeatedEvent -= OnArmyDefeatedEvent;
         }
 
         public override bool CanBeEntered()
@@ -31,6 +28,7 @@ namespace DCLBattle.Battle
 
         public override void StartState(BattleStateID previousState)
         {
+            _armiesHolder.ArmyDefeatedEvent += OnArmyDefeatedEvent;
             MessagingSystem<BattleStartEvent>.Publish(new BattleStartEvent());
         }
 
@@ -40,12 +38,11 @@ namespace DCLBattle.Battle
 
         public override void EndState()
         {
+            _armiesHolder.ArmyDefeatedEvent -= OnArmyDefeatedEvent;
         }
 
         private void OnArmyDefeatedEvent(Army defeatedArmy)
         {
-            defeatedArmy.ArmyDefeatedEvent -= OnArmyDefeatedEvent;
-
             int remainingAllianceID = -1;
             for (int armyIndex = 0; armyIndex < _armiesHolder.ArmiesCount; armyIndex++)
             {
@@ -65,6 +62,7 @@ namespace DCLBattle.Battle
                 }
             }
 
+            // Only one alliance remaining, we request to exit this state
             RequestToExitState?.Invoke();
         }
     }

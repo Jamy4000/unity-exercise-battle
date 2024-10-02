@@ -6,6 +6,9 @@ namespace DCLBattle.Battle
     {
         int ArmiesCount { get; }
         Army GetArmy(int armyIndex);
+
         UnityEngine.Vector3 BattleCenter { get; }
+
+        System.Action<Army> ArmyDefeatedEvent { get; set; }
     }
 }

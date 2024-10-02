@@ -1,4 +1,5 @@
 ﻿using DataStructures.ViliWonka.KDTree;
+using System;
 using System.Collections.Generic;
 using UnityEngine;
 using Utils;
@@ -18,9 +19,6 @@ namespace DCLBattle.Battle
         private readonly List<UnitBase> _units;
 
         private readonly KDTree _tree = new(_MAX_POINTS_PER_LEAF_NODE);
-        private readonly KDQuery _query = new();
-        private readonly List<int> _queryResults = new(128);
-        private readonly List<float> _queryDistances = new(128);
 
         // High value = fast build, slow search; Low value = slow build, fast search
         private const int _MAX_POINTS_PER_LEAF_NODE = 2;
@@ -50,22 +48,25 @@ namespace DCLBattle.Battle
             RebuildTree();
         }
 
-        public void UpdateUnits()
+        public void CalculateNewData()
         {
             foreach (var unit in _units)
             {
-                unit.ManualUpdate();
+                unit.CalculateNewData();
+            }
+        }
+
+        public void ApplyCalculatedData()
+        {
+            foreach (var unit in _units)
+            {
+                unit.ApplyCalculatedData();
             }
         }
 
         public void LateUpdate()
         {
             _units.RemoveAll(unit => unit.IsMarkedForDeletion);
-
-            if (RemainingUnitsCount == 0)
-            {
-                ArmyDefeatedEvent?.Invoke(this);
-            }
         }
 
         private void RebuildTree()
@@ -96,14 +97,16 @@ namespace DCLBattle.Battle
                 return null;
             }
 
-            _queryResults.Clear();
-            _queryDistances.Clear();
+            // Cannot pre-allocate since we are querying in threads
+            var queryResults = new List<int>(1);
+            var queryDistances = new List<float>(1);
+            var query = new KDQuery();
 
             // spherical query
-            _query.ClosestPoint(_tree, source, _queryResults, _queryDistances);
+            query.ClosestPoint(_tree, source, queryResults, queryDistances);
 
-            distance = _queryDistances[0];
-            return _units[_queryResults[0]];
+            distance = queryDistances[0];
+            return _units[queryResults[0]];
         }
 
         public int GetUnitsInRadius_NoAlloc(Vector3 source, float radius, (UnitBase unit, float distance)[] result)
@@ -113,16 +116,18 @@ namespace DCLBattle.Battle
                 return 0;
             }
 
-            _queryResults.Clear();
-            _queryDistances.Clear();
+            // Cannot pre-allocate since we are querying in threads
+            var queryResults = new List<int>(result.Length);
+            var queryDistances = new List<float>(result.Length);
+            var query = new KDQuery();
 
             // spherical query
-            _query.Radius(_tree, source, radius, _queryResults, _queryDistances);
+            query.Radius(_tree, source, radius, queryResults, queryDistances);
 
-            int maxResults = Mathf.Min(result.Length, _queryResults.Count);
+            int maxResults = Mathf.Min(result.Length, queryResults.Count);
             for (int resultIndex = 0; resultIndex < maxResults; resultIndex++)
             {
-                result[resultIndex] = (_units[_queryResults[resultIndex]], _queryDistances[resultIndex]);
+                result[resultIndex] = (_units[queryResults[resultIndex]], queryDistances[resultIndex]);
             }
 
             return maxResults;

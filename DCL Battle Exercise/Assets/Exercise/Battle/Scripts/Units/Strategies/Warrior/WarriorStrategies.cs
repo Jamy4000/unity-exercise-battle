@@ -12,7 +12,7 @@ namespace DCLBattle.Battle
             UnitBase closestEnemy = unitToUpdate.Army.GetClosestEnemy(unitToUpdate.Position, out float distance);
 
             // AttackRange check done in the Attack Method
-            unitToUpdate.Attack(closestEnemy);
+            unitToUpdate.Target = closestEnemy;
 
             // normalizing
             Vector3 toNearest = (closestEnemy.Position - unitToUpdate.Position) / distance;
@@ -63,7 +63,7 @@ namespace DCLBattle.Battle
                 moveDirection += toNearestEnemy;
 
                 // AttackRange check done in the Attack Method
-                unitToUpdate.Attack(closestEnemy);
+                unitToUpdate.Target = closestEnemy;
             }
             else
             {

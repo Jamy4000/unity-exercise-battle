@@ -1,6 +1,5 @@
 ﻿using System.Collections.Generic;
 using UnityEngine;
-using Utils;
 
 namespace DCLBattle.Battle
 {
@@ -23,10 +22,10 @@ namespace DCLBattle.Battle
             base.Initialize(parameters);
         }
 
-        public override void ManualUpdate()
+        public override void ApplyCalculatedData()
         {
             CurrentAttackCooldown -= Time.deltaTime;
-            base.ManualUpdate();
+            base.ApplyCalculatedData();
         }
 
         protected void ResetAttackCooldown()
@@ -74,6 +73,8 @@ namespace DCLBattle.Battle
         public abstract float AttackRange { get; }
         public abstract float AttackCooldown { get; }
 
+        public IAttackReceiver Target { get; set; }
+
         public System.Action<float> UnitWasHitEvent { get; set; }
 
         public bool IsMarkedForDeletion { get; set; }
@@ -107,13 +108,23 @@ namespace DCLBattle.Battle
             _lastPosition = transform.position;
         }
 
-        public virtual void ManualUpdate()
+        public virtual void CalculateNewData()
         {
+            Fsm.ManualUpdate();
+        }
+
+        public virtual void ApplyCalculatedData()
+        {
+            // Applying delta time here since moveOffset is calculated in a parrallel thread
+            transform.position += _moveOffset * Time.deltaTime;
             _moveOffset = Vector3.zero;
 
-            Fsm.ManualUpdate();
-
-            transform.position += _moveOffset;
+            // If we found a target this frame
+            if (Target != null)
+            {
+                Attack(Target);
+                Target = null;
+            }
 
             // TODO I don't think this should be here + hard coded value for Speed
             Animator.SetFloat("MovementSpeed", (transform.position - _lastPosition).magnitude / 20f);
