@@ -52,7 +52,7 @@ public class UnitModelSO : ScriptableObject, IUnitModel
 
     public virtual UnitBase InstantiateUnit(UnitCreationParameters parameters)
     {
-        // TODO Pooling
+        // TODO Pooling ? In case we want to add reinforcement during battle maybe ?
         UnitBase unitGameobject = Instantiate(_unitPrefab).GetComponent<UnitBase>();
         unitGameobject.Initialize(parameters);
         return unitGameobject;

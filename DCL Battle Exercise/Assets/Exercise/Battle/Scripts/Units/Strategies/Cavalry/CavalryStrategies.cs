@@ -11,10 +11,6 @@ namespace DCLBattle.Battle
         {
             UnitBase closestEnemy = unitToUpdate.Army.GetClosestEnemy(unitToUpdate.Position, out float distance);
 
-            // TODO this shouldn't be necessary
-            if (closestEnemy == null)
-                return Vector3.zero;
-
             unitToUpdate.Attack(closestEnemy);
 
             // normalizing
@@ -59,9 +55,6 @@ namespace DCLBattle.Battle
 
             // We check who the closest enemy is
             UnitBase closestEnemy = unitToUpdate.Army.GetClosestEnemy(unitToUpdate.Position, out float distance);
-            // TODO This should never happen
-            if (closestEnemy == null)
-                return moveDirection;
 
             Vector3 toNearestEnemy = Vector3.Normalize(closestEnemy.Position - unitToUpdate.Position);
             if (unitToUpdate.AttackCooldown <= 0f)
