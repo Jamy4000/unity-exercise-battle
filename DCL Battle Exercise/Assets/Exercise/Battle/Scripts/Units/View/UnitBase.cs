@@ -54,12 +54,12 @@ namespace DCLBattle.Battle
     /// <summary>
     /// This base class for Units is mainly useful to pass reference around without worrying about the Generic type
     /// </summary>
-    public abstract class UnitBase : MonoBehaviour, IAttackReceiver, IAttacker
+    public abstract class UnitBase : MonoBehaviour, IAttackReceiver, IAttacker, I_LateUpdateOnly
     {
         // not returning _model.UnitType in order to use the value in the OnValidate method of the Model SO
         public abstract UnitType UnitType { get; }
 
-        // TODO this crossdependency feels wrong
+        // TODO this crossdependency feels wrong, I'd rather have an ID instead
         public Army Army { get; private set; }
         public IStrategyUpdater StrategyUpdater { get; private set; }
 
@@ -105,6 +105,8 @@ namespace DCLBattle.Battle
             transform.name = $"{parameters.ParentArmy.Model.ArmyName} - {parameters.UnitModel.UnitName}";
 
             _lastPosition = transform.position;
+
+            GameUpdater.Register(this);
         }
 
         public virtual void ManualUpdate()
@@ -128,6 +130,8 @@ namespace DCLBattle.Battle
         protected virtual void OnDestroy()
         {
             Fsm.UnregisterStateStartedCallback(OnStateStarted);
+
+            GameUpdater.Unregister(this);
         }
 
         public virtual void Move(Vector3 delta)

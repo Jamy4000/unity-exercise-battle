@@ -65,7 +65,7 @@ namespace DCLBattle.Battle
                 }
             }
 
-            RequestToExitState?.Invoke();
+            RequestToExitCurrentState?.Invoke();
         }
     }
 }

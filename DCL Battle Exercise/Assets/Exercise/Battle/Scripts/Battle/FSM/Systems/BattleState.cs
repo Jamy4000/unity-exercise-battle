@@ -9,7 +9,7 @@ namespace DCLBattle.Battle
         public abstract BattleStateID StateEnum { get; }
 
         public Action<BattleStateID> RequestEnterState { get; set; }
-        public Action RequestToExitState { get; set; }
+        public Action RequestToExitCurrentState { get; set; }
         public bool IsActiveState { get; set; }
 
         public abstract bool CanBeEntered();

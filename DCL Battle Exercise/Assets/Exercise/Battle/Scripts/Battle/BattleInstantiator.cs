@@ -35,7 +35,6 @@ namespace DCLBattle.Battle
         [SerializeField]
         private BattleStateID _defaultState = BattleStateID.OnGoing;
 
-        // TODO won't work if using parallelization
         private static readonly IStrategyUpdater[,] _strategyUpdaters = new IStrategyUpdater[IArmyModel.UnitLength, IStrategyUpdater.StrategyCount];
 
         private IArmiesHolder _armiesHolder;
