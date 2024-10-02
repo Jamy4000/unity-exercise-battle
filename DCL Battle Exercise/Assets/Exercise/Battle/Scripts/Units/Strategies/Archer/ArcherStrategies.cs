@@ -11,6 +11,7 @@ namespace DCLBattle.Battle
         {
             UnitBase closestEnemy = unitToUpdate.Army.GetClosestEnemy(unitToUpdate.Position, out float distance);
 
+            // AttackRange check done in the Attack Method
             unitToUpdate.Attack(closestEnemy);
 
             // normalizing
@@ -72,7 +73,7 @@ namespace DCLBattle.Battle
                 Vector3 flank = _flankRotation * toNearest;
                 moveDirection += Vector3.Normalize(-(toNearest + flank));
 
-                // Slight change in design, we were always attacking the closest enemy, even when not in range
+                // no need to call attack if the unit is further than attack range
                 unitToUpdate.Attack(closestEnemy);
             }
             else

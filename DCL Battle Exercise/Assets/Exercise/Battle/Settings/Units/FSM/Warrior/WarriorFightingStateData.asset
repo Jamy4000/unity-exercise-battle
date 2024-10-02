@@ -13,6 +13,6 @@ MonoBehaviour:
   m_Name: WarriorFightingStateData
   m_EditorClassIdentifier: 
   <ExitStates>k__BackingField: 02000000
-  _speed: 15
+  _speed: 8
   _maxDistanceFromCenter: 80
   _minDistanceFromOtherUnits: 2
