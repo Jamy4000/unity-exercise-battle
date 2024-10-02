@@ -12,6 +12,9 @@ namespace DCLBattle
 
         private IArmiesHolder _armiesHolder;
 
+        private int _averageframeCount;
+        private float _averageFPS;
+
         private void Start()
         {
             GameUpdater.Register(this);
@@ -22,6 +25,9 @@ namespace DCLBattle
         {
             float currentFPS = 1f / Time.unscaledDeltaTime;
             _currentFpsCounter.text = $"Current FPS: {currentFPS:F2}";
+
+            _averageframeCount++;
+            _averageFPS += (currentFPS - _averageFPS) / _averageframeCount;
 
             int unitCount = 0;
             for (int armyIndex = 0; armyIndex < _armiesHolder.ArmiesCount; armyIndex++)
@@ -38,8 +44,7 @@ namespace DCLBattle
 
         public void ManualUpdate1Hz()
         {
-            float averageFPS = Time.frameCount / Time.time;
-            _averageFpsCounter.text = $"Average FPS: {averageFPS:F2}";
+            _averageFpsCounter.text = $"Average FPS: {_averageFPS:F2}";
 
         }
     }
