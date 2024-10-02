@@ -1,3 +1,5 @@
+using UnityEngine;
+
 namespace DCLBattle.Battle
 {
     public interface IStrategyUpdater
@@ -13,6 +15,7 @@ namespace DCLBattle.Battle
         /// </summary>
         /// <param name="unitToUpdate">The unit we want to update</param>
         /// <returns>returns the direction in which we want the unit to move</returns>
-        UnityEngine.Vector3 UpdateStrategy(UnitBase unitToUpdate);
+        //UnityEngine.Vector3 UpdateStrategy(UnitBase unitToUpdate);
+        TargetInfo UpdateStrategy(UnitData dataSet, out Vector3 strategyMovement);
     }
 }

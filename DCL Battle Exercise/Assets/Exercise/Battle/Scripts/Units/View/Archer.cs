@@ -6,7 +6,7 @@ namespace DCLBattle.Battle
     {
         public override UnitType UnitType => UnitType.Archer;
 
-        public override void ApplyCalculatedData()
+        public override void ApplyCalculatedData(UnitData dataSet, TargetInfo targetInfo, IArmiesHolder armiesHolder)
         {
             if (AttackCooldown > Model.MaxAttackCooldown - Model.PostAttackDelay)
             {
@@ -14,7 +14,7 @@ namespace DCLBattle.Battle
             }
             else
             {
-                base.ApplyCalculatedData();
+                base.ApplyCalculatedData(dataSet, targetInfo, armiesHolder);
             }
         }
 

@@ -49,7 +49,7 @@ namespace DCLBattle.Battle
             for (int armyIndex = 0; armyIndex < _armiesToSpawn.Length; armyIndex++)
             {
                 ArmySpawnParameters armySpawnParam = _armiesToSpawn[armyIndex];
-                armies[armyIndex] = CreateArmy(armySpawnParam.ArmyModel, armySpawnParam.GetSpawnBounds());
+                armies[armyIndex] = CreateArmy(armySpawnParam.ArmyModel, armySpawnParam.GetSpawnBounds(), armyIndex);
             }
 
             // Second pass to feed the enemy armies inside each army
@@ -97,10 +97,10 @@ namespace DCLBattle.Battle
             _armiesHolder.Dispose();
         }
 
-        private Army CreateArmy(IArmyModel armyModel, Bounds spawnBounds)
+        private Army CreateArmy(IArmyModel armyModel, Bounds spawnBounds, int armyID)
         {
             // TODO remove hard implementation
-            Army army = new(armyModel);
+            Army army = new(armyModel, armyID);
 
             // For each type of unit in the game
             for (int unitTypeIndex = 0; unitTypeIndex < IArmyModel.UnitLength; unitTypeIndex++)
@@ -132,7 +132,7 @@ namespace DCLBattle.Battle
                 // Provides the reference to the strategy Updater that this unit will be using at the start of the battle, based on its army configuration
                 IStrategyUpdater strategyUpdater = _strategyUpdaters[(int)unitModel.UnitType, (int)armyModel.Strategy];
 
-                UnitCreationParameters parameters = new(position, rotation, army, unitModel, strategyUpdater);
+                UnitCreationParameters parameters = new(position, unitIndex, rotation, army, unitModel, strategyUpdater);
 
                 UnitBase newUnit = unitModel.InstantiateUnit(parameters);
 

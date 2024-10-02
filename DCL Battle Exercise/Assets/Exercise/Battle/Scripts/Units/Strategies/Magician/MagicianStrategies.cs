@@ -1,23 +1,38 @@
 using System.Collections.Generic;
 using UnityEngine;
+using Utils;
 
 namespace DCLBattle.Battle
 {
-    public sealed class MagicianBasicStrategyUpdater : IStrategyUpdater
+    public sealed class MagicianBasicStrategyUpdater : IStrategyUpdater, I_Startable
     {
         public ArmyStrategy ArmyStrategy => ArmyStrategy.Basic;
 
-        public Vector3 UpdateStrategy(UnitBase unitToUpdate)
-        {
-            UnitBase closestEnemy = unitToUpdate.Army.GetClosestEnemy(unitToUpdate.Position, out float distance);
+        public bool HasStarted { get; set; }
 
-            // AttackRange check done in the Attack Method
-            unitToUpdate.Target = closestEnemy;
+        private IArmiesHolder _armiesHolder;
+
+        public MagicianBasicStrategyUpdater()
+        {
+            GameUpdater.Register(this);
+        }
+
+        public void Start()
+        {
+            _armiesHolder = UnityServiceLocator.ServiceLocator.Global.Get<IArmiesHolder>();
+            GameUpdater.Unregister(this);
+        }
+
+        public TargetInfo UpdateStrategy(UnitData unitData, out Vector3 strategyMovement)
+        {
+            var unitArmy = _armiesHolder.GetArmy(unitData.ArmyID);
+
+            TargetInfo target = unitArmy.GetClosestEnemy(unitData.Position, out float distance);
 
             // normalizing
-            Vector3 toNearest = (closestEnemy.Position - unitToUpdate.Position) / distance;
-            toNearest.Scale(IStrategyUpdater.FlatScale);
-            return Vector3.Normalize(toNearest);
+            strategyMovement = (target.Position - unitData.Position) / distance;
+            strategyMovement.Scale(IStrategyUpdater.FlatScale);
+            return target;
         }
     }
 
@@ -27,8 +42,11 @@ namespace DCLBattle.Battle
 
         private static readonly Quaternion _flankRotation = Quaternion.Euler(0f, 90f, 0f);
 
-        public Vector3 UpdateStrategy(UnitBase unitToUpdate)
+        public TargetInfo UpdateStrategy(UnitData unitData, out Vector3 strategyMovement)
         {
+            strategyMovement = Vector3.zero;
+            return default;
+            /*
             Vector3 moveDirection = Vector3.zero;
 
             // We get the enemies' center point
@@ -49,7 +67,7 @@ namespace DCLBattle.Battle
             {
                 if (opponentsArmiesCenter.x < unitPositionX)
                     moveDirection += Vector3.left;
-
+                
                 if (opponentsArmiesCenter.x > unitPositionX)
                     moveDirection += Vector3.right;
             }
@@ -75,6 +93,7 @@ namespace DCLBattle.Battle
             }
 
             return Vector3.Normalize(moveDirection);
+            */
         }
     }
 }

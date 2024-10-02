@@ -87,14 +87,16 @@ public abstract class StrategySO : ScriptableObject
 public class UnitCreationParameters
 {
     public readonly Vector3 Position;
+    public readonly int UnitID;
     public readonly Quaternion Rotation;
     public readonly IUnitModel UnitModel;
     public readonly Army ParentArmy;
     public readonly IStrategyUpdater StrategyUpdater;
 
-    public UnitCreationParameters(Vector3 position, Quaternion rotation, Army parentArmy, IUnitModel unitModel, IStrategyUpdater strategyUpdater)
+    public UnitCreationParameters(Vector3 position, int unitID, Quaternion rotation, Army parentArmy, IUnitModel unitModel, IStrategyUpdater strategyUpdater)
     {
         Position = position;
+        UnitID = unitID;
         Rotation = rotation;
         UnitModel = unitModel;
         ParentArmy = parentArmy;

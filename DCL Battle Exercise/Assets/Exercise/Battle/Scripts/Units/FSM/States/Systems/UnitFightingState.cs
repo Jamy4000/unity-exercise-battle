@@ -34,7 +34,7 @@ namespace DCLBattle.Battle
             Vector3 moveOffset = CalculateEvadeAlliesOffset();
 
             // We then calculate the move offset for this unit using the strategy of the army
-            moveOffset += Unit.StrategyUpdater.UpdateStrategy(Unit);
+            //moveOffset += Unit.StrategyUpdater.UpdateStrategy(Unit);
 
             moveOffset = Vector3.Normalize(moveOffset);
 
@@ -71,7 +71,7 @@ namespace DCLBattle.Battle
                 var army = armiesHolder.GetArmy(armyIndex);
 
                 // We check to find the units within X radius of the current unit
-                int unitsInRadiusCount = army.GetUnitsInRadius_NoAlloc(Unit.Position, StateData.MinDistanceFromOtherUnits, _unitsInRadius);
+                int unitsInRadiusCount = 0;// army.GetUnitsInRadius_NoAlloc(Unit.Position, StateData.MinDistanceFromOtherUnits, _unitsInRadius);
 
                 // for every unit within that radius
                 for (int unitIndex = 0; unitIndex < unitsInRadiusCount; unitIndex++)

@@ -1,5 +1,6 @@
 ﻿using System.Collections.Generic;
 using UnityEngine;
+using static UnityEngine.UI.CanvasScaler;
 
 namespace DCLBattle.Battle
 {
@@ -22,10 +23,10 @@ namespace DCLBattle.Battle
             base.Initialize(parameters);
         }
 
-        public override void ApplyCalculatedData()
+        public override void ApplyCalculatedData(UnitData dataSet, TargetInfo targetInfo, IArmiesHolder armiesHolder)
         {
             CurrentAttackCooldown -= Time.deltaTime;
-            base.ApplyCalculatedData();
+            base.ApplyCalculatedData(dataSet, targetInfo, armiesHolder);
         }
 
         protected void ResetAttackCooldown()
@@ -73,10 +74,9 @@ namespace DCLBattle.Battle
         public abstract float AttackRange { get; }
         public abstract float AttackCooldown { get; }
 
-        public IAttackReceiver Target { get; set; }
-
         public System.Action<float> UnitWasHitEvent { get; set; }
 
+        public int UnitID { get; private set; }
         public bool IsMarkedForDeletion { get; set; }
         public Animator Animator { get; private set; }
         protected UnitFSM Fsm { get; private set; }
@@ -95,6 +95,7 @@ namespace DCLBattle.Battle
         {
             Army = parameters.ParentArmy;
             StrategyUpdater = parameters.StrategyUpdater;
+            UnitID = parameters.UnitID;
 
             Fsm = CreateFsm();
             Fsm.RegisterStateStartedCallback(OnStateStarted);
@@ -108,22 +109,17 @@ namespace DCLBattle.Battle
             _lastPosition = transform.position;
         }
 
-        public virtual void CalculateNewData()
-        {
-            Fsm.ManualUpdate();
-        }
-
-        public virtual void ApplyCalculatedData()
+        public virtual void ApplyCalculatedData(UnitData dataSet, TargetInfo targetInfo, IArmiesHolder armiesHolder)
         {
             // Applying delta time here since moveOffset is calculated in a parrallel thread
-            transform.position += _moveOffset * Time.deltaTime;
-            _moveOffset = Vector3.zero;
+            transform.position = dataSet.Position;// * Time.deltaTime;
+            //_moveOffset = Vector3.zero;
 
             // If we found a target this frame
-            if (Target != null)
+            if (targetInfo.UnitID != -1)
             {
-                Attack(Target);
-                Target = null;
+                var unitBase = armiesHolder.GetArmy(targetInfo.ArmyID).GetUnit(targetInfo.UnitID);
+                Attack(unitBase);
             }
 
             // TODO I don't think this should be here + hard coded value for Speed
