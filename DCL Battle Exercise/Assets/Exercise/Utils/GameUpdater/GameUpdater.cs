@@ -14,7 +14,7 @@ namespace Utils
 
         private bool _isPaused;
 
-        private readonly GameUpdateScheduler _scheduler = new GameUpdateScheduler();
+        private readonly GameUpdateScheduler _scheduler = new();
 
         private static readonly List<GameUpdateScheduler.IScheduled> _pendingRegistration = new List<GameUpdateScheduler.IScheduled>(64);
         private static readonly List<GameUpdateScheduler.IScheduled> _pendingUnregistration = new List<GameUpdateScheduler.IScheduled>(64);
@@ -50,6 +50,13 @@ namespace Utils
         private void FixedUpdate()
         {
             _scheduler.RunFixedUpdate(_isPaused);
+        }
+
+        private void OnDestroy()
+        {
+            _scheduler.UnregisterAll();
+            _pendingRegistration.Clear();
+            _pendingUnregistration.Clear();
         }
 
         public void SetPaused(bool paused)

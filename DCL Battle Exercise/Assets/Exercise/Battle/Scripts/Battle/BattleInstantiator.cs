@@ -1,10 +1,12 @@
 using System.Collections.Generic;
+using System.Threading.Tasks;
 using UnityEngine;
 using Utils;
 
 namespace DCLBattle.Battle
 {
-    public sealed class BattleInstantiator : MonoBehaviour, IArmiesHolder
+    public sealed class BattleInstantiator : MonoBehaviour, IArmiesHolder, I_UpdateOnly, I_LateUpdateOnly,
+        ISubscriber<BattleStartEvent>, ISubscriber<AllianceWonEvent>
     {
         /// <summary>
         /// Simple serialized struct to link an army to its spawn point
@@ -73,6 +75,19 @@ namespace DCLBattle.Battle
             UnityServiceLocator.ServiceLocator.ForSceneOf(this).Register(this);
 
             _battleFSM = CreateFSM();
+
+            MessagingSystem<BattleStartEvent>.Subscribe(this);
+            MessagingSystem<AllianceWonEvent>.Subscribe(this);
+
+            GameUpdater.Register(this);
+        }
+
+        private void Start()
+        {
+            foreach (var army in _armies)
+            {
+                army.Start();
+            }
         }
 
         private BattleFSM CreateFSM()
@@ -91,21 +106,49 @@ namespace DCLBattle.Battle
             return new BattleFSM(defaultState, states);
         }
 
-        void Update()
+        public void ManualUpdate()
         {
+            List<Task> tasks = new List<Task>();
+
             int remainingArmies = 0;
+            foreach (var army in _armies)
+            {
+                if (army.RemainingUnitsCount > 0)
+                    remainingArmies++;
+
+                tasks.Add(Task.Factory.StartNew(() => army.UpdateArmyData()));
+            }
+            Task.WaitAll(tasks.ToArray());
+
+            BattleCenter = Vector3.zero;
+            foreach (var army in _armies)
+            {
+                BattleCenter += army.Center;
+            }
+            BattleCenter /= remainingArmies;
+
             foreach (var army in _armies)
             {
                 if (army.RemainingUnitsCount == 0)
                     continue;
 
-                BattleCenter += army.Center;
-                remainingArmies++;
+                army.UpdateUnits();
             }
 
-            BattleCenter /= remainingArmies;
-
             _battleFSM.ManualUpdate();
+
+            foreach (var army in _armies)
+            {
+                if (army.RemainingUnitsCount == 0)
+                    continue;
+
+                army.LateUpdate();
+            }
+        }
+
+        public void ManualLateUpdate()
+        {
+            _battleFSM.ManualLateUpdate();
         }
 
         private void OnDrawGizmos()
@@ -126,9 +169,12 @@ namespace DCLBattle.Battle
             Gizmos.DrawSphere(BattleCenter, 4f);
         }
 
-        private void LateUpdate()
+        private void OnDestroy()
         {
-            _battleFSM.ManualLateUpdate();
+            GameUpdater.Unregister(this);
+
+            MessagingSystem<BattleStartEvent>.Unsubscribe(this);
+            MessagingSystem<AllianceWonEvent>.Unsubscribe(this);
         }
 
         private Army CreateArmy(IArmyModel armyModel, Bounds spawnBounds)
@@ -187,6 +233,16 @@ namespace DCLBattle.Battle
                     _strategyUpdaters[unitTypeIndex, strategyIndex] = unitModel.CreateStrategyUpdater((ArmyStrategy)strategyIndex);
                 }
             }
+        }
+
+        public void OnEvent(AllianceWonEvent evt)
+        {
+            GameUpdater.Unregister(this);
+        }
+
+        public void OnEvent(BattleStartEvent evt)
+        {
+            GameUpdater.Register(this);
         }
     }
 }

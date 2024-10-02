@@ -16,6 +16,11 @@ namespace Utils
                 OnReturnedToPool, OnDestroyPoolObject, collectionChecks, minPoolSize, maxPoolSize);
         }
 
+        ~GenericPoolHelper()
+        {
+            _objectPool.Dispose();
+        }
+
         public TPoolable RequestPoolableObject()
         {
             TPoolable poolable = _objectPool.Get();

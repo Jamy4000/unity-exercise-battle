@@ -19,11 +19,5 @@ namespace DCLBattle.Battle
             target.Hit(this, target.Position, Model.Damage);
             ResetAttackCooldown();
         }
-
-        public void OnDeathAnimFinished()
-        {
-            // TODO Pooling
-            Destroy(gameObject);
-        }
     }
 }

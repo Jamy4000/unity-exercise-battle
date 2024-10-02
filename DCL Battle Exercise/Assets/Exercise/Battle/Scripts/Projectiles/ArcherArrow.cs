@@ -40,14 +40,20 @@ namespace DCLBattle.Battle
 
         public void ManualUpdate()
         {
+            // I hate this, but since the gameUpdater needs to wait until end of frame to actually unregister 
+            // there may be one frame in which we try to access a dead target
+            if (_target == null)
+                return;
+
             Vector3 position = transform.position;
-            Vector3 direction = Vector3.Normalize(_target.Position - position);
+            Vector3 toTarget = _target.Position - position;
+            float sqDist = Vector3.SqrMagnitude(toTarget);
+
+            Vector3 direction = toTarget / Mathf.Sqrt(sqDist);
             position += direction * (_speed * Time.deltaTime);
 
             transform.position = position;
             transform.forward = direction;
-
-            float sqDist = Vector3.SqrMagnitude(_target.Position - transform.position);
 
             if (sqDist < _distanceSqBeforeDespawn)
             {
@@ -61,6 +67,7 @@ namespace DCLBattle.Battle
         {
             // This usually happens when the target dies before the arrow reaches it
             OnShouldReturnToPool?.Invoke(this);
+            GameUpdater.Unregister(this);
         }
 
         // IGenericPoolable
@@ -82,6 +89,8 @@ namespace DCLBattle.Battle
         // Called when object is destroy out of pool
         public void Destroy()
         {
+            GameUpdater.Unregister(this);
+            GameObject.Destroy(gameObject);
         }
     }
 }

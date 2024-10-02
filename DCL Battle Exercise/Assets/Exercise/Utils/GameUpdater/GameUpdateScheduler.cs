@@ -210,6 +210,16 @@ namespace Utils
             }
         }
 
+        public void UnregisterAll()
+        {
+            foreach (var item in _allMembers)
+            {
+                UnregisterComplete(item);
+                UnregisterInterval(item);
+            }
+            _allMembers.Clear();
+        }
+
         internal void RunUpdate(bool isPaused)
         {
             UpdatePending();

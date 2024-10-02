@@ -31,7 +31,7 @@ namespace DCLBattle.Battle
 
         public override void StartState(BattleStateID previousState)
         {
-            MessagingSystem<StartBattleEvent>.Publish(new StartBattleEvent());
+            MessagingSystem<BattleStartEvent>.Publish(new BattleStartEvent());
         }
 
         public override void UpdateState()

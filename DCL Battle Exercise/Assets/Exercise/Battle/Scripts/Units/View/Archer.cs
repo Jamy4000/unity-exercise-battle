@@ -6,18 +6,6 @@ namespace DCLBattle.Battle
     {
         public override UnitType UnitType => UnitType.Archer;
 
-        private static ArcherArrowPool _arrowsPool;
-
-        public override void Initialize(UnitCreationParameters parameters)
-        {
-            base.Initialize(parameters);
-            
-            // TODO this should be avoidable I think
-            if (_arrowsPool == null)
-            {
-                _arrowsPool = new ArcherArrowPool(Model.ArrowPrefab, Model.MinArrowPoolSize, Model.MaxArrowPoolSize);
-            }
-        }
         public override void ManualUpdate()
         {
             if (AttackCooldown > Model.MaxAttackCooldown - Model.PostAttackDelay)
@@ -38,16 +26,11 @@ namespace DCLBattle.Battle
             if (Vector3.SqrMagnitude(transform.position - target.Position) > Model.AttackRangeSq)
                 return;
 
-            IProjectile projectile = _arrowsPool.RequestPoolableObject();
+            IProjectile projectile = Model.ArrowPool.RequestPoolableObject();
             projectile.Launch(this, target);
 
             Animator.SetTrigger("Attack");
             ResetAttackCooldown();
-        }
-
-        public void OnDeathAnimFinished()
-        {
-            Destroy(gameObject);
         }
     }
 }

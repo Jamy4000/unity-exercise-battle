@@ -54,8 +54,7 @@ namespace DCLBattle.Battle
     /// <summary>
     /// This base class for Units is mainly useful to pass reference around without worrying about the Generic type
     /// </summary>
-    public abstract class UnitBase : MonoBehaviour, IAttackReceiver, IAttacker, 
-        I_UpdateOnly, I_LateUpdateOnly, ISubscriber<StartBattleEvent>, ISubscriber<AllianceWonEvent>
+    public abstract class UnitBase : MonoBehaviour, IAttackReceiver, IAttacker
     {
         // not returning _model.UnitType in order to use the value in the OnValidate method of the Model SO
         public abstract UnitType UnitType { get; }
@@ -64,7 +63,7 @@ namespace DCLBattle.Battle
         public Army Army { get; private set; }
         public IStrategyUpdater StrategyUpdater { get; private set; }
 
-        public Vector3 Position => transform.position;
+        public Vector3 Position => _lastPosition;
 
         // IAttackReceiver
         public float Health => _currentHealth;
@@ -77,6 +76,7 @@ namespace DCLBattle.Battle
 
         public System.Action<float> UnitWasHitEvent { get; set; }
 
+        public bool IsMarkedForDeletion { get; set; }
         public Animator Animator { get; private set; }
         protected UnitFSM Fsm { get; private set; }
 
@@ -87,7 +87,6 @@ namespace DCLBattle.Battle
         protected virtual void Awake()
         {
             Animator = GetComponentInChildren<Animator>();
-            MessagingSystem<StartBattleEvent>.Subscribe(this);
         }
 
         // Create when instantiated
@@ -95,7 +94,6 @@ namespace DCLBattle.Battle
         {
             Army = parameters.ParentArmy;
             StrategyUpdater = parameters.StrategyUpdater;
-            MessagingSystem<AllianceWonEvent>.Subscribe(this);
 
             Fsm = CreateFsm();
             Fsm.RegisterStateStartedCallback(OnStateStarted);
@@ -130,7 +128,6 @@ namespace DCLBattle.Battle
         protected virtual void OnDestroy()
         {
             Fsm.UnregisterStateStartedCallback(OnStateStarted);
-            GameUpdater.Unregister(this);
         }
 
         public virtual void Move(Vector3 delta)
@@ -144,22 +141,11 @@ namespace DCLBattle.Battle
             UnitWasHitEvent?.Invoke(_currentHealth);
         }
 
-        public void OnEvent(AllianceWonEvent evt)
-        {
-            GameUpdater.Unregister(this);
-        }
-
-        public void OnEvent(StartBattleEvent evt)
-        {
-            GameUpdater.Register(this);
-        }
-
         private void OnStateStarted(UnitStateID newState)
         {
             if (newState == UnitStateID.Dying)
             {
                 AttackReceiverDiedEvent?.Invoke(this);
-                GameUpdater.Unregister(this);
             }
         }
 
