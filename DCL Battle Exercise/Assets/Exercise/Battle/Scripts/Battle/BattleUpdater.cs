@@ -123,15 +123,20 @@ namespace DCLBattle.Battle
 
         private void UpdateUnits()
         {
-            var parallelResult = Parallel.ForEach(_armies, army => army.CalculateNewData());
-
-            while (!parallelResult.IsCompleted)
-                continue;
-
-                // We apply the data on the main thread
             foreach (var army in _armies)
             {
                 if (army.RemainingUnitsCount == 0)
+                    continue;
+                army.CalculateNewData();
+            }
+
+            // We apply the data on the main thread
+            foreach (var army in _armies)
+            {
+                if (army.RemainingUnitsCount == 0)
+                    continue;
+
+                while (!army.IsDoneUpdatingUnits)
                     continue;
 
                 army.ApplyCalculatedData();

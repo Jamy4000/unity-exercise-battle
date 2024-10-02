@@ -1,6 +1,8 @@
 ﻿using DataStructures.ViliWonka.KDTree;
 using System.Collections.Generic;
+using System.Threading.Tasks;
 using UnityEngine;
+using static UnityEngine.UI.CanvasScaler;
 
 namespace DCLBattle.Battle
 {
@@ -165,14 +167,16 @@ namespace DCLBattle.Battle
             RebuildTree();
         }
 
+        private ParallelLoopResult _loopResult;
+        public bool IsDoneUpdatingUnits => _loopResult.IsCompleted;
+
         public void CalculateNewData()
         {
-            _targets.Clear();
-            for (int i = 0; i < RemainingUnitsCount; i++)
+            _loopResult = Parallel.For(0, RemainingUnitsCount, (int i) =>
             {
                 _unitsData[i].CalculateNewData(_units[i].StrategyUpdater, ArmiesHolder, out TargetInfo target);
-                _targets.Add(target);
-            }
+                _targets[i] = target;
+            });
         }
 
         public void ApplyCalculatedData()
@@ -216,6 +220,7 @@ namespace DCLBattle.Battle
             _units.Add(unit);
             // todo hard coded
             _unitsData.Add(new UnitData(unit.Position, unit.Army.ArmyID, unit.UnitID, unit.AttackRange, unit.AttackCooldown, 80f, 2f));
+            _targets.Add(new());
         }
 
         /*

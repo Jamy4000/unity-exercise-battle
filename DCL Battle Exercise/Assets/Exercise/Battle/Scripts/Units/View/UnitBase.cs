@@ -54,7 +54,7 @@ namespace DCLBattle.Battle
     /// <summary>
     /// This base class for Units is mainly useful to pass reference around without worrying about the Generic type
     /// </summary>
-    public abstract class UnitBase : MonoBehaviour, IAttackReceiver, IAttacker, I_LateUpdateOnly
+    public abstract class UnitBase : MonoBehaviour, IAttackReceiver, IAttacker, Utils.I_LateUpdateOnly
     {
         // not returning _model.UnitType in order to use the value in the OnValidate method of the Model SO
         public abstract UnitType UnitType { get; }
@@ -108,7 +108,7 @@ namespace DCLBattle.Battle
 
             _lastPosition = transform.position;
 
-            GameUpdater.Register(this);
+            Utils.GameUpdater.Register(this);
         }
 
         public virtual void ApplyCalculatedData(UnitData dataSet, TargetInfo targetInfo, IArmiesHolder armiesHolder)
@@ -138,7 +138,7 @@ namespace DCLBattle.Battle
         {
             Fsm.UnregisterStateStartedCallback(OnStateStarted);
 
-            GameUpdater.Unregister(this);
+            Utils.GameUpdater.Unregister(this);
         }
 
         public virtual void Move(Vector3 delta)
