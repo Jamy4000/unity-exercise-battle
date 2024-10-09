@@ -6,7 +6,7 @@ using Utils.SpatialPartitioning;
 
 namespace DCLBattle.Battle
 {
-    public class Army
+    public class Army : IServiceConsumer
     {
         public readonly IArmyModel Model;
         public int RemainingUnitsCount => _units.Count;
@@ -25,9 +25,11 @@ namespace DCLBattle.Battle
 
         private readonly Action<Army> _cachedArmyDefeatedCallback;
 
-        public Army(IArmyModel model)
+        public Army(IArmyModel model, IServiceLocator serviceLocator)
         {
             Model = model;
+            serviceLocator.AddConsumer(this);
+
             //_spatialPartitioner = new Quadtree<UnitBase>(Vector2.zero, Vector2.one * 100f);
             _spatialPartitioner = new KDTree<UnitBase, Vector2>(2, new TwoDimensionComparer());
             _cachedArmyDefeatedCallback = RemoveEnemyArmy;
@@ -43,7 +45,6 @@ namespace DCLBattle.Battle
 
         public void Start()
         {
-            ArmiesHolder = UnityServiceLocator.ServiceLocator.Global.Get<IArmiesHolder>();
             RebuildTree();
         }
 
@@ -150,6 +151,11 @@ namespace DCLBattle.Battle
         {
             _enemyArmies.Remove(enemy);
             enemy.ArmyDefeatedEvent -= _cachedArmyDefeatedCallback;
+        }
+
+        public void ConsumeLocator(IServiceLocator locator)
+        {
+            ArmiesHolder = locator.GetService<IArmiesHolder>();
         }
     }
 }

@@ -37,10 +37,16 @@ namespace DCLBattle.Battle
 
         private static readonly IStrategyUpdater[,] _strategyUpdaters = new IStrategyUpdater[IArmyModel.UnitLength, IStrategyUpdater.StrategyCount];
 
+        [SerializeField, Interface(typeof(IServiceLocator))]
+        private Object _serviceLocatorObject;
+        private IServiceLocator _serviceLocator;
+
         private IArmiesHolder _armiesHolder;
 
         void Awake()
         {
+            _serviceLocator = _serviceLocatorObject as IServiceLocator;
+
             // TODO Hide Implementation
             var armies = new Army[_armiesToSpawn.Length];
 
@@ -69,7 +75,7 @@ namespace DCLBattle.Battle
             }
 
             // TODO Hide Implementation
-            _armiesHolder = new BattleUpdater(armies, _battleStatesData, _defaultState);
+            _armiesHolder = new BattleUpdater(armies, _serviceLocator, _battleStatesData, _defaultState);
         }
 
         private void OnDrawGizmos()
@@ -99,7 +105,7 @@ namespace DCLBattle.Battle
         private Army CreateArmy(IArmyModel armyModel, Bounds spawnBounds)
         {
             // TODO remove hard implementation
-            Army army = new(armyModel);
+            Army army = new(armyModel, _serviceLocator);
 
             // For each type of unit in the game
             for (int unitTypeIndex = 0; unitTypeIndex < IArmyModel.UnitLength; unitTypeIndex++)

@@ -7,15 +7,23 @@ using Utils;
 
 namespace DCLBattle.Battle
 {
-    public sealed class GameOverMenu : MonoBehaviour, ISubscriber<AllianceWonEvent>
+    public sealed class GameOverMenu : MonoBehaviour, ISubscriber<AllianceWonEvent>, IServiceConsumer
     {
         [SerializeField]
         private TextMeshProUGUI _armyWins;
         [SerializeField]
         public Button _goToMenu;
 
-        void Awake()
+        [SerializeField, Interface(typeof(IServiceLocator))]
+        private Object _serviceLocatorObject;
+
+        private IArmiesHolder _armiesHolder;
+
+        private void Awake()
         {
+            var serviceLocator = _serviceLocatorObject as IServiceLocator;
+            serviceLocator.AddConsumer(this);
+
             _goToMenu.onClick.AddListener(GoToMenu);
             gameObject.SetActive(false);
             MessagingSystem<AllianceWonEvent>.Subscribe(this);
@@ -33,13 +41,11 @@ namespace DCLBattle.Battle
 
         public void OnEvent(AllianceWonEvent evt)
         {
-            var armiesHolder = UnityServiceLocator.ServiceLocator.Global.Get<IArmiesHolder>();
+            List<string> winnersList = new(_armiesHolder.ArmiesCount);
 
-            List<string> winnersList = new(armiesHolder.ArmiesCount);
-
-            for (int i = 0; i < armiesHolder.ArmiesCount; i++)
+            for (int i = 0; i < _armiesHolder.ArmiesCount; i++)
             {
-                IArmyModel armyModel = armiesHolder.GetArmy(i).Model;
+                IArmyModel armyModel = _armiesHolder.GetArmy(i).Model;
                 if (armyModel.AllianceID == evt.AllianceID)
                 {
                     winnersList.Add(armyModel.ArmyName);
@@ -65,6 +71,11 @@ namespace DCLBattle.Battle
 
             _armyWins.text = $"The Armies of {concatenatedNames} won!";
             gameObject.SetActive(true);
+        }
+
+        public void ConsumeLocator(IServiceLocator locator)
+        {
+            _armiesHolder = locator.GetService<IArmiesHolder>();
         }
     }
 }

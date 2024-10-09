@@ -483,6 +483,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 96c0062d469220144abfda24ed9760ae, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  _serviceLocatorObject: {fileID: 591741074}
 --- !u!1 &443984562
 GameObject:
   m_ObjectHideFlags: 0
@@ -767,7 +768,7 @@ MonoBehaviour:
   m_faceColor:
     serializedVersion: 2
     rgba: 4294967295
-  m_fontSize: 62.35
+  m_fontSize: 95.15
   m_fontSizeBase: 72
   m_fontWeight: 400
   m_enableAutoSizing: 1
@@ -827,27 +828,13 @@ GameObject:
   m_Component:
   - component: {fileID: 591741075}
   - component: {fileID: 591741074}
-  - component: {fileID: 591741073}
   m_Layer: 0
-  m_Name: ServiceLocator [Global]
+  m_Name: ServiceLocator
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
   m_IsActive: 1
---- !u!114 &591741073
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 591741072}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 173fa78c7c0f7ac45abff16122e72d07, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  dontDestroyOnLoad: 0
 --- !u!114 &591741074
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -857,7 +844,7 @@ MonoBehaviour:
   m_GameObject: {fileID: 591741072}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 74529e27149c2ac45b29a08a71945d5d, type: 3}
+  m_Script: {fileID: 11500000, guid: e1df661213c342f48a97dbe5340453d1, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
 --- !u!4 &591741075
@@ -995,6 +982,7 @@ MonoBehaviour:
   _currentFpsCounter: {fileID: 1214435881}
   _averageFpsCounter: {fileID: 857033195}
   _unitCounter: {fileID: 1918550402}
+  _serviceLocatorObject: {fileID: 591741074}
 --- !u!1 &764418156
 GameObject:
   m_ObjectHideFlags: 0
@@ -1132,7 +1120,7 @@ MonoBehaviour:
   m_faceColor:
     serializedVersion: 2
     rgba: 4294967295
-  m_fontSize: 7.5
+  m_fontSize: 14.2
   m_fontSizeBase: 72
   m_fontWeight: 400
   m_enableAutoSizing: 1
@@ -1291,7 +1279,7 @@ MonoBehaviour:
   m_faceColor:
     serializedVersion: 2
     rgba: 4294967295
-  m_fontSize: 7.45
+  m_fontSize: 14.2
   m_fontSizeBase: 72
   m_fontWeight: 400
   m_enableAutoSizing: 1
@@ -1546,6 +1534,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   _armyWins: {fileID: 584733685}
   _goToMenu: {fileID: 87333000}
+  _serviceLocatorObject: {fileID: 591741074}
 --- !u!1 &1918550400
 GameObject:
   m_ObjectHideFlags: 0
@@ -1630,7 +1619,7 @@ MonoBehaviour:
   m_faceColor:
     serializedVersion: 2
     rgba: 4294967295
-  m_fontSize: 9.35
+  m_fontSize: 14.2
   m_fontSizeBase: 72
   m_fontWeight: 400
   m_enableAutoSizing: 1
@@ -1722,6 +1711,7 @@ MonoBehaviour:
   - {fileID: 11400000, guid: c514966d384fc4f4fa3072d3a11387d8, type: 2}
   - {fileID: 11400000, guid: eaf93a7ab4b3a8a4298f5326ff5e789c, type: 2}
   _defaultState: 0
+  _serviceLocatorObject: {fileID: 591741074}
 --- !u!4 &1951697636
 Transform:
   m_ObjectHideFlags: 0

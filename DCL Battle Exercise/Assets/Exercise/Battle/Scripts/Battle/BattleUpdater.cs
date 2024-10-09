@@ -21,14 +21,13 @@ namespace DCLBattle.Battle
 
 
         // TODO FSM parameters should be injected differently
-        public BattleUpdater(Army[] armies, BattleStateData[] battleStatesData, BattleStateID defaultStateValue)
+        public BattleUpdater(Army[] armies, IServiceLocator serviceLocator, BattleStateData[] battleStatesData, BattleStateID defaultStateValue)
         {
             _armies = armies;
+            serviceLocator.AddService(this as IArmiesHolder);
 
             MessagingSystem<BattleStartEvent>.Subscribe(this);
             MessagingSystem<AllianceWonEvent>.Subscribe(this);
-
-            UnityServiceLocator.ServiceLocator.Global.Register<IArmiesHolder>(this);
 
             // the FSM throws the BattleStartEvent, so we need to create it at the end
             _battleFSM = CreateFSM(battleStatesData, defaultStateValue);
@@ -129,6 +128,10 @@ namespace DCLBattle.Battle
         public void OnEvent(AllianceWonEvent evt)
         {
             GameUpdater.Unregister(this);
+        }
+
+        public void Initialize(IServiceLocator serviceLocator)
+        {
         }
     }
 }
