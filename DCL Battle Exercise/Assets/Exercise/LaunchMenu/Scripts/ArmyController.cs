@@ -8,6 +8,7 @@ namespace DCLBattle.LaunchMenu
     {
         private readonly IArmyModel _model;
         private readonly IArmyView _view;
+        private readonly System.Action<IArmyData> _cachedUserInputReceivedCallback;
 
         public ArmyController(IArmyModel model, IArmyView view)
         {
@@ -22,7 +23,13 @@ namespace DCLBattle.LaunchMenu
 
             this._view = view;
             this._view.InjectModel(model);
-            this._view.RegisterArmyDataChangedCallback(OnUserInputReceived);
+            _cachedUserInputReceivedCallback = OnUserInputReceived;
+            this._view.RegisterArmyDataChangedCallback(_cachedUserInputReceivedCallback);
+        }
+
+        ~ArmyController()
+        {
+            this._view.UnregisterArmyDataChangedCallback(_cachedUserInputReceivedCallback);
         }
 
         private void OnUserInputReceived(IArmyData changedData)

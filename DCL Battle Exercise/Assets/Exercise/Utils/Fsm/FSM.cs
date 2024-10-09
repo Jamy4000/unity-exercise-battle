@@ -16,10 +16,16 @@ namespace Utils
         private System.Action<TStateEnum> _stateStartedEvent;
         private System.Action<TStateEnum> _stateEndedEvent;
 
+        private readonly System.Action<TStateEnum> _cachedAddPendingStateCallback;
+        private readonly System.Action _cachedExitCurrentStateCallback;
+
         private bool _explicitExitRequestReceived;
 
         protected FSM(TState defaultState, List<TState> states)
         {
+            _cachedExitCurrentStateCallback = ExitCurrentState;
+            _cachedAddPendingStateCallback = AddPendingState;
+
             States = new Dictionary<TStateEnum, TState>(states.Count);
 
             for (int stateIndex = 0; stateIndex < states.Count; stateIndex++)
@@ -134,7 +140,7 @@ namespace Utils
             _explicitExitRequestReceived = false;
 
             newState.StartState(oldState);
-            newState.RequestToExitCurrentState += ExitCurrentState;
+            newState.RequestToExitCurrentState += _cachedExitCurrentStateCallback;
 
             _currentStatePotentialTransitions.AddRange(newState.GetTransitionsStates());
             // some states may be set as potential transitions, but may not be registered in the FSM yet.
@@ -166,7 +172,7 @@ namespace Utils
 
             for (int stateIndex = 0; stateIndex < _currentStatePotentialTransitions.Count; stateIndex++)
             {
-                States[_currentStatePotentialTransitions[stateIndex]].RequestEnterState -= AddPendingState;
+                States[_currentStatePotentialTransitions[stateIndex]].RequestEnterState -= _cachedAddPendingStateCallback;
             }
 
             _currentStatePotentialTransitions.Clear();

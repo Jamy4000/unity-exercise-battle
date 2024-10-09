@@ -4,6 +4,9 @@ using Utils;
 
 namespace DCLBattle
 {
+    /// <summary>
+    /// This is a debug class that creates a bunch of Garbage, but as it's just a utility I won't fix it
+    /// </summary>
     public sealed class InfoCounter : MonoBehaviour, I_Update1Hz
     {
         [SerializeField] private TMPro.TextMeshProUGUI _currentFpsCounter;

@@ -5,6 +5,7 @@ namespace Utils
     public abstract class GenericPoolHelper<TPoolable> where TPoolable : class, IGenericPoolable
     {
         private readonly ObjectPool<TPoolable> _objectPool;
+        private readonly System.Action<IGenericPoolable> _cachedReleasePoolableCallback;
 
         public delegate void OnObjectPooledStatusChangedDelegate(TPoolable poolable);
         public event OnObjectPooledStatusChangedDelegate OnObjectWasPooledEvent;
@@ -12,6 +13,8 @@ namespace Utils
 
         protected GenericPoolHelper(int minPoolSize, int maxPoolSize, bool collectionChecks)
         {
+            _cachedReleasePoolableCallback = ReleasePoolable;
+
             _objectPool = new ObjectPool<TPoolable>(CreatePooledItem, OnTakeFromPool,
                 OnReturnedToPool, OnDestroyPoolObject, collectionChecks, minPoolSize, maxPoolSize);
         }
@@ -24,20 +27,20 @@ namespace Utils
         public TPoolable RequestPoolableObject()
         {
             TPoolable poolable = _objectPool.Get();
-            poolable.OnShouldReturnToPool += ReleasePoolable;
+            poolable.OnShouldReturnToPool += _cachedReleasePoolableCallback;
             OnObjectWasPooledEvent?.Invoke(poolable);
             return poolable;
         }
 
         public void AddPreplacedPoolable(TPoolable poolable)
         {
-            poolable.OnShouldReturnToPool += ReleasePoolable;
+            poolable.OnShouldReturnToPool += _cachedReleasePoolableCallback;
         }
 
         protected void ReleasePoolable(IGenericPoolable poolableToRelease)
         {
             TPoolable releasedPoolable = poolableToRelease as TPoolable;
-            releasedPoolable.OnShouldReturnToPool -= ReleasePoolable;
+            releasedPoolable.OnShouldReturnToPool -= _cachedReleasePoolableCallback;
             OnObjectWasReturnedEvent?.Invoke(releasedPoolable);
             _objectPool.Release(releasedPoolable);
         }

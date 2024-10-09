@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using UnityEngine;
 using Utils;
 using Utils.SpatialPartitioning;
@@ -22,11 +23,14 @@ namespace DCLBattle.Battle
 
         private readonly List<Army> _enemyArmies = new();
 
+        private readonly Action<Army> _cachedArmyDefeatedCallback;
+
         public Army(IArmyModel model)
         {
             Model = model;
             //_spatialPartitioner = new Quadtree<UnitBase>(Vector2.zero, Vector2.one * 100f);
             _spatialPartitioner = new KDTree<UnitBase, Vector2>(2, new TwoDimensionComparer());
+            _cachedArmyDefeatedCallback = RemoveEnemyArmy;
 
             // pre-allocate the list
             int armySize = 0;
@@ -139,12 +143,13 @@ namespace DCLBattle.Battle
         public void AddEnemyArmy(Army enemy)
         {
             _enemyArmies.Add(enemy);
-            enemy.ArmyDefeatedEvent += RemoveEnemyArmy;
+            enemy.ArmyDefeatedEvent += _cachedArmyDefeatedCallback;
         }
 
         private void RemoveEnemyArmy(Army enemy)
         {
             _enemyArmies.Remove(enemy);
+            enemy.ArmyDefeatedEvent -= _cachedArmyDefeatedCallback;
         }
     }
 }

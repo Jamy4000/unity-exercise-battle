@@ -4,6 +4,7 @@ using Utils;
 
 namespace DCLBattle.Battle
 {
+    [RequireComponent(typeof(Renderer))]
     public sealed class ArcherArrow : MonoBehaviour, IProjectile, I_UpdateOnly
     {
         [SerializeField]
@@ -22,20 +23,28 @@ namespace DCLBattle.Battle
 
         public Action<IGenericPoolable> OnShouldReturnToPool { get; set; }
 
+        // Avoids generating Garbage
+        private GameObject _go;
+        private Material _material;
+        private Action<IAttackReceiver> _cachedTargetDiedDelegate;
+
         private void Awake()
         {
             _distanceSqBeforeDespawn = _distanceBeforeDespawn * _distanceBeforeDespawn;
+            _material = GetComponent<Renderer>().material;
+            _cachedTargetDiedDelegate = OnTargetDied;
+            _go = gameObject;
         }
 
         public void Launch(IAttacker attacker, IAttackReceiver target)
         {
             _source = attacker;
             _target = target;
-            _target.AttackReceiverDiedEvent += OnTargetDied;
+            _target.AttackReceiverDiedEvent += _cachedTargetDiedDelegate;
 
             transform.position = attacker.Position;
 
-            GetComponent<Renderer>().material.color = attacker.Army.Model.ArmyColor;
+            _material.color = attacker.Army.Model.ArmyColor;
         }
 
         public void ManualUpdate()
@@ -75,14 +84,14 @@ namespace DCLBattle.Battle
         public void Enable()
         {
             GameUpdater.Register(this);
-            gameObject.SetActive(true);
+            _go.SetActive(true);
         }
 
         // Raised when returned to pool and disabled
         public void Disable()
         {
-            _target.AttackReceiverDiedEvent -= OnTargetDied;
-            gameObject.SetActive(false);
+            _target.AttackReceiverDiedEvent -= _cachedTargetDiedDelegate;
+            _go.SetActive(false);
             GameUpdater.Unregister(this);
         }
 
@@ -90,7 +99,7 @@ namespace DCLBattle.Battle
         public void Destroy()
         {
             GameUpdater.Unregister(this);
-            GameObject.Destroy(gameObject);
+            GameObject.Destroy(_go);
         }
     }
 }

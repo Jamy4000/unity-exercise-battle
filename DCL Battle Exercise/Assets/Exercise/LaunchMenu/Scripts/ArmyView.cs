@@ -1,4 +1,3 @@
-using System.Linq;
 using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
@@ -9,6 +8,7 @@ namespace DCLBattle.LaunchMenu
     {
         void InjectModel(IArmyModel model);
         void RegisterArmyDataChangedCallback(System.Action<IArmyData> callback);
+        void UnregisterArmyDataChangedCallback(System.Action<IArmyData> callback);
     }
 
     public class ArmyView : MonoBehaviour, IArmyView
@@ -24,11 +24,16 @@ namespace DCLBattle.LaunchMenu
         private EnumDropdownWrapper<ArmyStrategy> enumDropdown;
 
         private System.Action<IArmyData> _onDataChanged;
+        private System.Action<ArmyStrategy> _onStrategyChangedCallback;
+        private System.Action<IArmyData> _cachedOnUnitCountChangedCallback;
 
         private void Awake()
         {
+            _cachedOnUnitCountChangedCallback = OnUnitCountChanged;
+            _onStrategyChangedCallback = OnStrategyChanged;
+
             enumDropdown = new EnumDropdownWrapper<ArmyStrategy>(strategyDropdown);
-            enumDropdown.OnValueChanged += OnStrategyChanged;
+            enumDropdown.OnValueChanged += _onStrategyChangedCallback;
         }
 
         public void InjectModel(IArmyModel armyModel)
@@ -47,13 +52,18 @@ namespace DCLBattle.LaunchMenu
                 IUnitView unitView = Instantiate(unitSliderPrefab.gameObject, unitsSliderContent).GetComponent<IUnitView>();
                 unitView.InjectModel(armyModel, unitModel);
                 
-                unitView.RegisterArmyDataChangedCallback(OnUnitCountChanged);
+                unitView.RegisterArmyDataChangedCallback(_cachedOnUnitCountChangedCallback);
             }
         }
 
         public void RegisterArmyDataChangedCallback(System.Action<IArmyData> callback)
         {
             _onDataChanged += callback;
+        }
+
+        public void UnregisterArmyDataChangedCallback(System.Action<IArmyData> callback)
+        {
+            _onDataChanged -= callback;
         }
 
         private void OnStrategyChanged(ArmyStrategy strategy)
@@ -69,7 +79,7 @@ namespace DCLBattle.LaunchMenu
 
         private void OnDestroy()
         {
-            enumDropdown.OnValueChanged -= OnStrategyChanged;
+            enumDropdown.OnValueChanged -= _onStrategyChangedCallback;
             enumDropdown?.Dispose();
         }
     }

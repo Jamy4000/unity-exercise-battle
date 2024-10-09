@@ -94,9 +94,12 @@ namespace DCLBattle.Battle
         private Vector3 _moveOffset;
         private Vector3 _lastPosition;
 
+        private System.Action<UnitStateID> _cachedOnStateStartedCallback;
+
         protected virtual void Awake()
         {
             Animator = GetComponentInChildren<Animator>();
+            _cachedOnStateStartedCallback = OnStateStarted;
         }
 
         // Create when instantiated
@@ -107,7 +110,7 @@ namespace DCLBattle.Battle
             UnitID = parameters.UnitID;
 
             Fsm = CreateFsm();
-            Fsm.RegisterStateStartedCallback(OnStateStarted);
+            Fsm.RegisterStateStartedCallback(_cachedOnStateStartedCallback);
 
             _currentHealth = parameters.UnitModel.BaseHealth;
             
@@ -140,7 +143,7 @@ namespace DCLBattle.Battle
 
         protected virtual void OnDestroy()
         {
-            Fsm.UnregisterStateStartedCallback(OnStateStarted);
+            Fsm.UnregisterStateStartedCallback(_cachedOnStateStartedCallback);
 
             GameUpdater.Unregister(this);
         }

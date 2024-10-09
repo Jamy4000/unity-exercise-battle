@@ -5,12 +5,14 @@ namespace DCLBattle.Battle
     public class BattleOngoingState : BattleState<BattleOngoingStateData>
     {
         private readonly IArmiesHolder _armiesHolder;
+        private readonly System.Action<Army> _cachedArmyDefeatedCallback;
 
         public BattleOngoingState(BattleOngoingStateData stateData, IArmiesHolder armiesHolder) : base(stateData)
         {
+            _cachedArmyDefeatedCallback = OnArmyDefeatedEvent;
             for (int armyIndex = 0; armyIndex < armiesHolder.ArmiesCount; armyIndex++)
             {
-                armiesHolder.GetArmy(armyIndex).ArmyDefeatedEvent += OnArmyDefeatedEvent;
+                armiesHolder.GetArmy(armyIndex).ArmyDefeatedEvent += _cachedArmyDefeatedCallback;
             }
             _armiesHolder = armiesHolder;
         }
@@ -44,7 +46,7 @@ namespace DCLBattle.Battle
 
         private void OnArmyDefeatedEvent(Army defeatedArmy)
         {
-            defeatedArmy.ArmyDefeatedEvent -= OnArmyDefeatedEvent;
+            defeatedArmy.ArmyDefeatedEvent -= _cachedArmyDefeatedCallback;
 
             int remainingAllianceID = -1;
             for (int armyIndex = 0; armyIndex < _armiesHolder.ArmiesCount; armyIndex++)

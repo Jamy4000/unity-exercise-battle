@@ -8,14 +8,17 @@ namespace DCLBattle.Battle
         // except if we end up threading this
         private static readonly (UnitBase unit, float distance)[] _unitsInRadius = new (UnitBase, float)[16];
 
+        private readonly System.Action<float> _cachedUnitWasHitCallback;
+
         public UnitFightingState(UnitFightingStateData stateData, UnitBase unit) : base(stateData, unit)
         {
-            unit.UnitWasHitEvent += OnUnitWasHit;
+            _cachedUnitWasHitCallback = OnUnitWasHit;
+            unit.UnitWasHitEvent += _cachedUnitWasHitCallback;
         }
 
         public override void OnDestroy()
         {
-            Unit.UnitWasHitEvent -= OnUnitWasHit;
+            Unit.UnitWasHitEvent -= _cachedUnitWasHitCallback;
         }
 
         public override bool CanBeEntered()
