@@ -1,14 +1,15 @@
-using UnityEngine;
 using Utils;
 
 namespace DCLBattle.Battle
 {
     public class UnitDyingState : UnitState<UnitDyingStateData>, I_UpdateOnly
     {
+        private readonly int _deathAnimHash;
         private float _deathAnimTimer;
 
         public UnitDyingState(UnitDyingStateData stateData, UnitBase unit) : base(stateData, unit)
         {
+            _deathAnimHash = UnityEngine.Animator.StringToHash(stateData.DeathAnimName);
         }
 
         public override void OnDestroy()
@@ -19,7 +20,7 @@ namespace DCLBattle.Battle
 
         public override bool CanBeEntered()
         {
-            return Unit.Health <= Mathf.Epsilon;
+            return Unit.Health <= UnityEngine.Mathf.Epsilon;
         }
 
         public override bool CanBeExited()
@@ -29,7 +30,7 @@ namespace DCLBattle.Battle
 
         public override void StartState(UnitStateID previousState)
         {
-            Unit.Animator.SetTrigger(StateData.DeathAnimName);
+            Unit.Animator.SetTrigger(_deathAnimHash);
             _deathAnimTimer = Unit.Animator.GetCurrentAnimatorClipInfo(0).Length;
             GameUpdater.Register(this);
         }
@@ -41,7 +42,7 @@ namespace DCLBattle.Battle
         public void ManualUpdate()
         {
             _deathAnimTimer -= UnityEngine.Time.deltaTime;
-            if (_deathAnimTimer <= 0f)
+            if (_deathAnimTimer <= UnityEngine.Mathf.Epsilon)
             {
                 UnityEngine.Object.Destroy(Unit.gameObject);
                 GameUpdater.Unregister(this);

@@ -15,7 +15,7 @@ namespace DCLBattle.Battle
             if (Vector3.SqrMagnitude(transform.position - target.Position) > Model.AttackRangeSq)
                 return;
 
-            Animator.SetTrigger("Attack");
+            Animator.SetTrigger(AttackAnimHash);
 
             target.Hit(this, target.Position, Model.Damage);
             ResetAttackCooldown();

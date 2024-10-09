@@ -18,6 +18,9 @@ namespace DCLBattle.Battle
         protected float CurrentAttackCooldown;
         public override float AttackCooldown => CurrentAttackCooldown;
 
+        // TODO Could add that Attack string in the unit data
+        protected int AttackAnimHash { get; } = Animator.StringToHash("Attack");
+
         public override void Initialize(UnitCreationParameters parameters)
         {
             Model = parameters.UnitModel as TModel;
@@ -86,7 +89,7 @@ namespace DCLBattle.Battle
         public Animator Animator { get; private set; }
         protected UnitFSM Fsm { get; private set; }
 
-
+        private readonly int _movementSpeedAnimHash = Animator.StringToHash("MovementSpeed");
         private float _currentHealth;
         private Vector3 _moveOffset;
         private Vector3 _lastPosition;
@@ -126,7 +129,7 @@ namespace DCLBattle.Battle
             transform.position += _moveOffset;
 
             // TODO I don't think this should be here + hard coded value for Speed
-            Animator.SetFloat("MovementSpeed", (transform.position - _lastPosition).magnitude / 20f);
+            Animator.SetFloat(_movementSpeedAnimHash, (transform.position - _lastPosition).magnitude / 20f);
             _lastPosition = transform.position;
         }
 

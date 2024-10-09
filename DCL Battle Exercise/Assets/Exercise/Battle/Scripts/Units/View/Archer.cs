@@ -29,7 +29,7 @@ namespace DCLBattle.Battle
             IProjectile projectile = Model.ArrowPool.RequestPoolableObject();
             projectile.Launch(this, target);
 
-            Animator.SetTrigger("Attack");
+            Animator.SetTrigger(AttackAnimHash);
             ResetAttackCooldown();
         }
     }

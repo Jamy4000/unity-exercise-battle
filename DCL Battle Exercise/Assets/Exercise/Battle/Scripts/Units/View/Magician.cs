@@ -30,7 +30,7 @@ namespace DCLBattle.Battle
             IProjectile fireball = Model.FireballPool.RequestPoolableObject();
             fireball.Launch(this, target);
 
-            Animator.SetTrigger("Attack");
+            Animator.SetTrigger(AttackAnimHash);
             ResetAttackCooldown();
         }
     }
