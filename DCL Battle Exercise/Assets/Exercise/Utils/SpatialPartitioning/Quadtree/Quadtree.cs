@@ -1,7 +1,4 @@
-using System;
 using System.Collections.Generic;
-using System.Xml.Linq;
-using UnityEditor.Experimental.GraphView;
 using UnityEngine;
 
 namespace Utils.SpatialPartitioning
@@ -45,32 +42,6 @@ namespace Utils.SpatialPartitioning
             _halfSize = halfSize;
         }
 
-        public void OnDrawGizmos()
-        {
-            // Set the Gizmos color to differentiate between root and subdivided nodes
-            Gizmos.color = _isDivided ? Color.yellow : Color.green;
-
-            // Draw the boundaries of this Quadtree node
-            Gizmos.DrawWireCube(new(_center.x, 0f, _center.y), new(_halfSize.x * 2, 0.5f, _halfSize.y * 2f));
-
-            // If the node is subdivided, recursively draw the child quadrants
-            if (_isDivided)
-            {
-                _northEast.OnDrawGizmos();
-                _northWest.OnDrawGizmos();
-                _southEast.OnDrawGizmos();
-                _southWest.OnDrawGizmos();
-            }
-
-            // Optionally, draw the points inside this node for visual debugging
-            Gizmos.color = Color.red;
-            for (int i = 0; i < _elementCount; i++)
-            {
-                Vector3 pos = new(_elements[i].Position.x, 0f, _elements[i].Position.y);
-                Gizmos.DrawSphere(pos, 0.1f); // Adjust the size of the spheres as needed
-            }
-        }
-
         public void Insert(TElement element)
         {
             Vector2 point = element.Position;
@@ -78,7 +49,7 @@ namespace Utils.SpatialPartitioning
             // If the point is outside the bounds, expand the quadtree
             if (!ContainsPoint(point))
             {
-                throw new ArgumentException("point is outside quadtree bounds");
+                throw new System.ArgumentException("point is outside quadtree bounds");
             }
 
             // Subdivide if needed and insert the point into the appropriate child node
@@ -284,6 +255,32 @@ namespace Utils.SpatialPartitioning
         {
             return point.x >= _center.x - _halfSize.x && point.x < _center.x + _halfSize.x &&
                    point.y >= _center.y - _halfSize.y && point.y < _center.y + _halfSize.y;
+        }
+
+        public void OnDrawGizmos()
+        {
+            // Set the Gizmos color to differentiate between root and subdivided nodes
+            Gizmos.color = _isDivided ? Color.yellow : Color.green;
+
+            // Draw the boundaries of this Quadtree node
+            Gizmos.DrawWireCube(new(_center.x, 0f, _center.y), new(_halfSize.x * 2, 0.5f, _halfSize.y * 2f));
+
+            // If the node is subdivided, recursively draw the child quadrants
+            if (_isDivided)
+            {
+                _northEast.OnDrawGizmos();
+                _northWest.OnDrawGizmos();
+                _southEast.OnDrawGizmos();
+                _southWest.OnDrawGizmos();
+            }
+
+            // Optionally, draw the points inside this node for visual debugging
+            Gizmos.color = Color.red;
+            for (int i = 0; i < _elementCount; i++)
+            {
+                Vector3 pos = new(_elements[i].Position.x, 0f, _elements[i].Position.y);
+                Gizmos.DrawSphere(pos, 0.1f); // Adjust the size of the spheres as needed
+            }
         }
     }
 }

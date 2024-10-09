@@ -27,7 +27,5 @@ namespace Utils.SpatialPartitioning
 
         QueryResult<TElement> QueryClosest(TData source);
         int QueryWithinRange_NoAlloc(TData source, float range, QueryResult<TElement>[] results, int offset = 0);
-
-        void OnDrawGizmos();
     }
 }

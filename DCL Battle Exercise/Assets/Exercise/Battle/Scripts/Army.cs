@@ -25,7 +25,8 @@ namespace DCLBattle.Battle
         public Army(IArmyModel model)
         {
             Model = model;
-            _spatialPartitioner = new Quadtree<UnitBase>(Vector2.zero, Vector2.one * 100f);
+            //_spatialPartitioner = new Quadtree<UnitBase>(Vector2.zero, Vector2.one * 100f);
+            _spatialPartitioner = new KDTree<UnitBase, Vector2>(2, new TwoDimensionComparer());
 
             // pre-allocate the list
             int armySize = 0;
@@ -34,11 +35,6 @@ namespace DCLBattle.Battle
                 armySize += model.GetUnitCount((UnitType)i);
             }
             _units = new(armySize);
-        }
-
-        public void OnDrawGizmos()
-        {
-            _spatialPartitioner.OnDrawGizmos();
         }
 
         public void Start()
