@@ -1,6 +1,7 @@
 ﻿using System.Collections.Generic;
 using UnityEngine;
 using Utils;
+using Utils.SpatialPartitioning;
 
 namespace DCLBattle.Battle
 {
@@ -54,16 +55,21 @@ namespace DCLBattle.Battle
     /// <summary>
     /// This base class for Units is mainly useful to pass reference around without worrying about the Generic type
     /// </summary>
-    public abstract class UnitBase : MonoBehaviour, IAttackReceiver, IAttacker, I_LateUpdateOnly
+    public abstract class UnitBase : MonoBehaviour, IAttackReceiver, IAttacker, 
+        I_LateUpdateOnly, ISpatialEntity<Vector2>, System.IComparable<UnitBase>
     {
         // not returning _model.UnitType in order to use the value in the OnValidate method of the Model SO
         public abstract UnitType UnitType { get; }
+        public int UnitID { get; private set; }
 
         // TODO this crossdependency feels wrong, I'd rather have an ID instead
         public Army Army { get; private set; }
         public IStrategyUpdater StrategyUpdater { get; private set; }
 
         public Vector3 Position => _lastPosition;
+
+        //  IPosition<Vector2>, this is for the QuadTree
+        Vector2 ISpatialEntity<Vector2>.Position => new(_lastPosition.x, _lastPosition.z);
 
         // IAttackReceiver
         public float Health => _currentHealth;
@@ -80,6 +86,7 @@ namespace DCLBattle.Battle
         public Animator Animator { get; private set; }
         protected UnitFSM Fsm { get; private set; }
 
+
         private float _currentHealth;
         private Vector3 _moveOffset;
         private Vector3 _lastPosition;
@@ -94,6 +101,7 @@ namespace DCLBattle.Battle
         {
             Army = parameters.ParentArmy;
             StrategyUpdater = parameters.StrategyUpdater;
+            UnitID = parameters.UnitID;
 
             Fsm = CreateFsm();
             Fsm.RegisterStateStartedCallback(OnStateStarted);
@@ -151,6 +159,16 @@ namespace DCLBattle.Battle
             {
                 AttackReceiverDiedEvent?.Invoke(this);
             }
+        }
+
+        public float GetSqDistance(Vector2 otherPoint)
+        {
+            return Vector2.SqrMagnitude(otherPoint - new Vector2(_lastPosition.x, _lastPosition.z));
+        }
+
+        public int CompareTo(UnitBase other)
+        {
+            return UnitID - other.UnitID;
         }
 
         protected abstract UnitFSM CreateFsm();

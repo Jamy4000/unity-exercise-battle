@@ -91,13 +91,16 @@ public class UnitCreationParameters
     public readonly IUnitModel UnitModel;
     public readonly Army ParentArmy;
     public readonly IStrategyUpdater StrategyUpdater;
+    public readonly int UnitID;
 
-    public UnitCreationParameters(Vector3 position, Quaternion rotation, Army parentArmy, IUnitModel unitModel, IStrategyUpdater strategyUpdater)
+    public UnitCreationParameters(Vector3 position, Quaternion rotation, Army parentArmy, 
+        IUnitModel unitModel, IStrategyUpdater strategyUpdater, int unitID)
     {
         Position = position;
         Rotation = rotation;
         UnitModel = unitModel;
         ParentArmy = parentArmy;
         StrategyUpdater = strategyUpdater;
+        UnitID = unitID;
     }
 }

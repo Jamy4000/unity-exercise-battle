@@ -1,7 +1,7 @@
-﻿using DataStructures.ViliWonka.KDTree;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using UnityEngine;
 using Utils;
+using Utils.SpatialPartitioning;
 
 namespace DCLBattle.Battle
 {
@@ -17,18 +17,15 @@ namespace DCLBattle.Battle
 
         private readonly List<UnitBase> _units;
 
-        private readonly KDTree _tree = new(_MAX_POINTS_PER_LEAF_NODE);
-        private readonly KDQuery _query = new();
-        private readonly List<int> _queryResults = new(128);
-        private readonly List<float> _queryDistances = new(128);
+        private readonly ISpatialPartitioner<UnitBase, Vector2> _spatialPartitioner;
+        private readonly QueryResult<UnitBase>[] _radiusQueryResults = new QueryResult<UnitBase>[32];
 
-        // High value = fast build, slow search; Low value = slow build, fast search
-        private const int _MAX_POINTS_PER_LEAF_NODE = 2;
         private readonly List<Army> _enemyArmies = new();
 
         public Army(IArmyModel model)
         {
             Model = model;
+            _spatialPartitioner = new Quadtree<UnitBase>(Vector2.zero, Vector2.one * 100f);
 
             // pre-allocate the list
             int armySize = 0;
@@ -37,6 +34,11 @@ namespace DCLBattle.Battle
                 armySize += model.GetUnitCount((UnitType)i);
             }
             _units = new(armySize);
+        }
+
+        public void OnDrawGizmos()
+        {
+            _spatialPartitioner.OnDrawGizmos();
         }
 
         public void Start()
@@ -71,16 +73,15 @@ namespace DCLBattle.Battle
         private void RebuildTree()
         {
             Center = Vector3.zero;
-            Vector3[] pointClound = new Vector3[RemainingUnitsCount];
+            _spatialPartitioner.RemoveAll();
+
             for (int i = 0; i < RemainingUnitsCount; i++)
             {
-                Vector3 position = _units[i].Position;
-                pointClound[i] = position;
-                Center += position;
+                _spatialPartitioner.Insert(_units[i]);
+                Center += _units[i].Position;
             }
 
             Center /= RemainingUnitsCount;
-            _tree.Build(pointClound, _MAX_POINTS_PER_LEAF_NODE);
         }
 
         public void AddUnit(UnitBase unit)
@@ -90,20 +91,10 @@ namespace DCLBattle.Battle
 
         public UnitBase GetClosestUnit(Vector3 source, out float distance)
         {
-            if (RemainingUnitsCount == 0)
-            {
-                distance = Mathf.Infinity;
-                return null;
-            }
+            var queryResult = _spatialPartitioner.QueryClosest(new(source.x, source.z));
 
-            _queryResults.Clear();
-            _queryDistances.Clear();
-
-            // spherical query
-            _query.ClosestPoint(_tree, source, _queryResults, _queryDistances);
-
-            distance = _queryDistances[0];
-            return _units[_queryResults[0]];
+            distance = queryResult.Distance;
+            return queryResult.Element;
         }
 
         public int GetUnitsInRadius_NoAlloc(Vector3 source, float radius, (UnitBase unit, float distance)[] result)
@@ -113,16 +104,14 @@ namespace DCLBattle.Battle
                 return 0;
             }
 
-            _queryResults.Clear();
-            _queryDistances.Clear();
+            Vector2 source2D = new(source.x, source.z);
+            int resultCount = _spatialPartitioner.QueryWithinRange_NoAlloc(source2D, radius, _radiusQueryResults);
 
-            // spherical query
-            _query.Radius(_tree, source, radius, _queryResults, _queryDistances);
-
-            int maxResults = Mathf.Min(result.Length, _queryResults.Count);
+            int maxResults = Mathf.Min(result.Length, resultCount);
             for (int resultIndex = 0; resultIndex < maxResults; resultIndex++)
             {
-                result[resultIndex] = (_units[_queryResults[resultIndex]], _queryDistances[resultIndex]);
+                var queryResult = _radiusQueryResults[resultIndex];
+                result[resultIndex] = (queryResult.Element, queryResult.Distance);
             }
 
             return maxResults;
@@ -130,16 +119,13 @@ namespace DCLBattle.Battle
 
         public UnitBase GetClosestEnemy(Vector3 position, out float closestDistance)
         {
-            closestDistance = Mathf.Infinity;
-            UnitBase closestEnemy = null;
-            for (int armyIndex = 0; armyIndex < _enemyArmies.Count; armyIndex++)
+            UnitBase closestEnemy = _enemyArmies[0].GetClosestUnit(position, out closestDistance);
+
+            for (int armyIndex = 1; armyIndex < _enemyArmies.Count; armyIndex++)
             {
                 UnitBase enemyUnit = _enemyArmies[armyIndex].GetClosestUnit(position, out float enemyDistance);
-                // no unit found
-                if (enemyUnit == null)
-                    continue;
 
-                if (closestEnemy == null || enemyDistance < closestDistance)
+                if (enemyDistance < closestDistance)
                 {
                     closestEnemy = enemyUnit;
                     closestDistance = enemyDistance;
@@ -157,9 +143,10 @@ namespace DCLBattle.Battle
         public void AddEnemyArmy(Army enemy)
         {
             _enemyArmies.Add(enemy);
+            enemy.ArmyDefeatedEvent += RemoveEnemyArmy;
         }
 
-        public void RemoveEnemyArmy(Army enemy)
+        private void RemoveEnemyArmy(Army enemy)
         {
             _enemyArmies.Remove(enemy);
         }

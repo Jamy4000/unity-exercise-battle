@@ -85,6 +85,8 @@ namespace DCLBattle.Battle
 
                 Gizmos.color = army.Model.ArmyColor;
                 Gizmos.DrawSphere(army.Center, 2f);
+
+                army.OnDrawGizmos();
             }
 
             Gizmos.color = Color.magenta;
@@ -131,7 +133,7 @@ namespace DCLBattle.Battle
                 // Provides the reference to the strategy Updater that this unit will be using at the start of the battle, based on its army configuration
                 IStrategyUpdater strategyUpdater = _strategyUpdaters[(int)unitModel.UnitType, (int)armyModel.Strategy];
 
-                UnitCreationParameters parameters = new(position, rotation, army, unitModel, strategyUpdater);
+                UnitCreationParameters parameters = new(position, rotation, army, unitModel, strategyUpdater, unitIndex);
 
                 UnitBase newUnit = unitModel.InstantiateUnit(parameters);
 
