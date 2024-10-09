@@ -6,7 +6,7 @@ using Utils.SpatialPartitioning;
 
 namespace DCLBattle.Battle
 {
-    public class Army : IServiceConsumer
+    public class Army : IServiceConsumer, IDisposable
     {
         public readonly IArmyModel Model;
         public int RemainingUnitsCount => _units.Count;
@@ -30,8 +30,8 @@ namespace DCLBattle.Battle
             Model = model;
             serviceLocator.AddConsumer(this);
 
-            //_spatialPartitioner = new Quadtree<UnitBase>(Vector2.zero, Vector2.one * 100f);
-            _spatialPartitioner = new KDTree<UnitBase, Vector2>(2, new TwoDimensionComparer());
+            _spatialPartitioner = new Quadtree<UnitBase>(Vector2.zero, Vector2.one * 1000f);
+            //_spatialPartitioner = new KDTree<UnitBase, Vector2>(2, new TwoDimensionComparer());
             _cachedArmyDefeatedCallback = RemoveEnemyArmy;
 
             // pre-allocate the list
@@ -43,9 +43,20 @@ namespace DCLBattle.Battle
             _units = new(armySize);
         }
 
+        public void OnDrawGizmos()
+        {
+            if (_spatialPartitioner is Quadtree<UnitBase> quadtree)
+                quadtree.OnDrawGizmos();
+        }
+
         public void Start()
         {
             RebuildTree();
+        }
+
+        public void Dispose()
+        {
+            _spatialPartitioner.Dispose();
         }
 
         public void UpdateArmyData()

@@ -1,286 +1,340 @@
+using System;
 using System.Collections.Generic;
+using UnityEditor.Experimental.GraphView;
 using UnityEngine;
+using UnityEngine.Pool;
+using UnityEngine.UIElements;
 
 namespace Utils.SpatialPartitioning
 {
     public interface ISpatialEntity<TData>
     {
         TData Position { get; }
-        float GetSqDistance(TData otherPoint);
+        float GetSqDistance(TData otherVector2);
     }
 
-    public sealed class Quadtree<TElement> : ISpatialPartitioner<TElement, Vector2> 
-        where TElement : ISpatialEntity<Vector2>, System.IComparable<TElement>
+    public class AABB
     {
-        private const int MAX_POINTS = 4;
-        private readonly TElement[] _elements = new TElement[MAX_POINTS];
-        private int _elementCount = 0;
+        public readonly float MinX, MinY, MaxX, MaxY;
 
-        // Child nodes
-        private Quadtree<TElement> _northEast;
-        private Quadtree<TElement> _northWest;
-        private Quadtree<TElement> _southEast;
-        private Quadtree<TElement> _southWest;
-
-        // Center and size of this node
-        private Vector2 _center;
-        private Vector2 _halfSize;
-
-        private bool _isDivided = false;
-
-        public Quadtree()
+        public AABB(float MinX, float MinY, float MaxX, float MaxY)
         {
-            _center = Vector2.zero;
-            _halfSize = Vector2.one;
+            this.MinX = MinX;
+            this.MinY = MinY;
+            this.MaxX = MaxX;
+            this.MaxY = MaxY;
         }
 
-        public Quadtree(Vector2 center, Vector2 halfSize)
+        public bool Contains(Vector2 point)
         {
-            _center = center;
-            if (halfSize == Vector2.zero)
-                throw new System.Exception("Half size of the Quadtree should be above 0!");
-            _halfSize = halfSize;
+            return point.x >= MinX && point.x <= MaxX && point.y >= MinY && point.y <= MaxY;
+        }
+
+        // Checks if the bounding box intersects with another bounding box
+        public bool Intersects(AABB other)
+        {
+            return !(other.MinX > MaxX || other.MaxX < MinX || other.MinY > MaxY || other.MaxY < MinY);
+        }
+    }
+
+    public class QuadtreeNode<TElement>
+        where TElement : class, ISpatialEntity<Vector2>, IComparable<TElement>
+    {
+        public TElement Element;                              // An element in this node (if this is a leaf node)
+
+        public readonly AABB Boundary;                      // The AABB representing the boundary of this node
+        public QuadtreeNode<TElement>[] Children { get; private set; }  // The four child quadrants (NW, NE, SW, SE)
+
+        public QuadtreeNode(AABB boundary, int maxChildrenCount)
+        {
+            this.Boundary = boundary;
+            this.Children = new QuadtreeNode<TElement>[maxChildrenCount];
+        }
+
+        public void ResetChildren()
+        {
+            for (int i = 0; i < Children.Length; i++)
+            {
+                if (Children[i].HasChildren)
+                    Children[i].ResetChildren();
+
+                Children[i].Element = null;
+                Children[i] = null;
+            }
+        }
+
+        public bool HasElement => Element != null;
+        public bool HasChildren => Children[0] != null;
+    }
+
+    public sealed class Quadtree<TElement> : ISpatialPartitioner<TElement, Vector2>
+        where TElement : class, ISpatialEntity<Vector2>, IComparable<TElement>
+    {
+        private QuadtreeNode<TElement> _root;
+        private readonly QueryResultsComparer<TElement> _queryResultsComparer = new();
+
+        private const int MAX_CHILDREN_COUNT = 4;
+
+        public Quadtree(Vector2 center, Vector2 size)
+        {
+            var halfSize = size * 0.5f;
+            var aabb = new AABB(center.x - halfSize.x, center.y - halfSize.y, center.x + halfSize.x, center.y + halfSize.y);
+            _root = new QuadtreeNode<TElement>(aabb, MAX_CHILDREN_COUNT);
+        }
+
+        public void Dispose()
+        {
+            _root.ResetChildren();
         }
 
         public void Insert(TElement element)
         {
-            Vector2 point = element.Position;
-
-            // If the point is outside the bounds, expand the quadtree
-            if (!ContainsPoint(point))
-            {
-                throw new System.ArgumentException("point is outside quadtree bounds");
-            }
-
-            // Subdivide if needed and insert the point into the appropriate child node
-            if (_elementCount == MAX_POINTS)
-            {
-                Subdivide();
-            }
-
-            Quadtree<TElement> container = GetContainerForPoint(point);
-            if (container == null)
-            {
-                // TODO this may provoke OutOfBounds
-                _elements[_elementCount++] = element;
-            }
-            else
-            {
-                container.Insert(element);
-            }
+            Insert_Internal(_root, element);
         }
 
-        public void Remove(TElement element)
+        private void Insert_Internal(QuadtreeNode<TElement> node, TElement element)
         {
-            var container = GetContainerForPoint(element.Position);
-
-            if (container == null)
-            {
-                // Remove the point from the current node
-                for (int i = 0; i < _elementCount; i++)
-                {
-                    // If both elements are the same
-                    if (_elements[i].CompareTo(element) == 0)
-                    {
-                        _elements[i] = _elements[--_elementCount]; // Swap with last and decrease count
-                        return;
-                    }
-                }
-
-                throw new System.Exception("Couldn't remove element from quadtree");
-            }
-            else
-            {
-                container.Remove(element);
-            }
-        }
-
-        public void RemoveAll()
-        {
-            _elementCount = 0;
-
-            if (_isDivided)
-            {
-                _northEast.RemoveAll();
-                _northWest.RemoveAll();
-                _southEast.RemoveAll();
-                _southWest.RemoveAll();
-            }
-        }
-
-        public QueryResult<TElement> QueryClosest(Vector2 source)
-        {
-            if (_isDivided)
-            {
-                List<QueryResult<TElement>> results = new(4);
-
-                if (_northWest.ContainsPoint(source))
-                    results.Add(_northWest.QueryClosest(source));
-
-                if (_northEast.ContainsPoint(source))
-                    results.Add(_northEast.QueryClosest(source));
-
-                if (_southWest.ContainsPoint(source))
-                    results.Add(_southWest.QueryClosest(source));
-
-                if (_southEast.ContainsPoint(source))
-                    results.Add(_southEast.QueryClosest(source));
-
-                QueryResult<TElement> finalResult = results[0];
-                for (int resultIndex = 0; resultIndex < results.Count; resultIndex++)
-                {
-                    if (finalResult.Distance > results[resultIndex].Distance)
-                        finalResult = results[resultIndex];
-                }
-
-                return finalResult;
-            }
-            else
-            {
-                float minDistanceSq = Mathf.Infinity;
-                QueryResult<TElement> result = new();
-
-                for (int elementIndex = 0; elementIndex < _elementCount; elementIndex++)
-                {
-                    var element = _elements[elementIndex];
-                    float sqDistance = element.GetSqDistance(source);
-                    if (sqDistance < minDistanceSq)
-                    {
-                        result = new QueryResult<TElement>(element, Mathf.Sqrt(sqDistance));
-                        minDistanceSq = sqDistance;
-                    }
-                }
-
-                return result;
-            }
-        }
-
-        private Quadtree<TElement> GetContainerForPoint(Vector2 point)
-        {
-            if (!_isDivided)
-                return null;
-
-            if (_northWest.ContainsPoint(point))
-                return _northWest;
-
-            if (_northEast.ContainsPoint(point))
-                return _northEast;
-
-            if (_southWest.ContainsPoint(point))
-                return _southWest;
-
-            if (_southEast.ContainsPoint(point))
-                return _southEast;
-
-            return null;
-        }
-
-        public int QueryWithinRange_NoAlloc(Vector2 source, float range, QueryResult<TElement>[] results, int offset = 0)
-        {
-            // Check if the results array is empty.
-            // Important for the slicing (results[count..]) done below when checking the children quadrants
-            if (results.Length == 0)
-                return 0;
-
-            // Check if the current node intersects with the query range
-            if (!IsWithinRange(source, range))
-                return 0;
-
-            float sqRange = range * range;
-            int count = 0;
-
-            // Check points in the current node
-            for (int i = 0; i < _elementCount; i++)
-            {
-                float sqDist = _elements[i].GetSqDistance(source);
-                if (sqDist <= sqRange)
-                {
-                    results[offset + count++] = new QueryResult<TElement>(_elements[i], Mathf.Sqrt(sqDist));
-
-                    if (offset + count == results.Length)
-                        return count; // Stop if results are full
-                }
-            }
-
-            // Check children quadrants
-            if (_isDivided)
-            {
-                count += _northEast.QueryWithinRange_NoAlloc(source, range, results, offset + count);
-                count += _northWest.QueryWithinRange_NoAlloc(source, range, results, offset + count);
-                count += _southEast.QueryWithinRange_NoAlloc(source, range, results, offset + count);
-                count += _southWest.QueryWithinRange_NoAlloc(source, range, results, offset + count);
-            }
-
-            return count; // Return the total number of results found
-        }
-
-        private bool IsWithinRange(Vector2 point, float range)
-        {
-            return point.x >= (_center.x - _halfSize.x - range) &&
-                   point.x <= (_center.x + _halfSize.x + range) &&
-                   point.y >= (_center.y - _halfSize.y - range) &&
-                   point.y <= (_center.y + _halfSize.y + range);
-        }
-
-        // Subdivide the current node into 4 quadrants
-        private void Subdivide()
-        {
-            // no need to subdivide if we already did it
-            if (_isDivided)
+            if (!node.Boundary.Contains(element.Position))
                 return;
 
-            Vector2 childHalfSize = _halfSize * 0.5f;
-
-            _northWest = new Quadtree<TElement>(new Vector2(_center.x - childHalfSize.x, _center.y - childHalfSize.y), childHalfSize);
-            _northEast = new Quadtree<TElement>(new Vector2(_center.x + childHalfSize.x, _center.y - childHalfSize.y), childHalfSize);
-            _southWest = new Quadtree<TElement>(new Vector2(_center.x - childHalfSize.x, _center.y + childHalfSize.y), childHalfSize);
-            _southEast = new Quadtree<TElement>(new Vector2(_center.x + childHalfSize.x, _center.y + childHalfSize.y), childHalfSize);
-
-            foreach (var element in _elements)
+            // If node has children, insert the point into the appropriate quadrant
+            if (node.HasChildren)
             {
-                Quadtree<TElement> containingChild = GetContainerForPoint(element.Position);
-                // An element is only moved if it completely fits into a child quadrant.
-                if (containingChild != null)
+                InsertIntoChildren(node, element);
+                return;
+            }
+
+            // If node is not a leaf yet
+            if (!node.HasElement)
+            {
+                node.Element = element;
+                return;
+            }
+
+            // If node is a leaf but already has a point, subdivide and redistribute
+            Subdivide(node);
+
+            InsertIntoChildren(node, node.Element);  // Move the existing point to the children
+            node.Element = null;                    // This node no longer holds the point itself
+
+            InsertIntoChildren(node, element);       // Insert the new point into the children
+        }
+
+        private void InsertIntoChildren(QuadtreeNode<TElement> node, TElement element)
+        {
+            foreach (var child in node.Children)
+            {
+                Insert_Internal(child, element);
+            }
+        }
+
+        // Subdivide the node into 4 child quadrants
+        private void Subdivide(QuadtreeNode<TElement> node)
+        {
+            float midX = (node.Boundary.MinX + node.Boundary.MaxX) / 2;
+            float midY = (node.Boundary.MinY + node.Boundary.MaxY) / 2;
+
+            node.Children[0] = new QuadtreeNode<TElement>(new AABB(node.Boundary.MinX, midY, midX, node.Boundary.MaxY), MAX_CHILDREN_COUNT); // NW
+            node.Children[1] = new QuadtreeNode<TElement>(new AABB(midX, midY, node.Boundary.MaxX, node.Boundary.MaxY), MAX_CHILDREN_COUNT); // NE
+            node.Children[2] = new QuadtreeNode<TElement>(new AABB(node.Boundary.MinX, node.Boundary.MinY, midX, midY), MAX_CHILDREN_COUNT); // SW
+            node.Children[3] = new QuadtreeNode<TElement>(new AABB(midX, node.Boundary.MinY, node.Boundary.MaxX, midY), MAX_CHILDREN_COUNT); // SE
+        }
+
+        // Nearest neighbor search
+        public QueryResult<TElement> QueryClosest(Vector2 position)
+        {
+            TElement bestElement = null;
+            float bestDistSq = float.PositiveInfinity;
+
+            QueryClosest_Internal(_root, position, ref bestElement, ref bestDistSq);
+            return new QueryResult<TElement>(bestElement, Mathf.Sqrt(bestDistSq));
+        }
+
+        private void QueryClosest_Internal(QuadtreeNode<TElement> node, Vector2 source, ref TElement bestElement, ref float bestDistSq)
+        {
+            if (!node.Boundary.Contains(source) && 
+                DistanceSquaredToAABB(source, node.Boundary) > bestDistSq)
+                return;
+
+            if (node.HasChildren)
+            {
+                // Check child nodes in order of proximity
+                foreach (var child in node.Children)
                 {
-                    Remove(element);
-                    containingChild.Insert(element);
+                    QueryClosest_Internal(child, source, ref bestElement, ref bestDistSq);
+                }
+            }
+            // No element when children are present (it's a leaf), check if it's closer
+            else if (node.HasElement)
+            {
+                float distSq = node.Element.GetSqDistance(source);
+                if (distSq < bestDistSq)
+                {
+                    bestDistSq = distSq;
+                    bestElement = node.Element;
+                }
+            }
+        }
+
+        public int QueryWithinRange_NoAlloc(Vector2 source, float range, QueryResult<TElement>[] results)
+        {
+            // create a list to add the elements in range
+            List<QueryResult<TElement>> elementsInRange = GenericPool<List<QueryResult<TElement>>>.Get();
+
+            // feed the list
+            int elementsCount = QueryRange_Internal(_root, source, range * range, elementsInRange);
+            // sort the list by elements distance
+            elementsInRange.Sort(_queryResultsComparer);
+
+            // assign elements to results
+            int minElementCount = Mathf.Min(elementsCount, results.Length);
+            for (int i = 0; i < minElementCount; i++)
+            {
+                results[i] = elementsInRange[i];
+            }
+
+            elementsInRange.Clear();
+            GenericPool<List<QueryResult<TElement>>>.Release(elementsInRange);
+            return minElementCount;
+        }
+
+        private int QueryRange_Internal(QuadtreeNode<TElement> node, Vector2 source, float sqRange, List<QueryResult<TElement>> results)
+        {
+            if (!node.Boundary.Contains(source))
+                return 0;
+
+            int count = 0;
+
+            if (node.HasChildren)
+            {
+                foreach (var child in node.Children)
+                {
+                    count += QueryRange_Internal(child, source, sqRange, results);
+                }
+            }
+            // No element when children are present, so we check that in an else
+            else if (node.HasElement)
+            {
+                float sqDistance = node.Element.GetSqDistance(source);
+                if (sqDistance <= sqRange)
+                {
+                    results.Add(new(node.Element, Mathf.Sqrt(sqDistance)));
+                    count++;
                 }
             }
 
-            _isDivided = true;
+
+            return count;
         }
 
-        // Checks if a point is within the bounds of this quadtree node
-        private bool ContainsPoint(Vector2 point)
+        // Remove an element from the Quadtree
+        public void Remove(TElement element)
         {
-            return point.x >= _center.x - _halfSize.x && point.x < _center.x + _halfSize.x &&
-                   point.y >= _center.y - _halfSize.y && point.y < _center.y + _halfSize.y;
+            Remove_Internal(_root, element);
         }
 
+        private bool Remove_Internal(QuadtreeNode<TElement> node, TElement element)
+        {
+            if (!node.Boundary.Contains(element.Position))
+                return false;
+
+            if (node.HasChildren)
+            {
+                for (int i = 0; i < MAX_CHILDREN_COUNT; i++)
+                {
+                    if (Remove_Internal(node.Children[i], element))
+                    {
+                        // After removal, check if all children are empty and merge them back
+                        if (ShouldMerge(node))
+                        {
+                            node.ResetChildren();
+                        }
+                        return true;
+                    }
+                }
+            }
+            // No element when children are present, so we check that in an else
+            else if (node.HasElement)
+            {
+                // If this is the same element
+                if (node.Element.CompareTo(element) == 0)
+                {
+                    node.Element = null;
+                    return true;
+                }
+                return false;
+            }
+
+            return false;
+        }
+
+        private bool ShouldMerge(QuadtreeNode<TElement> node)
+        {
+            if (!node.HasChildren)
+                return true;
+
+            // Check if all children are empty or null, if so, merge them back into a single node
+            foreach (var child in node.Children)
+            {
+                if (child.HasElement)
+                    return false;
+            }
+            return true;
+        }
+
+        // Remove all points from the Quadtree
+        public void RemoveAll()
+        {
+            RemoveAll_Internal(_root);
+        }
+
+        private void RemoveAll_Internal(QuadtreeNode<TElement> node)
+        {
+            if (node.HasChildren)
+            {
+                node.ResetChildren();
+            }
+
+            node.Element = null;
+        }
+
+        // Helper function to calculate squared distance between a point and an AABB (for pruning)
+        private static float DistanceSquaredToAABB(Vector2 point, AABB boundary)
+        {
+            // If the point is inside the boundary, distance is zero
+            float dx = Mathf.Max(boundary.MinX - point.x, 0, point.x - boundary.MaxX);
+            float dy = Mathf.Max(boundary.MinY - point.y, 0, point.y - boundary.MaxY);
+
+            return dx * dx + dy * dy;
+        }
+
+#if UNITY_EDITOR
         public void OnDrawGizmos()
         {
-            // Set the Gizmos color to differentiate between root and subdivided nodes
-            Gizmos.color = _isDivided ? Color.yellow : Color.green;
+            OnDrawGizmos(_root);
+        }
 
-            // Draw the boundaries of this Quadtree node
-            Gizmos.DrawWireCube(new(_center.x, 0f, _center.y), new(_halfSize.x * 2, 0.5f, _halfSize.y * 2f));
+        private void OnDrawGizmos(QuadtreeNode<TElement> node)
+        {
+            if (node == null)
+                return;
 
-            // If the node is subdivided, recursively draw the child quadrants
-            if (_isDivided)
+            // Draw the boundary of the node
+            Gizmos.color = Color.green; // Set the color for the boundary
+            Gizmos.DrawLine(new Vector3(node.Boundary.MinX, 0, node.Boundary.MinY), new Vector3(node.Boundary.MaxX, 0, node.Boundary.MinY));
+            Gizmos.DrawLine(new Vector3(node.Boundary.MaxX, 0, node.Boundary.MinY), new Vector3(node.Boundary.MaxX, 0, node.Boundary.MaxY));
+            Gizmos.DrawLine(new Vector3(node.Boundary.MaxX, 0, node.Boundary.MaxY), new Vector3(node.Boundary.MinX, 0, node.Boundary.MaxY));
+            Gizmos.DrawLine(new Vector3(node.Boundary.MinX, 0, node.Boundary.MaxY), new Vector3(node.Boundary.MinX, 0, node.Boundary.MinY));
+
+            // Recursively draw the children
+            if (node.HasChildren)
             {
-                _northEast.OnDrawGizmos();
-                _northWest.OnDrawGizmos();
-                _southEast.OnDrawGizmos();
-                _southWest.OnDrawGizmos();
-            }
-
-            // Optionally, draw the points inside this node for visual debugging
-            Gizmos.color = Color.red;
-            for (int i = 0; i < _elementCount; i++)
-            {
-                Vector3 pos = new(_elements[i].Position.x, 0f, _elements[i].Position.y);
-                Gizmos.DrawSphere(pos, 0.1f); // Adjust the size of the spheres as needed
+                foreach (var child in node.Children)
+                {
+                    OnDrawGizmos(child);
+                }
             }
         }
+#endif
     }
 }

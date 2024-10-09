@@ -64,6 +64,11 @@ namespace DCLBattle.Battle
 
         public void Dispose()
         {
+            foreach (var army in _armies)
+            {
+                army.Dispose();
+            }
+
             GameUpdater.Unregister(this);
 
             MessagingSystem<BattleStartEvent>.Unsubscribe(this);

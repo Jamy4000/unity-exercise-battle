@@ -91,6 +91,7 @@ namespace DCLBattle.Battle
 
                 Gizmos.color = army.Model.ArmyColor;
                 Gizmos.DrawSphere(army.Center, 2f);
+                army.OnDrawGizmos();
             }
 
             Gizmos.color = Color.magenta;

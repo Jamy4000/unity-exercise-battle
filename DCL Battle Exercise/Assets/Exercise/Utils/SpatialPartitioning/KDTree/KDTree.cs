@@ -19,6 +19,21 @@ namespace Utils.SpatialPartitioning
                 Left = null;
                 Right = null;
             }
+
+            public void ResetNode()
+            {
+                Element = default;
+                if (Left != null)
+                {
+                    Left.ResetNode();
+                    Left = null;
+                }
+                if (Right != null)
+                {
+                    Right.ResetNode();
+                    Right = null;
+                }
+            }
         }
 
         private KDNode _root;
@@ -30,6 +45,11 @@ namespace Utils.SpatialPartitioning
             _root = null;
             _dimensions = dimensions;
             _dimensionComparer = dimensionComparer;
+        }
+
+        public void Dispose()
+        {
+            _root.ResetNode();
         }
 
         public void Insert(TElement element)
@@ -136,12 +156,12 @@ namespace Utils.SpatialPartitioning
             return best;
         }
 
-        public int QueryWithinRange_NoAlloc(TDimension source, float range, QueryResult<TElement>[] results, int offset = 0)
+        public int QueryWithinRange_NoAlloc(TDimension source, float range, QueryResult<TElement>[] results)
         {
-            return QueryWithinRange_NoAlloc_Internal(_root, source, range * range, results, 0, offset);
+            return QueryWithinRange_NoAlloc_Internal(_root, source, range * range, results, 0);
         }
 
-        private int QueryWithinRange_NoAlloc_Internal(KDNode node, TDimension source, float rangeSq, QueryResult<TElement>[] results, int depth, int offset)
+        private int QueryWithinRange_NoAlloc_Internal(KDNode node, TDimension source, float rangeSq, QueryResult<TElement>[] results, int depth, int offset = 0)
         {
             if (node == null)
                 return offset;
