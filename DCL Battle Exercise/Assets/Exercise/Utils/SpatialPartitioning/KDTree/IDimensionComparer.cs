@@ -6,6 +6,7 @@ namespace Utils.SpatialPartitioning
     {
         public int Compare(TDimension x, TDimension y, int axis);
         public float GetComponentOnAxis(TDimension value, int axis);
+        public float CalculateDistanceSq(TDimension x, TDimension y);
     }
 
     public sealed class OneDimensionComparer : IDimensionComparer<float>
@@ -19,6 +20,11 @@ namespace Utils.SpatialPartitioning
         {
             return value;
         }
+
+        public float CalculateDistanceSq(float x, float y)
+        {
+            return Mathf.Abs(y - x);
+        }
     }
 
     public sealed class TwoDimensionComparer : IDimensionComparer<Vector2>
@@ -31,6 +37,11 @@ namespace Utils.SpatialPartitioning
         public float GetComponentOnAxis(Vector2 value, int axis)
         {
             return axis == 0 ? value.x : value.y;
+        }
+
+        public float CalculateDistanceSq(Vector2 x, Vector2 y)
+        {
+            return Vector2.SqrMagnitude(y - x);
         }
     }
 
@@ -49,6 +60,11 @@ namespace Utils.SpatialPartitioning
         public float GetComponentOnAxis(Vector3 value, int axis)
         {
             return axis == 0 ? value.x : axis == 1 ? value.y : value.z;
+        }
+
+        public float CalculateDistanceSq(Vector3 x, Vector3 y)
+        {
+            return Vector3.SqrMagnitude(y - x);
         }
     }
 
@@ -69,6 +85,11 @@ namespace Utils.SpatialPartitioning
         public float GetComponentOnAxis(Vector4 value, int axis)
         {
             return axis == 0 ? value.x : axis == 1 ? value.y : axis == 3 ? value.z : value.w;
+        }
+
+        public float CalculateDistanceSq(Vector4 x, Vector4 y)
+        {
+            return Vector4.SqrMagnitude(y - x);
         }
     }
 }

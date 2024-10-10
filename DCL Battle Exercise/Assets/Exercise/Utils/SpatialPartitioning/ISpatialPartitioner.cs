@@ -3,14 +3,14 @@ using UnityEngine;
 
 namespace Utils.SpatialPartitioning
 {
-    public class QueryResult<TElement>
+    public class QueryResult
     {
-        public readonly TElement Element;
+        public readonly int ElementID;
         public readonly float Distance;
 
-        public QueryResult(TElement element = default, float distance = Mathf.Infinity)
+        public QueryResult(int elementID = int.MinValue, float distance = Mathf.Infinity)
         {
-            Element = element;
+            ElementID = elementID;
             Distance = distance;
         }
     }
@@ -19,20 +19,20 @@ namespace Utils.SpatialPartitioning
     /// An interface to let us switch between 2D and 3D spatial partitioner (KD Tree, QuadTree, Octree, ...)
     /// I'm using Vector3 as a base data struct since using generics would be quite messy here.
     /// </summary>
-    public interface ISpatialPartitioner<TElement, TData> : System.IDisposable
+    public interface ISpatialPartitioner<TData> : System.IDisposable
     {
-        void Insert(TElement element);
+        void Insert(TData position, int elementID);
 
-        void Remove(TElement element);
+        void Remove(TData position, int elementID);
         void RemoveAll();
 
-        QueryResult<TElement> QueryClosest(TData source);
-        int QueryWithinRange_NoAlloc(TData source, float range, QueryResult<TElement>[] results);
+        QueryResult QueryClosest(TData source);
+        int QueryWithinRange_NoAlloc(TData source, float range, QueryResult[] results);
     }
 
-    public sealed class QueryResultsComparer<TElement> : IComparer<QueryResult<TElement>>
+    public sealed class QueryResultsComparer : IComparer<QueryResult>
     {
-        public int Compare(QueryResult<TElement> x, QueryResult<TElement> y)
+        public int Compare(QueryResult x, QueryResult y)
         {
             return x.Distance.CompareTo(y.Distance);
         }

@@ -1,12 +1,11 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using UnityEngine;
 using Utils;
 using Utils.SpatialPartitioning;
 
 namespace DCLBattle.Battle
 {
-    public class Army : IServiceConsumer, IDisposable
+    public class Army : IServiceConsumer, System.IDisposable
     {
         public readonly IArmyModel Model;
         public int RemainingUnitsCount => _units.Count;
@@ -18,20 +17,21 @@ namespace DCLBattle.Battle
 
         private readonly List<UnitBase> _units;
 
-        private readonly ISpatialPartitioner<UnitBase, Vector2> _spatialPartitioner;
-        private readonly QueryResult<UnitBase>[] _radiusQueryResults = new QueryResult<UnitBase>[32];
+        private readonly ISpatialPartitioner<Vector2> _spatialPartitioner;
+        private readonly QueryResult[] _radiusQueryResults = new QueryResult[32];
 
         private readonly List<Army> _enemyArmies = new();
 
-        private readonly Action<Army> _cachedArmyDefeatedCallback;
+        private readonly System.Action<Army> _cachedArmyDefeatedCallback;
 
         public Army(IArmyModel model, IServiceLocator serviceLocator)
         {
             Model = model;
             serviceLocator.AddConsumer(this);
 
-            _spatialPartitioner = new Quadtree<UnitBase>(Vector2.zero, Vector2.one * 1000f);
-            //_spatialPartitioner = new KDTree<UnitBase, Vector2>(2, new TwoDimensionComparer());
+            _spatialPartitioner = new Quadtree(Vector2.zero, Vector2.one * 1000f);
+            // Uncomment to try out the KDTree, though it is quite slower
+            //_spatialPartitioner = new KDTree<Vector2>(2, new TwoDimensionComparer());
             _cachedArmyDefeatedCallback = RemoveEnemyArmy;
 
             // pre-allocate the list
@@ -45,7 +45,7 @@ namespace DCLBattle.Battle
 
         public void OnDrawGizmos()
         {
-            if (_spatialPartitioner is Quadtree<UnitBase> quadtree)
+            if (_spatialPartitioner is Quadtree quadtree)
                 quadtree.OnDrawGizmos();
         }
 
@@ -89,8 +89,9 @@ namespace DCLBattle.Battle
 
             for (int i = 0; i < RemainingUnitsCount; i++)
             {
-                _spatialPartitioner.Insert(_units[i]);
-                Center += _units[i].Position;
+                var position = _units[i].Position;
+                _spatialPartitioner.Insert(new(position.x, position.z), i);
+                Center += position;
             }
 
             Center /= RemainingUnitsCount;
@@ -106,7 +107,7 @@ namespace DCLBattle.Battle
             var queryResult = _spatialPartitioner.QueryClosest(new(source.x, source.z));
 
             distance = queryResult.Distance;
-            return queryResult.Element;
+            return _units[queryResult.ElementID];
         }
 
         public int GetUnitsInRadius_NoAlloc(Vector3 source, float radius, (UnitBase unit, float distance)[] result)
@@ -123,7 +124,7 @@ namespace DCLBattle.Battle
             for (int resultIndex = 0; resultIndex < maxResults; resultIndex++)
             {
                 var queryResult = _radiusQueryResults[resultIndex];
-                result[resultIndex] = (queryResult.Element, queryResult.Distance);
+                result[resultIndex] = (_units[queryResult.ElementID], queryResult.Distance);
             }
 
             return maxResults;
