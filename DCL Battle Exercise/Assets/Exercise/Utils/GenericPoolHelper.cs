@@ -37,12 +37,17 @@ namespace Utils
             poolable.OnShouldReturnToPool += _cachedReleasePoolableCallback;
         }
 
+        public void ReleasePoolable(TPoolable poolable)
+        {
+            poolable.OnShouldReturnToPool -= _cachedReleasePoolableCallback;
+            OnObjectWasReturnedEvent?.Invoke(poolable);
+            _objectPool.Release(poolable);
+        }
+
+        // event callback
         protected void ReleasePoolable(IGenericPoolable poolableToRelease)
         {
-            TPoolable releasedPoolable = poolableToRelease as TPoolable;
-            releasedPoolable.OnShouldReturnToPool -= _cachedReleasePoolableCallback;
-            OnObjectWasReturnedEvent?.Invoke(releasedPoolable);
-            _objectPool.Release(releasedPoolable);
+            ReleasePoolable(poolableToRelease as TPoolable);
         }
 
         /// <summary>

@@ -1,7 +1,6 @@
+using System;
 using System.Collections.Generic;
-using UnityEditor.Experimental.GraphView;
 using UnityEngine;
-using UnityEngine.Pool;
 
 namespace Utils.SpatialPartitioning
 {
@@ -49,26 +48,45 @@ namespace Utils.SpatialPartitioning
         public readonly bool HasElement => ExternalID != int.MinValue;
     }
 
-    public sealed class Quadtree : ISpatialPartitioner<Vector2>
+    public sealed class QuadtreePool : GenericPoolHelper<Quadtree>
     {
-        private readonly AABB _boundary;                      // The AABB representing the boundary of this tree
+        public QuadtreePool(int minPoolSize = 16, int maxPoolSize = 128, bool collectionChecks = false) :
+            base(minPoolSize, maxPoolSize, collectionChecks)
+        {
+        }
+
+        protected override Quadtree CreatePooledItem()
+        {
+            return new Quadtree(Vector2.zero, Vector2.one, this);
+        }
+    }
+
+    public sealed class Quadtree : ISpatialPartitioner<Vector2>, IGenericPoolable
+    {
+        private AABB _boundary;                      // The AABB representing the boundary of this tree
 
         // using a list in case we reach max depth but still want to keep on adding elements
         private readonly List<QuadtreeElement> _elements;
         private readonly Quadtree[] _children;
         private bool HasChildren => _children[0] != null;
 
+        public Action<IGenericPoolable> OnShouldReturnToPool { get; set; }
+
         private readonly QueryResultsComparer _queryResultsComparer = new();
+        private QuadtreePool _pool;
 
         private const int MAX_CHILDREN_COUNT = 4;
-        private readonly int _maxElementsCountPerNode;
-        private readonly int _currentDepth;
-        private readonly int _maxDepth;
+        private int _maxElementsCountPerNode;
+        private int _currentDepth;
+        private int _maxDepth;
 
-        public Quadtree(Vector2 center, Vector2 size, int maxDepth = 50, int maxElementPerNode = 8, int currentDepth = 0)
+        public Quadtree(Vector2 center, Vector2 size, QuadtreePool pool = null, int maxDepth = 50, int maxElementPerNode = 8, int currentDepth = 0)
         {
             _maxElementsCountPerNode = maxElementPerNode;
             _maxDepth = maxDepth;
+            // the root quadtree created by the client will create this quadtreePool,
+            // and it will then be injected in every other quadtree when they get crated through the pool
+            _pool = pool ?? new QuadtreePool();
 
             var halfSize = size * 0.5f;
             _boundary = new AABB(center.x - halfSize.x, center.y - halfSize.y, center.x + halfSize.x, center.y + halfSize.y);
@@ -77,7 +95,7 @@ namespace Utils.SpatialPartitioning
             _currentDepth = currentDepth;
         }
 
-        private Quadtree(AABB boundary, int maxDepth, int maxElementPerNode, int currentDepth)
+        private Quadtree(AABB boundary, QuadtreePool pool, int maxDepth, int maxElementPerNode, int currentDepth)
         {
             _maxElementsCountPerNode = maxElementPerNode;
             _maxDepth = maxDepth;
@@ -90,7 +108,6 @@ namespace Utils.SpatialPartitioning
 
         public void Dispose()
         {
-
         }
 
         public void Insert(Vector2 position, int elementID)
@@ -148,10 +165,23 @@ namespace Utils.SpatialPartitioning
             float midX = (node._boundary.MinX + node._boundary.MaxX) * 0.5f;
             float midY = (node._boundary.MinY + node._boundary.MaxY) * 0.5f;
 
-            node._children[0] = new Quadtree(new AABB(node._boundary.MinX, midY, midX, node._boundary.MaxY), node._maxDepth, node._maxElementsCountPerNode, node._currentDepth + 1); // NW
-            node._children[1] = new Quadtree(new AABB(midX, midY, node._boundary.MaxX, node._boundary.MaxY), node._maxDepth, node._maxElementsCountPerNode, node._currentDepth + 1); // NE
-            node._children[2] = new Quadtree(new AABB(node._boundary.MinX, node._boundary.MinY, midX, midY), node._maxDepth, node._maxElementsCountPerNode, node._currentDepth + 1); // SW
-            node._children[3] = new Quadtree(new AABB(midX, node._boundary.MinY, node._boundary.MaxX, midY), node._maxDepth, node._maxElementsCountPerNode, node._currentDepth + 1); // SE
+            for (int i = 0; i < MAX_CHILDREN_COUNT; i++)
+            {
+                node._children[i] = node._pool.RequestPoolableObject();
+            }
+
+            node._children[0].Initialize(new AABB(node._boundary.MinX, midY, midX, node._boundary.MaxY), node._maxDepth, node._maxElementsCountPerNode, node._currentDepth + 1); // NW
+            node._children[1].Initialize(new AABB(midX, midY, node._boundary.MaxX, node._boundary.MaxY), node._maxDepth, node._maxElementsCountPerNode, node._currentDepth + 1); // NE
+            node._children[2].Initialize(new AABB(node._boundary.MinX, node._boundary.MinY, midX, midY), node._maxDepth, node._maxElementsCountPerNode, node._currentDepth + 1); // SW
+            node._children[3].Initialize(new AABB(midX, node._boundary.MinY, node._boundary.MaxX, midY), node._maxDepth, node._maxElementsCountPerNode, node._currentDepth + 1); // SE
+        }
+
+        private void Initialize(AABB aABB, int maxDepth, int maxElementsCountPerNode, int currentDepth)
+        {
+            _maxElementsCountPerNode = maxElementsCountPerNode;
+            _maxDepth = maxDepth;
+            _boundary = aABB;
+            _currentDepth = currentDepth;
         }
 
         // Nearest neighbor search
@@ -200,7 +230,7 @@ namespace Utils.SpatialPartitioning
         public int QueryWithinRange_NoAlloc(Vector2 source, float range, QueryResult[] results)
         {
             // create a list to add the elements in range
-            List<QueryResult> elementsInRange = GenericPool<List<QueryResult>>.Get();
+            List<QueryResult> elementsInRange = UnityEngine.Pool.ListPool<QueryResult>.Get();
 
             // feed the list
             int elementsCount = QueryRange_Internal(this, source, range * range, elementsInRange);
@@ -215,7 +245,7 @@ namespace Utils.SpatialPartitioning
             }
 
             elementsInRange.Clear();
-            GenericPool<List<QueryResult>>.Release(elementsInRange);
+            UnityEngine.Pool.ListPool<QueryResult>.Release(elementsInRange);
             return minElementCount;
         }
 
@@ -345,6 +375,18 @@ namespace Utils.SpatialPartitioning
             float dy = Mathf.Max(boundary.MinY - point.y, 0, point.y - boundary.MaxY);
 
             return dx * dx + dy * dy;
+        }
+
+        public void Enable()
+        {
+        }
+
+        public void Disable()
+        {
+        }
+
+        public void Destroy()
+        {
         }
 
 #if UNITY_EDITOR

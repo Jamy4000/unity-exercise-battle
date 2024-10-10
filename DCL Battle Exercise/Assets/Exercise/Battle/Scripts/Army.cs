@@ -30,8 +30,10 @@ namespace DCLBattle.Battle
             serviceLocator.AddConsumer(this);
 
             _spatialPartitioner = new Quadtree(Vector2.zero, Vector2.one * 1000f);
+
             // Uncomment to try out the KDTree, though it is quite slower
             //_spatialPartitioner = new KDTree<Vector2>(2, new TwoDimensionComparer());
+
             _cachedArmyDefeatedCallback = RemoveEnemyArmy;
 
             // pre-allocate the list
@@ -43,11 +45,12 @@ namespace DCLBattle.Battle
             _units = new(armySize);
         }
 
+#if UNITY_EDITOR
         public void OnDrawGizmos()
         {
-            if (_spatialPartitioner is Quadtree quadtree)
-                quadtree.OnDrawGizmos();
+            _spatialPartitioner.OnDrawGizmos();
         }
+#endif
 
         public void Start()
         {

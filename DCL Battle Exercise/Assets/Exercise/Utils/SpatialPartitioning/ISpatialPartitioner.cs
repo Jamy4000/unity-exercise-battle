@@ -3,7 +3,7 @@ using UnityEngine;
 
 namespace Utils.SpatialPartitioning
 {
-    public class QueryResult
+    public readonly struct QueryResult
     {
         public readonly int ElementID;
         public readonly float Distance;
@@ -28,6 +28,10 @@ namespace Utils.SpatialPartitioning
 
         QueryResult QueryClosest(TData source);
         int QueryWithinRange_NoAlloc(TData source, float range, QueryResult[] results);
+
+#if UNITY_EDITOR
+        void OnDrawGizmos();
+#endif
     }
 
     public sealed class QueryResultsComparer : IComparer<QueryResult>
