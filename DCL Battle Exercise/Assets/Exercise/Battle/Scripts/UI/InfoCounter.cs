@@ -16,6 +16,9 @@ namespace DCLBattle
         [SerializeField, Interface(typeof(IServiceLocator))]
         private Object _serviceLocatorObject;
 
+        [SerializeField, Interface(typeof(IBattleModel))]
+        private Object _battleModel;
+
         private IArmiesHolder _armiesHolder;
 
         private int _averageframeCount;
@@ -30,6 +33,7 @@ namespace DCLBattle
             serviceLocator.AddConsumer(this);
             MessagingSystem<BattleStartEvent>.Subscribe(this);
             MessagingSystem<AllianceWonEvent>.Subscribe(this);
+            this.enabled = false;
         }
 
         private void Update()
@@ -76,9 +80,13 @@ namespace DCLBattle
             {
                 unitCount += _armiesHolder.GetArmy(armyIndex).RemainingUnitsCount;
             }
+            Debug.Log("---------------------------------------------------------------");
             Debug.Log($"Battle Started with {unitCount} units.");
+            Debug.Log($"The Battle Algorithm is {(_battleModel as IBattleModel).Algorithm}.");
+
             _realtimeStart = Time.realtimeSinceStartup;
             MessagingSystem<BattleStartEvent>.Unsubscribe(this);
+            this.enabled = true;
         }
 
         public void OnEvent(AllianceWonEvent evt)
@@ -94,6 +102,7 @@ namespace DCLBattle
             finalAverageFPS /= _averageFPSs.Count;
             Debug.Log($"Battle has an average FPS of {finalAverageFPS:F2}.");
             MessagingSystem<AllianceWonEvent>.Unsubscribe(this);
+            this.enabled = false;
         }
     }
 

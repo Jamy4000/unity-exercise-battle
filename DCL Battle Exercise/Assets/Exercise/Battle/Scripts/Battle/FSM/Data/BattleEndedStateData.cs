@@ -3,7 +3,7 @@ using Utils;
 
 namespace DCLBattle.Battle
 {
-    [CreateAssetMenu(menuName = "DCLBattle/Battles/FSM/Battle Ended State Data", fileName = "BattleEndedStateData", order = 0)]
+    [CreateAssetMenu(menuName = "DCLBattle/Battle/FSM/Battle Ended State Data", fileName = "BattleEndedStateData", order = 0)]
     public class BattleEndedStateData : BattleStateData
     {
         public override BattleStateID StateID => BattleStateID.Ended;

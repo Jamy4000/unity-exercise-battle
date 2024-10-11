@@ -25,21 +25,25 @@ namespace DCLBattle.Battle
             public readonly Bounds GetSpawnBounds() => _armySpawnBounds.bounds;
         }
 
-        // TODO We may want to get that from a scriptable object instead, in case we want to let player add/remove armies in the launch menu
-        [SerializeField]
-        private ArmySpawnParameters[] _armiesToSpawn;
+        [SerializeField, Interface(typeof(IServiceLocator))]
+        private Object _serviceLocatorObject;
+        private IServiceLocator _serviceLocator;
 
-        [Header("FSM Data"), SerializeField]
+        [Header("Battle Data"), SerializeField, Interface(typeof(IBattleModel))]
+        private Object _battleModel;
+
+        [SerializeField]
         private BattleStateData[] _battleStatesData;
 
         [SerializeField]
         private BattleStateID _defaultState = BattleStateID.OnGoing;
 
-        private static readonly IStrategyUpdater[,] _strategyUpdaters = new IStrategyUpdater[IArmyModel.UnitLength, IStrategyUpdater.StrategyCount];
 
-        [SerializeField, Interface(typeof(IServiceLocator))]
-        private Object _serviceLocatorObject;
-        private IServiceLocator _serviceLocator;
+        // TODO We may want to get that from a scriptable object instead, in case we want to let player add/remove armies in the launch menu
+        [Header("Armies Data"), SerializeField]
+        private ArmySpawnParameters[] _armiesToSpawn;
+
+        private static readonly IStrategyUpdater[,] _strategyUpdaters = new IStrategyUpdater[IArmyModel.UnitLength, IStrategyUpdater.StrategyCount];
 
         private IArmiesHolder _armiesHolder;
 
@@ -106,7 +110,7 @@ namespace DCLBattle.Battle
         private Army CreateArmy(IArmyModel armyModel, Bounds spawnBounds)
         {
             // TODO remove hard implementation
-            Army army = new(armyModel, _serviceLocator);
+            Army army = new(_battleModel as IBattleModel, armyModel, _serviceLocator);
 
             // For each type of unit in the game
             for (int unitTypeIndex = 0; unitTypeIndex < IArmyModel.UnitLength; unitTypeIndex++)

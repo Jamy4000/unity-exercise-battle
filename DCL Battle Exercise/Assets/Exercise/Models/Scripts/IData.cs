@@ -9,4 +9,9 @@
     {
         void ApplyToModel(IUnitModel model);
     }
+
+    public interface IBattleData
+    {
+        void ApplyToModel(IBattleModel model);
+    }
 }

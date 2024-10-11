@@ -983,6 +983,7 @@ MonoBehaviour:
   _averageFpsCounter: {fileID: 857033195}
   _unitCounter: {fileID: 1918550402}
   _serviceLocatorObject: {fileID: 591741074}
+  _battleModel: {fileID: 11400000, guid: 4b7678c80b7099f4bbee4d96dc8a39b9, type: 2}
 --- !u!1 &764418156
 GameObject:
   m_ObjectHideFlags: 0
@@ -1120,7 +1121,7 @@ MonoBehaviour:
   m_faceColor:
     serializedVersion: 2
     rgba: 4294967295
-  m_fontSize: 14.2
+  m_fontSize: 9.75
   m_fontSizeBase: 72
   m_fontWeight: 400
   m_enableAutoSizing: 1
@@ -1279,7 +1280,7 @@ MonoBehaviour:
   m_faceColor:
     serializedVersion: 2
     rgba: 4294967295
-  m_fontSize: 14.2
+  m_fontSize: 9.75
   m_fontSizeBase: 72
   m_fontWeight: 400
   m_enableAutoSizing: 1
@@ -1619,7 +1620,7 @@ MonoBehaviour:
   m_faceColor:
     serializedVersion: 2
     rgba: 4294967295
-  m_fontSize: 14.2
+  m_fontSize: 12.9
   m_fontSizeBase: 72
   m_fontWeight: 400
   m_enableAutoSizing: 1
@@ -1698,6 +1699,13 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 80f1163b657907442b0350bd83993ac8, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  _serviceLocatorObject: {fileID: 591741074}
+  _battleModel: {fileID: 11400000, guid: 4b7678c80b7099f4bbee4d96dc8a39b9, type: 2}
+  _battleStatesData:
+  - {fileID: 11400000, guid: c514966d384fc4f4fa3072d3a11387d8, type: 2}
+  - {fileID: 11400000, guid: eaf93a7ab4b3a8a4298f5326ff5e789c, type: 2}
+  - {fileID: 11400000, guid: 778d1051d6ac6d44baf2327bac8bec8d, type: 2}
+  _defaultState: 3
   _armiesToSpawn:
   - _armyModel: {fileID: 11400000, guid: a6c80dd762eaa2942967f75607f7c7a3, type: 2}
     _armySpawnBounds: {fileID: 764418157}
@@ -1707,12 +1715,6 @@ MonoBehaviour:
     _armySpawnBounds: {fileID: 2052915548}
   - _armyModel: {fileID: 11400000, guid: 1534cd5a897919044ba600c86ae550c3, type: 2}
     _armySpawnBounds: {fileID: 443984563}
-  _battleStatesData:
-  - {fileID: 11400000, guid: c514966d384fc4f4fa3072d3a11387d8, type: 2}
-  - {fileID: 11400000, guid: eaf93a7ab4b3a8a4298f5326ff5e789c, type: 2}
-  - {fileID: 11400000, guid: 778d1051d6ac6d44baf2327bac8bec8d, type: 2}
-  _defaultState: 3
-  _serviceLocatorObject: {fileID: 591741074}
 --- !u!4 &1951697636
 Transform:
   m_ObjectHideFlags: 0
