@@ -24,7 +24,7 @@ namespace DCLBattle
         private int _averageframeCount;
         private float _averageFPS;
         private float _averageFPSDisplayTimer = 0f;
-        private float _realtimeStart;
+        private System.Diagnostics.Stopwatch _stopwatch = new();
         private readonly System.Collections.Generic.List<float> _averageFPSs = new(1064);
 
         private void Awake()
@@ -65,6 +65,7 @@ namespace DCLBattle
         {
             MessagingSystem<AllianceWonEvent>.Unsubscribe(this);
             MessagingSystem<BattleStartEvent>.Unsubscribe(this);
+            DisplayEndResults();
         }
 
 
@@ -84,15 +85,22 @@ namespace DCLBattle
             Debug.Log($"Battle Started with {unitCount} units.");
             Debug.Log($"The Battle Algorithm is {(_battleModel as IBattleModel).Algorithm}.");
 
-            _realtimeStart = Time.realtimeSinceStartup;
+            _stopwatch.Restart();
             MessagingSystem<BattleStartEvent>.Unsubscribe(this);
             this.enabled = true;
         }
 
         public void OnEvent(AllianceWonEvent evt)
         {
-            _realtimeStart = Time.realtimeSinceStartup - _realtimeStart;
-            Debug.Log($"Battle lasted for {_realtimeStart:F2} seconds.");
+            DisplayEndResults();
+            MessagingSystem<AllianceWonEvent>.Unsubscribe(this);
+            this.enabled = false;
+        }
+
+        private void DisplayEndResults()
+        {
+            _stopwatch.Stop();
+            Debug.Log($"Battle lasted for {_stopwatch.ElapsedMilliseconds / 1000f:F2} seconds.");
 
             float finalAverageFPS = 0f;
             foreach (var fps in _averageFPSs)
@@ -101,8 +109,6 @@ namespace DCLBattle
             }
             finalAverageFPS /= _averageFPSs.Count;
             Debug.Log($"Battle has an average FPS of {finalAverageFPS:F2}.");
-            MessagingSystem<AllianceWonEvent>.Unsubscribe(this);
-            this.enabled = false;
         }
     }
 

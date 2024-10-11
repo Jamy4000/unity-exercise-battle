@@ -82,6 +82,7 @@ namespace DCLBattle.Battle
             _armiesHolder = new BattleUpdater(armies, _serviceLocator, _battleStatesData, _defaultState);
         }
 
+#if UNITY_EDITOR
         private void OnDrawGizmos()
         {
             if (!Application.isPlaying)
@@ -101,6 +102,7 @@ namespace DCLBattle.Battle
             Gizmos.color = Color.magenta;
             Gizmos.DrawSphere(_armiesHolder.BattleCenter, 4f);
         }
+#endif
 
         private void OnDestroy()
         {
