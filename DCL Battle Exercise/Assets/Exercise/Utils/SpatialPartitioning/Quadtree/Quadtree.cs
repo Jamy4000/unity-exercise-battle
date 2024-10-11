@@ -30,14 +30,8 @@ namespace Utils.SpatialPartitioning
 
     public readonly struct QuadtreeElement
     {
-        public readonly int ExternalID;                               // The ID representing an element in this node (if this is a leaf node)
+        public readonly int ExternalID;     // The ID representing an element in this node (if this is a leaf node)
         public readonly Vector2 Position;
-
-        public QuadtreeElement(int elementID = int.MinValue)
-        {
-            ExternalID = elementID;
-            Position = Vector2.zero;
-        }
 
         public QuadtreeElement(int elementID, Vector2 position)
         {
@@ -73,7 +67,7 @@ namespace Utils.SpatialPartitioning
         public Action<IGenericPoolable> OnShouldReturnToPool { get; set; }
 
         private readonly QueryResultsComparer _queryResultsComparer = new();
-        private QuadtreePool _pool;
+        private readonly QuadtreePool _pool;
 
         private const int MAX_CHILDREN_COUNT = 4;
         private int _maxElementsCountPerNode;
@@ -90,17 +84,6 @@ namespace Utils.SpatialPartitioning
 
             var halfSize = size * 0.5f;
             _boundary = new AABB(center.x - halfSize.x, center.y - halfSize.y, center.x + halfSize.x, center.y + halfSize.y);
-            _elements = new List<QuadtreeElement>(maxElementPerNode);
-            _children = new Quadtree[MAX_CHILDREN_COUNT];
-            _currentDepth = currentDepth;
-        }
-
-        private Quadtree(AABB boundary, QuadtreePool pool, int maxDepth, int maxElementPerNode, int currentDepth)
-        {
-            _maxElementsCountPerNode = maxElementPerNode;
-            _maxDepth = maxDepth;
-
-            _boundary = boundary;
             _elements = new List<QuadtreeElement>(maxElementPerNode);
             _children = new Quadtree[MAX_CHILDREN_COUNT];
             _currentDepth = currentDepth;
@@ -358,11 +341,6 @@ namespace Utils.SpatialPartitioning
                 }
             }
 
-            int elementCount = _elements.Count;
-            for (int elementIndex = 0; elementIndex < elementCount; elementIndex++)
-            {
-                _elements[elementIndex] = new();
-            }
             _elements.Clear();
         }
 

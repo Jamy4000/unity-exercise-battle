@@ -1,380 +1,320 @@
-using System;
 using System.Collections.Generic;
 using UnityEngine;
 
 namespace Utils.SpatialPartitioning
 {
-    public sealed class KDNodePool<TDimension> : GenericPoolHelper<KDTree<TDimension>.KDNode>
+    public static class DimensionComparerFactory
     {
-        public KDNodePool(int minPoolSize = 16, int maxPoolSize = 128, bool collectionChecks = false) : 
-            base(minPoolSize, maxPoolSize, collectionChecks)
+        public static IDimensionComparer<TDimension> CreateDimensionComparer<TDimension>()
         {
-        }
-
-        protected override KDTree<TDimension>.KDNode CreatePooledItem()
-        {
-            return new KDTree<TDimension>.KDNode();
+            if (typeof(TDimension) == typeof(float))
+            {
+                return (IDimensionComparer<TDimension>)(object)new OneDimensionComparer();
+            }
+            else if (typeof(TDimension) == typeof(Vector2))
+            {
+                return (IDimensionComparer<TDimension>)(object)new TwoDimensionComparer();
+            }
+            else if (typeof(TDimension) == typeof(Vector3))
+            {
+                return (IDimensionComparer<TDimension>)(object)new ThreeDimensionComparer();
+            }
+            else
+            {
+                throw new System.NotSupportedException($"Dimension comparer for type {typeof(TDimension)} is not supported.");
+            }
         }
     }
 
     public sealed class KDTree<TDimension> : ISpatialPartitioner<TDimension>
     {
-        public sealed class KDNode : IGenericPoolable
+        public struct KDNode
         {
-            public int ElementID;
+            public int ExternalID;
             public TDimension Position;
 
-            public KDNode Left;
-            public KDNode Right;
+            public int LeftNodeIndex;
+            public int RightNodeIndex;
 
-            public Action<IGenericPoolable> OnShouldReturnToPool { get; set; }
+            public readonly bool HasLeftChild => LeftNodeIndex != -1;
+            public readonly bool HasRightChild => RightNodeIndex != -1;
 
-            public KDNode()
+            public KDNode(int elementID, TDimension position, int leftNodeIndex = -1, int rightNodeIndex = -1)
             {
-                ElementID = int.MinValue;
-                Left = null;
-                Right = null;
-            }
+                ExternalID = elementID;
+                Position = position;
 
-            public KDNode(int elementID)
-            {
-                ElementID = elementID;
-                Left = null;
-                Right = null;
-            }
-
-            public void Destroy()
-            {
-            }
-
-            public void Disable()
-            {
-            }
-
-            public void Enable()
-            {
-            }
-
-            public void ResetNode(KDTree<TDimension> tree)
-            {
-                ElementID = int.MinValue;
-                if (Left != null)
-                {
-                    Left.ResetNode(tree);
-                    Left.OnShouldReturnToPool?.Invoke(Left);
-                    Left = null;
-                }
-
-                if (Right != null)
-                {
-                    Right.ResetNode(tree);
-                    Right.OnShouldReturnToPool?.Invoke(Right);
-                    Right = null;
-                }
+                LeftNodeIndex = leftNodeIndex;
+                RightNodeIndex = rightNodeIndex;
             }
         }
 
-        private KDNode _root;
-        private readonly int _dimensions;
         private readonly IDimensionComparer<TDimension> _dimensionComparer;
-        private readonly KDNodePool<TDimension> _pool = new();
+        private readonly List<KDNode> _nodes = new(256);
 
-        public KDTree(int dimensions, IDimensionComparer<TDimension> dimensionComparer)
+        public KDTree()
         {
-            _root = null;
-            _dimensions = dimensions;
-            _dimensionComparer = dimensionComparer;
+            _dimensionComparer = DimensionComparerFactory.CreateDimensionComparer<TDimension>();
         }
 
         public void Dispose()
         {
-            _root?.ResetNode(this);
         }
 
         public void Insert(TDimension position, int elementID)
         {
-            _root = Insert_Internal(this, _root, position, elementID);
-        }
-
-        private static KDNode Insert_Internal(KDTree<TDimension> tree, KDNode root, TDimension position, int elementID)
-        {
-            KDNode currentNode = root;
-            KDNode parentNode = null;
-            int depth = 0;
-
-            // Traverse the tree to find the correct position for the new node
-            while (currentNode != null)
+            if (_nodes.Count == 0)
             {
-                parentNode = currentNode;
-                int axis = depth % tree._dimensions;
-
-                // Compare the position with the current node's position
-                if (tree._dimensionComparer.Compare(position, currentNode.Position, axis) < 0)
-                    currentNode = currentNode.Left; // Move left
-                else
-                    currentNode = currentNode.Right; // Move right
-
-                depth++;
+                _nodes.Add(new(elementID, position));
+                return;
             }
 
-            // Create the new node
-            KDNode newNode = tree._pool.RequestPoolableObject();
-            newNode.ElementID = elementID;
-            newNode.Position = position;
+            Insert_Internal(0, position, elementID, 0);
+        }
 
-            // If parentNode is null, then we are inserting the root node
-            if (parentNode == null)
-                return newNode;
+        private int Insert_Internal(int currentIndex, TDimension position, int elementID, int depth)
+        {
+            if (currentIndex == -1) // Empty slot
+            {
+                _nodes.Add(new(elementID, position));
+                return _nodes.Count - 1;
+            }
 
-            // Determine whether the new node goes to the left or right of the parent
-            int parentAxis = (depth - 1) % tree._dimensions;
-            if (tree._dimensionComparer.Compare(position, parentNode.Position, parentAxis) < 0)
-                parentNode.Left = newNode;
+            KDNode currentNode = _nodes[currentIndex];
+            int axis = depth % 2; // Switch between x (0) and y (1) axis
+
+            bool goLeft = _dimensionComparer.Compare(position, currentNode.Position, axis) < 0;
+
+            if (goLeft)
+            {
+                if (!currentNode.HasLeftChild)
+                {
+                    currentNode.LeftNodeIndex = Insert_Internal(-1, position, elementID, depth + 1); // Insert new left child
+                }
+                else
+                {
+                    currentNode.LeftNodeIndex = Insert_Internal(currentNode.LeftNodeIndex, position, elementID, depth + 1);
+                }
+            }
             else
-                parentNode.Right = newNode;
+            {
+                if (!currentNode.HasRightChild)
+                {
+                    currentNode.RightNodeIndex = Insert_Internal(-1, position, elementID, depth + 1); // Insert new right child
+                }
+                else
+                {
+                    currentNode.RightNodeIndex = Insert_Internal(currentNode.RightNodeIndex, position, elementID, depth + 1);
+                }
+            }
 
-            // Return the original root of the tree
-            return root;
+            _nodes[currentIndex] = currentNode; // Update node
+            return currentIndex;
         }
 
         public void Remove(TDimension position, int elementID)
         {
-            _root = Remove_Internal(this, _root, position, elementID, 0);
+            Remove_Internal(0, position, elementID, 0); // Start from the root, which is index 0
         }
 
-        private static KDNode Remove_Internal(KDTree<TDimension> tree, KDNode node, TDimension position, int elementID, int depth)
+        private int Remove_Internal(int currentIndex, TDimension position, int elementID, int depth)
         {
-            KDNode current = node;
-            KDNode parent = null;
-            int axis;
+            if (currentIndex == -1) return -1; // Base case: node not found
 
-            while (current != null)
+            KDNode current = _nodes[currentIndex];
+            int axis = depth % 2;
+
+            if (current.ExternalID == elementID)
             {
-                axis = depth % tree._dimensions;
-
-                // Found the node to remove
-                if (current.ElementID == elementID)
+                // If the node has only one child or no child, we return the child to replace the current node
+                if (current.LeftNodeIndex == -1)
                 {
-                    KDNode replacement;
-                    // Node with only one child or no child
-                    if (current.Left == null)
-                    {
-                        replacement = current.Right;
-                    }
-                    else if (current.Right == null)
-                    {
-                        replacement = current.Left;
-                    }
-                    else
-                    {
-                        // Node with two children: Get the inorder successor (smallest in the right subtree)
-                        KDNode minNode = FindMinIterative(tree, current.Right, axis, depth + 1);
-                        current.ElementID = minNode.ElementID;
-                        current.Position = minNode.Position;
-
-                        // Now we need to find the parent of the inorder successor to remove it
-                        parent = current;
-                        current = current.Right;
-                        depth++; // Move down to the right subtree to find the successor
-
-                        // Find the successor
-                        while (current != null && current.ElementID != minNode.ElementID)
-                        {
-                            parent = current;
-                            if (tree._dimensionComparer.Compare(minNode.Position, current.Position, depth % tree._dimensions) < 0)
-                            {
-                                current = current.Left;
-                                depth++;
-                            }
-                            else
-                            {
-                                current = current.Right;
-                                depth++;
-                            }
-                        }
-
-                        // Set replacement to the right child of the successor
-                        if (parent.Left == current) // If the successor is a left child
-                            parent.Left = current.Right;
-                        else // If the successor is a right child
-                            parent.Right = current.Right;
-
-                        return node; // Return the unchanged node pointer after removal
-                    }
-
-                    // If the node is the root, return the replacement
-                    if (parent == null)
-                    {
-                        return replacement;
-                    }
-
-                    // Link the parent to the replacement
-                    if (parent.Left == current)
-                        parent.Left = replacement;
-                    else
-                        parent.Right = replacement;
-
-                    return node; // Return the unchanged node pointer after removal
+                    return current.RightNodeIndex;
                 }
-                // Traverse the tree to find the node to remove
-                else if (tree._dimensionComparer.Compare(position, current.Position, axis) < 0)
+                else if (current.RightNodeIndex == -1)
                 {
-                    parent = current;
-                    current = current.Left;
-                    depth++;
+                    return current.LeftNodeIndex;
                 }
-                else if (tree._dimensionComparer.Compare(position, current.Position, axis) > 0)
+                else
                 {
-                    parent = current;
-                    current = current.Right;
-                    depth++;
+                    // Find the minimum node in the right subtree (successor)
+                    int minIndex = FindMin(current.RightNodeIndex, axis, depth + 1);
+                    KDNode minNode = _nodes[minIndex];
+
+                    // Replace current node with successor
+                    current.ExternalID = minNode.ExternalID;
+                    current.Position = minNode.Position;
+                    _nodes[currentIndex] = current;
+
+                    // Recursively remove the successor node
+                    current.RightNodeIndex = Remove_Internal(current.RightNodeIndex, minNode.Position, minNode.ExternalID, depth + 1);
+                }
+            }
+            else
+            {
+                bool goLeft = _dimensionComparer.Compare(position, position, axis) < 0;
+                if (goLeft)
+                {
+                    current.LeftNodeIndex = Remove_Internal(current.LeftNodeIndex, position, elementID, depth + 1);
+                }
+                else
+                {
+                    current.RightNodeIndex = Remove_Internal(current.RightNodeIndex, position, elementID, depth + 1);
                 }
             }
 
-            return node; // Return the unchanged node pointer if not found
+            return currentIndex; // Return the current index
         }
 
         public void RemoveAll()
         {
-            // Reset the root node which will clear all nodes in the KDTree
-            if (_root != null)
-            {
-                _root.ResetNode(this);
-                _root.OnShouldReturnToPool?.Invoke(_root);
-                _root = null; // Set root to null after resetting to allow garbage collection
-            }
+            _nodes.Clear(); // Clears all the nodes in the tree
         }
 
         public QueryResult QueryClosest(TDimension source)
         {
-            return QueryClosest_Internal(this, _root, source);
+            return QueryClosest_Internal(0, source); // Start from the root at index 0
         }
 
-        private static QueryResult QueryClosest_Internal(KDTree<TDimension> tree, KDNode node, TDimension source)
+        private QueryResult QueryClosest_Internal(int currentIndex, TDimension source)
         {
-            QueryResult bestResult = new(distance: Mathf.Infinity);
-            if (node == null)
+            QueryResult bestResult = new();
+            if (currentIndex == -1) 
                 return bestResult;
+
+            Stack<(int nodeIndex, int depth)> stack = UnityEngine.Pool.GenericPool<Stack<(int, int)>>.Get();
+            stack.Push((currentIndex, 0));
 
             float bestDistanceSq = Mathf.Infinity;
 
-            Stack<(KDNode node, int depth)> stack = UnityEngine.Pool.GenericPool<Stack<(KDNode, int)>>.Get();
-            stack.Push((node, 0));
-
             while (stack.Count > 0)
             {
-                var (currentNode, depth) = stack.Pop();
-                if (currentNode == null)
-                    continue;
+                var (nodeIndex, depth) = stack.Pop();
+                if (nodeIndex == -1) continue;
 
-                float distanceSq = tree._dimensionComparer.CalculateDistanceSq(currentNode.Position, source);
+                KDNode currentNode = _nodes[nodeIndex];
+                float distanceSq = _dimensionComparer.CalculateDistanceSq(currentNode.Position, source);
 
-                // Update the best result if the current node is closer
                 if (distanceSq < bestDistanceSq)
                 {
                     bestDistanceSq = distanceSq;
-                    bestResult = new QueryResult(currentNode.ElementID, Mathf.Sqrt(distanceSq));
+                    bestResult = new QueryResult(currentNode.ExternalID, Mathf.Sqrt(distanceSq));
                 }
 
-                int axis = depth % tree._dimensions;
-                float sourceComponent = tree._dimensionComparer.GetComponentOnAxis(source, axis);
-                float nodeComponent = tree._dimensionComparer.GetComponentOnAxis(currentNode.Position, axis);
+                int axis = depth % 2;
+                float sourceComponent = _dimensionComparer.GetComponentOnAxis(source, axis);
+                float nodeComponent = _dimensionComparer.GetComponentOnAxis(currentNode.Position, axis);
 
-                // Determine which side to explore first (nearNode/farNode)
-                KDNode nearNode = sourceComponent < nodeComponent ? currentNode.Left : currentNode.Right;
-                KDNode farNode = nearNode == currentNode.Left ? currentNode.Right : currentNode.Left;
+                int nearNodeIndex = sourceComponent < nodeComponent ? currentNode.LeftNodeIndex : currentNode.RightNodeIndex;
+                int farNodeIndex = nearNodeIndex == currentNode.LeftNodeIndex ? currentNode.RightNodeIndex : currentNode.LeftNodeIndex;
 
-                // Push the near node first, as it is more likely to have a closer point
-                stack.Push((nearNode, depth + 1));
+                stack.Push((nearNodeIndex, depth + 1));
 
-                // Check if the far side is worth exploring by comparing distances along the axis
                 if (Mathf.Abs(sourceComponent - nodeComponent) < bestResult.Distance)
                 {
-                    stack.Push((farNode, depth + 1));
+                    stack.Push((farNodeIndex, depth + 1));
                 }
             }
 
-
-            UnityEngine.Pool.GenericPool<Stack<(KDNode, int)>>.Release(stack);
+            UnityEngine.Pool.GenericPool<Stack<(int, int)>>.Release(stack);
             return bestResult;
         }
 
         public int QueryWithinRange_NoAlloc(TDimension source, float range, QueryResult[] results)
         {
-            return QueryWithinRange_NoAlloc_Internal(this, _root, source, range * range, results);
+            return QueryWithinRange_NoAlloc_Internal(0, source, range * range, results); // Start from root at index 0
         }
 
-        private static int QueryWithinRange_NoAlloc_Internal(KDTree<TDimension> tree, KDNode node, TDimension source, float rangeSq, QueryResult[] results)
+        private int QueryWithinRange_NoAlloc_Internal(int currentIndex, TDimension source, float rangeSq, QueryResult[] results)
         {
-            if (node == null)
+            if (currentIndex == -1) 
                 return 0;
 
-            int offset = 0;
-            Stack<(KDNode node, int depth)> stack = UnityEngine.Pool.GenericPool<Stack<(KDNode, int)>>.Get();
-            stack.Push((node, 0));
+            Stack<(int nodeIndex, int depth)> stack = UnityEngine.Pool.GenericPool<Stack<(int, int)>>.Get();
+            List<QueryResult> queryResults = UnityEngine.Pool.ListPool<QueryResult>.Get();
+            queryResults.Capacity = 64;
+
+            stack.Push((currentIndex, 0));
 
             while (stack.Count > 0)
             {
-                var (currentNode, depth) = stack.Pop();
-                if (currentNode == null)
+                var (nodeIndex, depth) = stack.Pop();
+                if (nodeIndex == -1) 
                     continue;
 
-                // Calculate squared distance between current node and source
-                float distanceSq = tree._dimensionComparer.CalculateDistanceSq(currentNode.Position, source);
+                KDNode currentNode = _nodes[nodeIndex];
+                float distanceSq = _dimensionComparer.CalculateDistanceSq(currentNode.Position, source);
 
-                // Check if the current node is within the specified range
                 if (distanceSq <= rangeSq)
                 {
-                    results[offset++] = new QueryResult(currentNode.ElementID, Mathf.Sqrt(distanceSq));
-                    if (offset >= results.Length)
-                        return offset;
+                    queryResults.Add(new QueryResult(currentNode.ExternalID, Mathf.Sqrt(distanceSq)));
                 }
 
-                // Determine the axis for comparison
-                int axis = depth % tree._dimensions;
-                float sourceComponent = tree._dimensionComparer.GetComponentOnAxis(source, axis);
-                float nodeComponent = tree._dimensionComparer.GetComponentOnAxis(currentNode.Position, axis);
+                int axis = depth % 2;
+                float sourceComponent = _dimensionComparer.GetComponentOnAxis(source, axis);
+                float nodeComponent = _dimensionComparer.GetComponentOnAxis(currentNode.Position, axis);
 
-                // Decide which side to visit first (left or right)
-                KDNode nearNode = sourceComponent < nodeComponent ? currentNode.Left : currentNode.Right;
-                KDNode farNode = nearNode == currentNode.Left ? currentNode.Right : currentNode.Left;
+                int nearNodeIndex = sourceComponent < nodeComponent ? currentNode.LeftNodeIndex : currentNode.RightNodeIndex;
+                int farNodeIndex = nearNodeIndex == currentNode.LeftNodeIndex ? currentNode.RightNodeIndex : currentNode.LeftNodeIndex;
 
-                // Add near node to the stack first
-                stack.Push((nearNode, depth + 1));
+                stack.Push((nearNodeIndex, depth + 1));
 
-                // Add far node to the stack if it's within the range on the current axis
-                if (Mathf.Abs(sourceComponent - nodeComponent) <= Mathf.Sqrt(rangeSq))
+                float axisDistance = Mathf.Abs(sourceComponent - nodeComponent);
+                if (axisDistance * axisDistance <= rangeSq)
                 {
-                    stack.Push((farNode, depth + 1));
+                    stack.Push((farNodeIndex, depth + 1));
                 }
             }
 
-            UnityEngine.Pool.GenericPool<Stack<(KDNode, int)>>.Release(stack);
-            return offset;
+            queryResults.Sort((a, b) => { return (int)(a.Distance - b.Distance); });
+            int maxResults = Mathf.Min(results.Length, queryResults.Count);
+            for (int i = 0; i < maxResults; i++)
+            {
+                results[i] = queryResults[i];
+            }
+
+            UnityEngine.Pool.ListPool<QueryResult>.Release(queryResults);
+            UnityEngine.Pool.GenericPool<Stack<(int, int)>>.Release(stack);
+            return maxResults;
         }
 
-        private static KDNode FindMinIterative(KDTree<TDimension> tree, KDNode node, int axis, int depth)
+        private int FindMin(int currentIndex, int axis, int depth)
         {
-            KDNode current = node;
-            KDNode best = current;
+            int minIndex = currentIndex;
 
-            while (current != null)
+            while (currentIndex != -1)
             {
-                int currentAxis = depth % tree._dimensions;
+                KDNode currentNode = _nodes[currentIndex];
+                int currentAxis = depth % 2;
 
                 if (currentAxis == axis)
                 {
-                    if (current.Left == null)
-                        return current;
-                    current = current.Left;
+                    if (currentNode.LeftNodeIndex == -1) 
+                        return currentIndex;
+
+                    currentIndex = currentNode.LeftNodeIndex;
                 }
                 else
                 {
-                    best = current;
-                    if (current.Left != null && tree._dimensionComparer.Compare(current.Left.Position, best.Position, axis) < 0)
-                        best = current.Left;
-                    if (current.Right != null && tree._dimensionComparer.Compare(current.Right.Position, best.Position, axis) < 0)
-                        best = current.Right;
+                    float currentComponent = _dimensionComparer.GetComponentOnAxis(currentNode.Position, axis);
+                    float minComponent = _dimensionComparer.GetComponentOnAxis(_nodes[minIndex].Position, axis);
+                    if (currentComponent < minComponent)
+                    {
+                        minIndex = currentIndex;
+                        minComponent = currentComponent;
+                    }
+
+                    float leftComponent = _dimensionComparer.GetComponentOnAxis(_nodes[currentNode.LeftNodeIndex].Position, axis);
+                    if (currentNode.LeftNodeIndex != -1 && leftComponent < minComponent)
+                    {
+                        minIndex = currentNode.LeftNodeIndex;
+                    }
+
+                    float rightComponent = _dimensionComparer.GetComponentOnAxis(_nodes[currentNode.RightNodeIndex].Position, axis);
+                    if (currentNode.RightNodeIndex != -1 && rightComponent < minComponent)
+                    {
+                        minIndex = currentNode.RightNodeIndex;
+                    }
 
                     break;
                 }
@@ -382,62 +322,37 @@ namespace Utils.SpatialPartitioning
                 depth++;
             }
 
-            return best;
+            return minIndex;
         }
 
 #if UNITY_EDITOR
         public void OnDrawGizmos()
         {
-            if (_root != null)
+            var dimensionComparer = DimensionComparerFactory.CreateDimensionComparer<TDimension>();
+            Gizmos.color = Color.yellow; // Set color for the node spheres
+            foreach (var node in _nodes)
             {
-                if (_root.Position is Vector2 vector2)
-                    DrawNodeGizmos(this, _root, new(vector2.x, 1f, vector2.y), 1f, 0); // Starting point and scale
-                else if (_root.Position is Vector3 vector3)
-                    DrawNodeGizmos(this, _root, vector3, 1f, 0); // Starting point and scale
-            }
-        }
-
-        private void DrawNodeGizmos(KDTree<TDimension> tree, KDNode node, Vector3 position, float scale, int depth)
-        {
-            if (node == null)
-                return;
-
-            // Draw the node's position
-            Gizmos.color = Color.Lerp(Color.red, Color.green, (depth % _dimensions) / (float)_dimensions);
-            Gizmos.DrawSphere(position, scale * 0.1f); // Draw a small sphere at the node's position
-
-            // Draw lines to children
-            if (node.Left != null)
-            {
-                Gizmos.color = Color.blue; // Color for left child connection
-                // ugly casting, but that's just for debug purposes
-                if (node.Left.Position is Vector2 leftNodePos2)
-                {
-                    Vector3 leftNodePosition = new(leftNodePos2.x, position.y, leftNodePos2.y);
-                    Gizmos.DrawLine(position, leftNodePosition);
-                    DrawNodeGizmos(tree, node.Left, leftNodePosition, scale * 0.9f, depth + 1); // Draw left subtree
-                }
-                else if (node.Left.Position is Vector3 leftNodePosition)
-                {
-                    Gizmos.DrawLine(position, leftNodePosition);
-                    DrawNodeGizmos(tree, node.Left, leftNodePosition, scale * 0.9f, depth + 1); // Draw left subtree
-                }
+                // Draw a sphere at the position of the node
+                Gizmos.DrawSphere(dimensionComparer.ToVector3(node.Position), 0.1f);
             }
 
-            if (node.Right != null)
+            // Optionally, draw lines between parents and children
+            Gizmos.color = Color.red; // Set color for the lines
+            for (int i = 0; i < _nodes.Count; i++)
             {
-                Gizmos.color = Color.magenta; // Color for right child connection
-                // ugly casting, but that's just for debug purposes
-                if (node.Right.Position is Vector2 rightNodePos2)
+                KDNode currentNode = _nodes[i];
+                Vector3 parentPosition = dimensionComparer.ToVector3(currentNode.Position);
+
+                if (currentNode.HasLeftChild)
                 {
-                    Vector3 rightNodePosition = new(rightNodePos2.x, position.y, rightNodePos2.y);
-                    Gizmos.DrawLine(position, rightNodePosition);
-                    DrawNodeGizmos(tree, node.Right, rightNodePosition, scale * 0.9f, depth + 1); // Draw right subtree
+                    Vector3 leftChildPosition = dimensionComparer.ToVector3(_nodes[currentNode.LeftNodeIndex].Position);
+                    Gizmos.DrawLine(parentPosition, leftChildPosition);
                 }
-                else if (node.Right.Position is Vector3 rightNodePosition)
+
+                if (currentNode.HasRightChild)
                 {
-                    Gizmos.DrawLine(position, rightNodePosition);
-                    DrawNodeGizmos(tree, node.Right, rightNodePosition, scale * 0.9f, depth + 1); // Draw right subtree
+                    Vector3 rightChildPosition = dimensionComparer.ToVector3(_nodes[currentNode.RightNodeIndex].Position);
+                    Gizmos.DrawLine(parentPosition, rightChildPosition);
                 }
             }
         }

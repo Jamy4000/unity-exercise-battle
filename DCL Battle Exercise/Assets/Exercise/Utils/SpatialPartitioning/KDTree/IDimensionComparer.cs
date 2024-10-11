@@ -7,6 +7,8 @@ namespace Utils.SpatialPartitioning
         public int Compare(TDimension x, TDimension y, int axis);
         public float GetComponentOnAxis(TDimension value, int axis);
         public float CalculateDistanceSq(TDimension x, TDimension y);
+        Vector3 ToVector3(TDimension position);
+        int GetDimension();
     }
 
     public sealed class OneDimensionComparer : IDimensionComparer<float>
@@ -25,6 +27,16 @@ namespace Utils.SpatialPartitioning
         {
             return Mathf.Abs(y - x);
         }
+
+        public Vector3 ToVector3(float position)
+        {
+            return new Vector3(0f, position, 0f);
+        }
+
+        public int GetDimension()
+        {
+            return 1;
+        }
     }
 
     public sealed class TwoDimensionComparer : IDimensionComparer<Vector2>
@@ -42,6 +54,16 @@ namespace Utils.SpatialPartitioning
         public float CalculateDistanceSq(Vector2 x, Vector2 y)
         {
             return Vector2.SqrMagnitude(y - x);
+        }
+
+        public Vector3 ToVector3(Vector2 position)
+        {
+            return new Vector3(position.x, 0f, position.y);
+        }
+
+        public int GetDimension()
+        {
+            return 2;
         }
     }
 
@@ -66,30 +88,15 @@ namespace Utils.SpatialPartitioning
         {
             return Vector3.SqrMagnitude(y - x);
         }
-    }
 
-    public sealed class FourDimensionComparer : IDimensionComparer<Vector4>
-    {
-        public int Compare(Vector4 a, Vector4 b, int axis)
+        public Vector3 ToVector3(Vector3 position)
         {
-            if (axis == 0)
-                return a.x.CompareTo(b.x);
-            else if (axis == 1)
-                return a.y.CompareTo(b.y);
-            else if (axis == 2)
-                return a.z.CompareTo(b.z);
-            else
-                return a.w.CompareTo(b.w);
+            return position;
         }
 
-        public float GetComponentOnAxis(Vector4 value, int axis)
+        public int GetDimension()
         {
-            return axis == 0 ? value.x : axis == 1 ? value.y : axis == 3 ? value.z : value.w;
-        }
-
-        public float CalculateDistanceSq(Vector4 x, Vector4 y)
-        {
-            return Vector4.SqrMagnitude(y - x);
+            return 3;
         }
     }
 }

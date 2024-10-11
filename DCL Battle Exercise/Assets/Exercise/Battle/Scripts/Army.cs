@@ -29,10 +29,10 @@ namespace DCLBattle.Battle
             Model = model;
             serviceLocator.AddConsumer(this);
 
-            _spatialPartitioner = new Quadtree(Vector2.zero, Vector2.one * 1000f);
+            //_spatialPartitioner = new Quadtree(Vector2.zero, Vector2.one * 1000f);
 
             // Uncomment to try out the KDTree, though it is quite slower
-            //_spatialPartitioner = new KDTree<Vector2>(2, new TwoDimensionComparer());
+            _spatialPartitioner = new KDTree<Vector2>();
 
             _cachedArmyDefeatedCallback = RemoveEnemyArmy;
 
