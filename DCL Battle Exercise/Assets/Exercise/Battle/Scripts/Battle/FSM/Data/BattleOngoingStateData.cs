@@ -1,4 +1,5 @@
 using UnityEngine;
+using Utils;
 
 namespace DCLBattle.Battle
 {
@@ -7,9 +8,9 @@ namespace DCLBattle.Battle
     {
         public override BattleStateID StateID => BattleStateID.OnGoing;
 
-        public override BattleState CreateStateInstance(IArmiesHolder armiesHolder)
+        public override BattleState CreateStateInstance(IServiceLocator serviceLocator)
         {
-            return new BattleOngoingState(this, armiesHolder);
+            return new BattleOngoingState(this, serviceLocator);
         }
     }
 

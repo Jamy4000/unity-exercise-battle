@@ -133,7 +133,7 @@ namespace DCLBattle.Battle
 
         public virtual void ManualLateUpdate()
         {
-            Fsm.ManualLateUpdate();
+            Fsm.LateUpdate();
         }
 
         protected virtual void OnDestroy()

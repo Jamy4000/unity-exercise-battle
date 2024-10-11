@@ -12,14 +12,34 @@ namespace DCLBattle.Battle
     {
         OnGoing = 0,
         Paused = 1,
-        Ended = 2
+        Ended = 2,
+        Setup = 3
     }
 
-    public sealed class BattleFSM : FSM<BattleState, BattleStateID>
+    public sealed class BattleFSM : FSM<BattleState, BattleStateID>, I_LateUpdateOnly
     {
         public BattleFSM(BattleState defaultState, List<BattleState> states) :
             base(defaultState, states)
         {
+            if (TryGetState(BattleStateID.Setup, out var state))
+            {
+                state.RequestToExitCurrentState += OnSetupDone;
+            }
+        }
+
+        public void ManualLateUpdate()
+        {
+            LateUpdate();
+            GameUpdater.Unregister(this);
+        }
+
+        private void OnSetupDone()
+        {
+            GameUpdater.Register(this);
+            if (TryGetState(BattleStateID.Setup, out var state))
+            {
+                state.RequestToExitCurrentState -= OnSetupDone;
+            }
         }
     }
 }

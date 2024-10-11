@@ -2,19 +2,15 @@ using Utils;
 
 namespace DCLBattle.Battle
 {
-    public class BattleOngoingState : BattleState<BattleOngoingStateData>
+    public class BattleOngoingState : BattleState<BattleOngoingStateData>, IServiceConsumer
     {
-        private readonly IArmiesHolder _armiesHolder;
+        private IArmiesHolder _armiesHolder;
         private readonly System.Action<Army> _cachedArmyDefeatedCallback;
 
-        public BattleOngoingState(BattleOngoingStateData stateData, IArmiesHolder armiesHolder) : base(stateData)
+        public BattleOngoingState(BattleOngoingStateData stateData, IServiceLocator serviceLocator) : base(stateData)
         {
             _cachedArmyDefeatedCallback = OnArmyDefeatedEvent;
-            for (int armyIndex = 0; armyIndex < armiesHolder.ArmiesCount; armyIndex++)
-            {
-                armiesHolder.GetArmy(armyIndex).ArmyDefeatedEvent += _cachedArmyDefeatedCallback;
-            }
-            _armiesHolder = armiesHolder;
+            serviceLocator.AddConsumer(this);
         }
 
         public override void OnDestroy()
@@ -68,6 +64,15 @@ namespace DCLBattle.Battle
             }
 
             RequestToExitCurrentState?.Invoke();
+        }
+
+        public void ConsumeLocator(IServiceLocator locator)
+        {
+            _armiesHolder = locator.GetService<IArmiesHolder>();
+            for (int armyIndex = 0; armyIndex < _armiesHolder.ArmiesCount; armyIndex++)
+            {
+                _armiesHolder.GetArmy(armyIndex).ArmyDefeatedEvent += _cachedArmyDefeatedCallback;
+            }
         }
     }
 }

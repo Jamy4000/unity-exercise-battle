@@ -1,5 +1,6 @@
 using System.Collections.Generic;
 using UnityEngine;
+using Utils;
 
 namespace DCLBattle.Battle
 {
@@ -12,6 +13,6 @@ namespace DCLBattle.Battle
 
         // This is an alternative to the factory pattern boilerplate code;
         // the data provides the implementation of the logic while injecting itself in the state.
-        public abstract BattleState CreateStateInstance(IArmiesHolder armiesHolder);
+        public abstract BattleState CreateStateInstance(IServiceLocator serviceLocator);
     }
 }

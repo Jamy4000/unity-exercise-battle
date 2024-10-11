@@ -1710,7 +1710,8 @@ MonoBehaviour:
   _battleStatesData:
   - {fileID: 11400000, guid: c514966d384fc4f4fa3072d3a11387d8, type: 2}
   - {fileID: 11400000, guid: eaf93a7ab4b3a8a4298f5326ff5e789c, type: 2}
-  _defaultState: 0
+  - {fileID: 11400000, guid: 778d1051d6ac6d44baf2327bac8bec8d, type: 2}
+  _defaultState: 3
   _serviceLocatorObject: {fileID: 591741074}
 --- !u!4 &1951697636
 Transform:

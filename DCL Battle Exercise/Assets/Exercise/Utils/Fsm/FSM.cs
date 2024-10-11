@@ -41,7 +41,7 @@ namespace Utils
             ActiveState.UpdateState();
         }
 
-        public virtual void ManualLateUpdate()
+        public virtual void LateUpdate()
         {
             if (!_explicitExitRequestReceived && !ActiveState.CanBeExited())
                 return;

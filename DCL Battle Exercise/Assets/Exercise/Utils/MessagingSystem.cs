@@ -5,11 +5,12 @@ namespace Utils
 {
     public static class MessagingSystem<T>
     {
-        private static readonly List<ISubscriber<T>> _subscribers = new List<ISubscriber<T>>();
+        private static readonly List<ISubscriber<T>> _subscribers = new();
 
         public static void Publish(T data)
         {
-            for (int i = 0; i < _subscribers.Count; i++)
+            int subscribersCount = _subscribers.Count;
+            for (int i = subscribersCount - 1; i >= 0; i--)
             {
                 if (_subscribers[i] != null)
                 {

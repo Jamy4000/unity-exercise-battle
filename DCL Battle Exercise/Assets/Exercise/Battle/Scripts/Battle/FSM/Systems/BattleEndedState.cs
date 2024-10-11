@@ -2,13 +2,13 @@ using Utils;
 
 namespace DCLBattle.Battle
 {
-    public class BattleEndedState : BattleState<BattleEndedStateData>
+    public class BattleEndedState : BattleState<BattleEndedStateData>, IServiceConsumer
     {
-        private readonly IArmiesHolder _armiesHolder;
+        private IArmiesHolder _armiesHolder;
 
-        public BattleEndedState(BattleEndedStateData stateData, IArmiesHolder armiesHolder) : base(stateData)
+        public BattleEndedState(BattleEndedStateData stateData, IServiceLocator serviceLocator) : base(stateData)
         {
-            _armiesHolder = armiesHolder;
+            serviceLocator.AddConsumer(this);
         }
 
         public override void OnDestroy()
@@ -44,6 +44,11 @@ namespace DCLBattle.Battle
 
         public override void EndState()
         {
+        }
+
+        public void ConsumeLocator(IServiceLocator locator)
+        {
+            _armiesHolder = locator.GetService<IArmiesHolder>();
         }
     }
 }

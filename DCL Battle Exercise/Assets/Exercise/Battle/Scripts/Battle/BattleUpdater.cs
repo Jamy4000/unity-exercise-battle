@@ -5,7 +5,7 @@ using Utils;
 
 namespace DCLBattle.Battle
 {
-    public sealed class BattleUpdater : IArmiesHolder, I_UpdateOnly, I_Startable, 
+    public sealed class BattleUpdater : IArmiesHolder, I_UpdateOnly, I_Startable,
         I_LateUpdateOnly, ISubscriber<BattleStartEvent>, ISubscriber<AllianceWonEvent>
     {
         private readonly Army[] _armies;
@@ -30,7 +30,7 @@ namespace DCLBattle.Battle
             MessagingSystem<AllianceWonEvent>.Subscribe(this);
 
             // the FSM throws the BattleStartEvent, so we need to create it at the end
-            _battleFSM = CreateFSM(battleStatesData, defaultStateValue);
+            _battleFSM = CreateFSM(battleStatesData, defaultStateValue, serviceLocator);
         }
 
         public void Start()
@@ -59,7 +59,7 @@ namespace DCLBattle.Battle
                 army.LateUpdate();
             }
 
-            _battleFSM.ManualLateUpdate();
+            _battleFSM.LateUpdate();
         }
 
         public void Dispose()
@@ -75,14 +75,14 @@ namespace DCLBattle.Battle
             MessagingSystem<AllianceWonEvent>.Unsubscribe(this);
         }
 
-        private BattleFSM CreateFSM(BattleStateData[] battleStatesData, BattleStateID defaultStateEnum)
+        private BattleFSM CreateFSM(BattleStateData[] battleStatesData, BattleStateID defaultStateEnum, IServiceLocator serviceLocator)
         {
             List<BattleState> states = new(battleStatesData.Length);
             BattleState defaultState = null;
 
             for (int i = 0; i < battleStatesData.Length; i++)
             {
-                BattleState state = battleStatesData[i].CreateStateInstance(this);
+                BattleState state = battleStatesData[i].CreateStateInstance(serviceLocator);
                 states.Add(state);
                 if (state.StateEnum == defaultStateEnum)
                     defaultState = state;
@@ -99,9 +99,10 @@ namespace DCLBattle.Battle
             foreach (var army in _armies)
             {
                 if (army.RemainingUnitsCount > 0)
+                {
                     remainingArmies++;
-
-                tasks.Add(Task.Factory.StartNew(() => army.UpdateArmyData()));
+                    tasks.Add(Task.Factory.StartNew(() => army.UpdateArmyData()));
+                }
             }
             Task.WaitAll(tasks.ToArray());
 
