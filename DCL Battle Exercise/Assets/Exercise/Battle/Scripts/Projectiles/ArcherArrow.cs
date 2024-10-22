@@ -25,6 +25,7 @@ namespace DCLBattle.Battle
 
         // Avoids generating Garbage
         private GameObject _go;
+        private Transform _transform;
         private Material _material;
         private Action<IAttackReceiver> _cachedTargetDiedDelegate;
 
@@ -34,6 +35,7 @@ namespace DCLBattle.Battle
             _material = GetComponent<Renderer>().material;
             _cachedTargetDiedDelegate = OnTargetDied;
             _go = gameObject;
+            _transform = transform;
         }
 
         public void Launch(IAttacker attacker, IAttackReceiver target)
@@ -42,7 +44,7 @@ namespace DCLBattle.Battle
             _target = target;
             _target.AttackReceiverDiedEvent += _cachedTargetDiedDelegate;
 
-            transform.position = attacker.Position;
+            _transform.position = attacker.Position;
 
             _material.color = attacker.Army.Model.ArmyColor;
         }
@@ -54,15 +56,15 @@ namespace DCLBattle.Battle
             if (_target == null)
                 return;
 
-            Vector3 position = transform.position;
+            Vector3 position = _transform.position;
             Vector3 toTarget = _target.Position - position;
             float sqDist = Vector3.SqrMagnitude(toTarget);
 
             Vector3 direction = toTarget / Mathf.Sqrt(sqDist);
             position += direction * (_speed * Time.deltaTime);
 
-            transform.position = position;
-            transform.forward = direction;
+            _transform.position = position;
+            _transform.forward = direction;
 
             if (sqDist < _distanceSqBeforeDespawn)
             {
@@ -99,7 +101,8 @@ namespace DCLBattle.Battle
         public void Destroy()
         {
             GameUpdater.Unregister(this);
-            GameObject.Destroy(_go);
+            if (_go != null)
+                GameObject.Destroy(_go);
         }
     }
 }

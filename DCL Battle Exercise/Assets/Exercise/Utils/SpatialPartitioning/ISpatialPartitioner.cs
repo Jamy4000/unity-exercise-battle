@@ -22,6 +22,7 @@ namespace Utils.SpatialPartitioning
     public interface ISpatialPartitioner<TData> : System.IDisposable
     {
         void Insert(TData position, int elementID);
+        void InsertPointCloud(IList<TData> positions, IList<int> elementsIDs, bool rebuildTree = true);
 
         void Remove(TData position, int elementID);
         void RemoveAll();

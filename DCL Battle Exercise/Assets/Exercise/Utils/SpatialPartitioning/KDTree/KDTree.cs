@@ -1,34 +1,35 @@
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.Pool;
 
 namespace Utils.SpatialPartitioning
 {
     public static class DimensionComparerFactory
     {
-        public static IDimensionComparer<TDimension> CreateDimensionComparer<TDimension>()
+        public static BaseDimensionComparer<TDimension> CreateDimensionComparer<TDimension>()
         {
             if (typeof(TDimension) == typeof(float))
             {
-                return (IDimensionComparer<TDimension>)(object)new OneDimensionComparer();
+                return (BaseDimensionComparer<TDimension>)(object)new OneDimensionComparer();
             }
-            else if (typeof(TDimension) == typeof(Vector2))
+            
+            if (typeof(TDimension) == typeof(Vector2))
             {
-                return (IDimensionComparer<TDimension>)(object)new TwoDimensionComparer();
+                return (BaseDimensionComparer<TDimension>)(object)new TwoDimensionsComparer();
             }
-            else if (typeof(TDimension) == typeof(Vector3))
+            
+            if (typeof(TDimension) == typeof(Vector3))
             {
-                return (IDimensionComparer<TDimension>)(object)new ThreeDimensionComparer();
+                return (BaseDimensionComparer<TDimension>)(object)new ThreeDimensionsComparer();
             }
-            else
-            {
-                throw new System.NotSupportedException($"Dimension comparer for type {typeof(TDimension)} is not supported.");
-            }
+            
+            throw new System.NotSupportedException($"Dimension comparer for type {typeof(TDimension)} is not supported.");
         }
     }
 
     public sealed class KDTree<TDimension> : ISpatialPartitioner<TDimension>
     {
-        public struct KDNode
+        private struct KDNode
         {
             public int ExternalID;
             public TDimension Position;
@@ -49,8 +50,29 @@ namespace Utils.SpatialPartitioning
             }
         }
 
-        private readonly IDimensionComparer<TDimension> _dimensionComparer;
+        private readonly struct NodeInsertionWrapper
+        {
+            public readonly int Start;
+            public readonly int End;
+            public readonly int Depth;
+            public readonly int ParentIndex;
+            public readonly bool IsLeftChild;
+
+            public NodeInsertionWrapper(int start, int end, int depth, int parentIndex, bool isLeftChild)
+            {
+                Start = start;
+                End = end;
+                Depth = depth;
+                ParentIndex = parentIndex;
+                IsLeftChild = isLeftChild;
+            }
+        }
+
+        private readonly BaseDimensionComparer<TDimension> _dimensionComparer;
         private readonly List<KDNode> _nodes = new(256);
+
+        private readonly Stack<NodeInsertionWrapper> _treeBuildingStack = new();
+        private readonly Stack<(int nodeIndex, int depth)> _treeSearchStack = new();
 
         public KDTree()
         {
@@ -60,26 +82,76 @@ namespace Utils.SpatialPartitioning
         public void Dispose()
         {
         }
+        
+        public void InsertPointCloud(IList<TDimension> positions, IList<int> elementIDs, bool rebuildTree = true)
+        {
+            if (rebuildTree) 
+                RemoveAll();
+            
+            int count = positions.Count;
+            if (count == 0) 
+                return;
+
+            // Iterative tree building using a stack
+            _treeBuildingStack.Push(new NodeInsertionWrapper(0, count, 0, -1, false));
+
+            while (_treeBuildingStack.Count > 0)
+            {
+                var nodeInsertionWrapper = _treeBuildingStack.Pop();
+                if (nodeInsertionWrapper.Start >= nodeInsertionWrapper.End) 
+                    continue;
+
+                // Select the axis based on depth
+                int axis = nodeInsertionWrapper.Depth % _dimensionComparer.Dimensions;
+
+                // Find the median
+                int medianIndex = _dimensionComparer.ApproximateMedianIndex(positions, nodeInsertionWrapper.Start, nodeInsertionWrapper.End, axis);
+
+                // Create the current node
+                int currentNodeIndex = _nodes.Count; // Get the index before adding the node
+                _nodes.Add(new KDNode(elementIDs[medianIndex], positions[medianIndex]));
+
+                if (nodeInsertionWrapper.ParentIndex > -1)
+                {
+                    // TODO it kind of sucks we need to make a copy here
+                    KDNode parentNodeCopy = _nodes[nodeInsertionWrapper.ParentIndex];
+                    
+                    if (nodeInsertionWrapper.IsLeftChild)
+                        parentNodeCopy.LeftNodeIndex = currentNodeIndex;
+                    else
+                        parentNodeCopy.RightNodeIndex = currentNodeIndex;
+                    
+                    _nodes[nodeInsertionWrapper.ParentIndex] = parentNodeCopy;
+                }
+
+                // Push left and right child ranges onto the stack
+                _treeBuildingStack.Push(new NodeInsertionWrapper(nodeInsertionWrapper.Start, medianIndex, nodeInsertionWrapper.Depth + 1, currentNodeIndex, true));
+                _treeBuildingStack.Push(new NodeInsertionWrapper(medianIndex + 1, nodeInsertionWrapper.End, nodeInsertionWrapper.Depth + 1, currentNodeIndex, false));
+            }
+            
+            _treeBuildingStack.Clear();
+        }
 
         public void Insert(TDimension position, int elementID)
         {
             if (_nodes.Count == 0)
             {
-                _nodes.Add(new(elementID, position));
+                _nodes.Add(new KDNode(elementID, position));
                 return;
             }
 
             Insert_Internal(0, position, elementID, 0);
         }
-
+        
         private int Insert_Internal(int currentIndex, TDimension position, int elementID, int depth)
         {
             if (currentIndex == -1) // Empty slot
             {
-                _nodes.Add(new(elementID, position));
+                _nodes.Add(new KDNode(elementID, position));
                 return _nodes.Count - 1;
             }
 
+            // TODO that's a mistake, we are setting the copy of a node, not the node in the array
             KDNode currentNode = _nodes[currentIndex];
             int axis = depth % 2; // Switch between x (0) and y (1) axis
 
@@ -87,25 +159,17 @@ namespace Utils.SpatialPartitioning
 
             if (goLeft)
             {
-                if (!currentNode.HasLeftChild)
-                {
-                    currentNode.LeftNodeIndex = Insert_Internal(-1, position, elementID, depth + 1); // Insert new left child
-                }
-                else
-                {
-                    currentNode.LeftNodeIndex = Insert_Internal(currentNode.LeftNodeIndex, position, elementID, depth + 1);
-                }
+                // Insert new left child
+                currentNode.LeftNodeIndex = currentNode.HasLeftChild ?
+                    Insert_Internal(currentNode.LeftNodeIndex, position, elementID, depth + 1) :
+                    Insert_Internal(-1, position, elementID, depth + 1) ;
             }
             else
             {
-                if (!currentNode.HasRightChild)
-                {
-                    currentNode.RightNodeIndex = Insert_Internal(-1, position, elementID, depth + 1); // Insert new right child
-                }
-                else
-                {
-                    currentNode.RightNodeIndex = Insert_Internal(currentNode.RightNodeIndex, position, elementID, depth + 1);
-                }
+                // Insert new right child
+                currentNode.RightNodeIndex = currentNode.HasRightChild ? 
+                    Insert_Internal(currentNode.RightNodeIndex, position, elementID, depth + 1) : 
+                    Insert_Internal(-1, position, elementID, depth + 1);
             }
 
             _nodes[currentIndex] = currentNode; // Update node
@@ -119,7 +183,8 @@ namespace Utils.SpatialPartitioning
 
         private int Remove_Internal(int currentIndex, TDimension position, int elementID, int depth)
         {
-            if (currentIndex == -1) return -1; // Base case: node not found
+            if (currentIndex == -1) 
+                return -1; // Base case: node not found
 
             KDNode current = _nodes[currentIndex];
             int axis = depth % 2;
@@ -131,24 +196,23 @@ namespace Utils.SpatialPartitioning
                 {
                     return current.RightNodeIndex;
                 }
-                else if (current.RightNodeIndex == -1)
+                
+                if (current.RightNodeIndex == -1)
                 {
                     return current.LeftNodeIndex;
                 }
-                else
-                {
-                    // Find the minimum node in the right subtree (successor)
-                    int minIndex = FindMin(current.RightNodeIndex, axis, depth + 1);
-                    KDNode minNode = _nodes[minIndex];
+                
+                // Find the minimum node in the right subtree (successor)
+                int minIndex = FindMin(current.RightNodeIndex, axis, depth + 1);
+                KDNode minNode = _nodes[minIndex];
 
-                    // Replace current node with successor
-                    current.ExternalID = minNode.ExternalID;
-                    current.Position = minNode.Position;
-                    _nodes[currentIndex] = current;
+                // Replace current node with successor
+                current.ExternalID = minNode.ExternalID;
+                current.Position = minNode.Position;
+                _nodes[currentIndex] = current;
 
-                    // Recursively remove the successor node
-                    current.RightNodeIndex = Remove_Internal(current.RightNodeIndex, minNode.Position, minNode.ExternalID, depth + 1);
-                }
+                // Recursively remove the successor node
+                current.RightNodeIndex = Remove_Internal(current.RightNodeIndex, minNode.Position, minNode.ExternalID, depth + 1);
             }
             else
             {
@@ -165,7 +229,7 @@ namespace Utils.SpatialPartitioning
 
             return currentIndex; // Return the current index
         }
-
+        
         public void RemoveAll()
         {
             _nodes.Clear(); // Clears all the nodes in the tree
@@ -182,14 +246,13 @@ namespace Utils.SpatialPartitioning
             if (currentIndex == -1) 
                 return bestResult;
 
-            Stack<(int nodeIndex, int depth)> stack = UnityEngine.Pool.GenericPool<Stack<(int, int)>>.Get();
-            stack.Push((currentIndex, 0));
+            _treeSearchStack.Push((currentIndex, 0));
 
             float bestDistanceSq = Mathf.Infinity;
 
-            while (stack.Count > 0)
+            while (_treeSearchStack.Count > 0)
             {
-                var (nodeIndex, depth) = stack.Pop();
+                var (nodeIndex, depth) = _treeSearchStack.Pop();
                 if (nodeIndex == -1) continue;
 
                 KDNode currentNode = _nodes[nodeIndex];
@@ -208,15 +271,14 @@ namespace Utils.SpatialPartitioning
                 int nearNodeIndex = sourceComponent < nodeComponent ? currentNode.LeftNodeIndex : currentNode.RightNodeIndex;
                 int farNodeIndex = nearNodeIndex == currentNode.LeftNodeIndex ? currentNode.RightNodeIndex : currentNode.LeftNodeIndex;
 
-                stack.Push((nearNodeIndex, depth + 1));
+                _treeSearchStack.Push((nearNodeIndex, depth + 1));
 
                 if (Mathf.Abs(sourceComponent - nodeComponent) < bestResult.Distance)
                 {
-                    stack.Push((farNodeIndex, depth + 1));
+                    _treeSearchStack.Push((farNodeIndex, depth + 1));
                 }
             }
 
-            UnityEngine.Pool.GenericPool<Stack<(int, int)>>.Release(stack);
             return bestResult;
         }
 
@@ -230,8 +292,10 @@ namespace Utils.SpatialPartitioning
             if (currentIndex == -1) 
                 return 0;
 
-            Stack<(int nodeIndex, int depth)> stack = UnityEngine.Pool.GenericPool<Stack<(int, int)>>.Get();
-            List<QueryResult> queryResults = UnityEngine.Pool.ListPool<QueryResult>.Get();
+            // TODO this is not thread safe
+            Stack<(int nodeIndex, int depth)> stack = GenericPool<Stack<(int, int)>>.Get();
+            List<QueryResult> queryResults = ListPool<QueryResult>.Get();
+            // TODO Hard coded value
             queryResults.Capacity = 64;
 
             stack.Push((currentIndex, 0));
@@ -273,8 +337,8 @@ namespace Utils.SpatialPartitioning
                 results[i] = queryResults[i];
             }
 
-            UnityEngine.Pool.ListPool<QueryResult>.Release(queryResults);
-            UnityEngine.Pool.GenericPool<Stack<(int, int)>>.Release(stack);
+            ListPool<QueryResult>.Release(queryResults);
+            GenericPool<Stack<(int, int)>>.Release(stack);
             return maxResults;
         }
 

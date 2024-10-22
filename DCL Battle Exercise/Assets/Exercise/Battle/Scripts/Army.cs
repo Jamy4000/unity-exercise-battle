@@ -1,5 +1,6 @@
 ﻿using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.Pool;
 using Utils;
 using Utils.SpatialPartitioning;
 
@@ -21,6 +22,8 @@ namespace DCLBattle.Battle
         private readonly QueryResult[] _radiusQueryResults = new QueryResult[32];
 
         private readonly List<Army> _enemyArmies = new();
+        private readonly List<Vector2> _unitsPositions = new(256);
+        private readonly List<int> _unitsIndices = new(256);
 
         private readonly System.Action<Army> _cachedArmyDefeatedCallback;
 
@@ -85,16 +88,20 @@ namespace DCLBattle.Battle
         private void RebuildTree()
         {
             Center = Vector3.zero;
-            _spatialPartitioner.RemoveAll();
-
-            for (int i = 0; i < RemainingUnitsCount; i++)
+            _unitsPositions.Clear();
+            _unitsIndices.Clear();
+            
+            for (int unitIndex = 0; unitIndex < RemainingUnitsCount; unitIndex++)
             {
-                var position = _units[i].Position;
-                _spatialPartitioner.Insert(new(position.x, position.z), i);
+                Vector3 position = _units[unitIndex].Position;
+                _unitsPositions.Add(new Vector2(position.x, position.z));
+                _unitsIndices.Add(unitIndex);
                 Center += position;
             }
-
+            
             Center /= RemainingUnitsCount;
+            
+            _spatialPartitioner.InsertPointCloud(_unitsPositions, _unitsIndices);
         }
 
         public void AddUnit(UnitBase unit)
@@ -102,9 +109,9 @@ namespace DCLBattle.Battle
             _units.Add(unit);
         }
 
-        public UnitBase GetClosestUnit(Vector3 source, out float distance)
+        private UnitBase GetClosestUnit(Vector3 source, out float distance)
         {
-            var queryResult = _spatialPartitioner.QueryClosest(new(source.x, source.z));
+            var queryResult = _spatialPartitioner.QueryClosest(new Vector2(source.x, source.z));
 
             distance = queryResult.Distance;
             return _units[queryResult.ElementID];

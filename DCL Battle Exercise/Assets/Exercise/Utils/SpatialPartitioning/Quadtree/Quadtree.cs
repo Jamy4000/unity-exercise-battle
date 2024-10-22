@@ -8,12 +8,12 @@ namespace Utils.SpatialPartitioning
     {
         public readonly float MinX, MinY, MaxX, MaxY;
 
-        public AABB(float MinX, float MinY, float MaxX, float MaxY)
+        public AABB(float minX, float minY, float maxX, float maxY)
         {
-            this.MinX = MinX;
-            this.MinY = MinY;
-            this.MaxX = MaxX;
-            this.MaxY = MaxY;
+            this.MinX = minX;
+            this.MinY = minY;
+            this.MaxX = maxX;
+            this.MaxY = maxY;
         }
 
         public bool Contains(Vector2 point)
@@ -38,8 +38,6 @@ namespace Utils.SpatialPartitioning
             ExternalID = elementID;
             Position = position;
         }
-
-        public readonly bool HasElement => ExternalID != int.MinValue;
     }
 
     public sealed class QuadtreePool : GenericPoolHelper<Quadtree>
@@ -93,6 +91,18 @@ namespace Utils.SpatialPartitioning
         {
         }
 
+        
+        public void InsertPointCloud(IList<Vector2> positions, IList<int> elementIDs, bool rebuildTree = true)
+        {
+            if (rebuildTree)
+                RemoveAll();
+            
+            for (int i = 0; i < positions.Count; i++)
+            {
+                Insert(positions[i], elementIDs[i]);
+            }
+        }
+        
         public void Insert(Vector2 position, int elementID)
         {
             int depth = 0;
@@ -159,11 +169,11 @@ namespace Utils.SpatialPartitioning
             node._children[3].Initialize(new AABB(midX, node._boundary.MinY, node._boundary.MaxX, midY), node._maxDepth, node._maxElementsCountPerNode, node._currentDepth + 1); // SE
         }
 
-        private void Initialize(AABB aABB, int maxDepth, int maxElementsCountPerNode, int currentDepth)
+        private void Initialize(AABB aabb, int maxDepth, int maxElementsCountPerNode, int currentDepth)
         {
             _maxElementsCountPerNode = maxElementsCountPerNode;
             _maxDepth = maxDepth;
-            _boundary = aABB;
+            _boundary = aabb;
             _currentDepth = currentDepth;
         }
 
@@ -343,7 +353,6 @@ namespace Utils.SpatialPartitioning
 
             _elements.Clear();
         }
-
 
         // Helper function to calculate squared distance between a point and an AABB (for pruning)
         private static float DistanceSquaredToAABB(Vector2 point, AABB boundary)
