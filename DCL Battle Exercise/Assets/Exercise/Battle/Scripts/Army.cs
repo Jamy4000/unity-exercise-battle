@@ -1,8 +1,10 @@
 ﻿using System.Collections.Generic;
+using System.Diagnostics;
 using UnityEngine;
 using UnityEngine.Pool;
 using Utils;
 using Utils.SpatialPartitioning;
+using Debug = UnityEngine.Debug;
 
 namespace DCLBattle.Battle
 {
@@ -60,6 +62,10 @@ namespace DCLBattle.Battle
         public void Dispose()
         {
             _spatialPartitioner.Dispose();
+            
+#if UNITY_EDITOR
+            Debug.Log($"{Model.ArmyName}: Mean Update time for Units: {(unitUpdateElapsedTime / updatesCount).ToString()}");
+#endif
         }
 
         public void UpdateArmyData()
@@ -67,12 +73,24 @@ namespace DCLBattle.Battle
             RebuildTree();
         }
 
+        private float unitUpdateElapsedTime = 0f;
+        private int updatesCount = 0;
+
         public void UpdateUnits()
         {
+#if UNITY_EDITOR
+            Stopwatch stopwach = Stopwatch.StartNew();
+#endif
             foreach (var unit in _units)
             {
                 unit.ManualUpdate();
             }
+            
+#if UNITY_EDITOR
+            stopwach.Stop();
+            unitUpdateElapsedTime += stopwach.ElapsedMilliseconds;
+            updatesCount++;
+#endif
         }
 
         public void LateUpdate()
@@ -140,7 +158,7 @@ namespace DCLBattle.Battle
         public UnitBase GetClosestEnemy(Vector3 position, out float closestDistance)
         {
             UnitBase closestEnemy = _enemyArmies[0].GetClosestUnit(position, out closestDistance);
-
+            
             for (int armyIndex = 1; armyIndex < _enemyArmies.Count; armyIndex++)
             {
                 UnitBase enemyUnit = _enemyArmies[armyIndex].GetClosestUnit(position, out float enemyDistance);
@@ -151,7 +169,7 @@ namespace DCLBattle.Battle
                     closestDistance = enemyDistance;
                 }
             }
-
+            
             return closestEnemy;
         }
 
