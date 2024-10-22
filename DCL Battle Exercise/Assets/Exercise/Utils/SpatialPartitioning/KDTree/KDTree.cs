@@ -144,7 +144,6 @@ namespace Utils.SpatialPartitioning
                     // Replace current node with successor
                     current.ExternalID = minNode.ExternalID;
                     current.Position = minNode.Position;
-                    _nodes[currentIndex] = current;
 
                     // Recursively remove the successor node
                     current.RightNodeIndex = Remove_Internal(current.RightNodeIndex, minNode.Position, minNode.ExternalID, depth + 1);
@@ -163,6 +162,7 @@ namespace Utils.SpatialPartitioning
                 }
             }
 
+            _nodes[currentIndex] = current;
             return currentIndex; // Return the current index
         }
 
@@ -205,8 +205,18 @@ namespace Utils.SpatialPartitioning
                 float sourceComponent = _dimensionComparer.GetComponentOnAxis(source, axis);
                 float nodeComponent = _dimensionComparer.GetComponentOnAxis(currentNode.Position, axis);
 
-                int nearNodeIndex = sourceComponent < nodeComponent ? currentNode.LeftNodeIndex : currentNode.RightNodeIndex;
-                int farNodeIndex = nearNodeIndex == currentNode.LeftNodeIndex ? currentNode.RightNodeIndex : currentNode.LeftNodeIndex;
+                int nearNodeIndex;
+                int farNodeIndex;
+                if (sourceComponent < nodeComponent)
+                {
+                    nearNodeIndex = currentNode.LeftNodeIndex;
+                    farNodeIndex = currentNode.RightNodeIndex;
+                }
+                else
+                {
+                    nearNodeIndex = currentNode.RightNodeIndex;
+                    farNodeIndex = currentNode.LeftNodeIndex;
+                }
 
                 stack.Push((nearNodeIndex, depth + 1));
 
